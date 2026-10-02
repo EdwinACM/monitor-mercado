@@ -1,0 +1,14 @@
+{
+  "name": "Monitor de Mercado",
+  "short_name": "Mercado",
+  "description": "Acciones de la BMV y deuda gubernamental con tendencias, señales y análisis diario.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3efe6",
+  "theme_color": "#6c1d45",
+  "icons": [
+    {"src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "/static/icon-180.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
