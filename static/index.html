@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mercado">
+<meta name="theme-color" content="#6c1d45">
+<title>Monitor de Mercado</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f6f4f5; --panel:#fff; --ink:#1d1a1c; --muted:#6b6468; --line:#e6e0e3;
+  --accent:#6c1d45; --accent-soft:#f3e6ed; --up:#137a43; --down:#b42318; --flat:#6b6468;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141113; --panel:#1e1a1c; --ink:#f1ecee; --muted:#a59ca1; --line:#332c30;
+         --accent:#d27aa6; --accent-soft:#3a2230; --up:#4cc38a; --down:#f2786d; --flat:#a59ca1; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.bar{max-width:1280px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+h1{font-size:18px;margin:0;color:var(--accent);letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--accent-soft)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--flat)}
+.abierto .dot{background:var(--up);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.grow{flex:1}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
+input,button,select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button{cursor:pointer;font-weight:600}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.5;cursor:wait}
+main{max-width:1280px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tab{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 14px;color:var(--muted)}
+.tab.on{color:var(--accent);border-color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;position:relative;transition:border-color .15s}
+.card:hover{border-color:var(--accent)}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.card .t{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:18px}
+.card .p{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+.card .v{font-size:12px;font-variant-numeric:tabular-nums;display:flex;gap:10px;flex-wrap:wrap}
+.card canvas{margin-top:6px;height:34px!important;width:100%!important}
+.card .x{position:absolute;top:6px;right:8px;border:0;background:none;color:var(--muted);padding:0 4px;font-size:15px}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.panel h2{font-size:15px;margin:0 0 2px}
+.sub{color:var(--muted);font-size:12px;margin-bottom:10px}
+.ph{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:5px 12px;font-weight:500}
+.seg button.on{background:var(--accent);color:#fff}
+.chartbox{position:relative;height:340px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+.tablewrap{max-height:380px;overflow:auto}
+.add{display:flex;gap:6px}
+.add input{width:130px;text-transform:uppercase}
+.err{background:#fde8e6;color:#8a1c12;border-radius:8px;padding:8px 12px;margin-bottom:12px;display:none}
+footer{max-width:1280px;margin:0 auto;padding:4px 16px 24px;color:var(--muted);font-size:12px}
+.hidden{display:none}
+@media (max-width:640px){
+  header{position:static}
+  .bar{padding:10px 12px;gap:8px}
+  main{padding:12px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .card{padding:10px;min-width:0}
+  .card .p{font-size:18px}
+  .card .v{flex-direction:column;gap:0;font-size:11px}
+  .chartbox{height:240px}
+  .tab{padding:8px 10px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>Monitor de Mercado</h1>
+    <span id="estado" class="pill"><span class="dot"></span><span id="estadoTxt">…</span></span>
+    <span class="grow"></span>
+    <div class="ctl">
+      <label>Desde <input type="date" id="desde" value="2026-03-01"></label>
+      <span>hasta <b id="hasta">hoy</b></span>
+      <button id="btnAct" class="primary">Actualizar</button>
+      <button id="btnXls">Excel</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="err" class="err"></div>
+  <div class="tabs">
+    <button class="tab on" data-tab="acc">Acciones</button>
+    <button class="tab" data-tab="deu">Instrumentos de deuda</button>
+  </div>
+
+  <section id="acc">
+    <div class="cards" id="cardsAcc"></div>
+    <div class="panel">
+      <div class="ph">
+        <div><h2 id="accTitulo">—</h2><div class="sub" id="accSub"></div></div>
+        <div class="ctl">
+          <div class="seg" id="vista"><button data-v="hist" class="on">Histórico</button><button data-v="intra">Hoy (5 min)</button></div>
+          <div class="add"><input id="nuevo" placeholder="BIMBOA.MX" aria-label="Agregar ticker"><button id="btnAdd">Agregar</button></div>
+        </div>
+      </div>
+      <div class="chartbox"><canvas id="chAcc"></canvas></div>
+    </div>
+    <div class="panel"><h2>Datos diarios</h2><div class="sub">Precios en MXN. Más reciente primero.</div>
+      <div class="tablewrap"><table id="tblAcc"></table></div></div>
+  </section>
+
+  <section id="deu" class="hidden">
+    <div class="cards" id="cardsDeu"></div>
+    <div class="panel">
+      <h2 id="deuTitulo">—</h2><div class="sub" id="deuSub"></div>
+      <div class="chartbox"><canvas id="chDeu"></canvas></div>
+    </div>
+    <div class="panel"><h2>Resultados de subasta</h2><div class="sub">Subasta primaria semanal (Banco de México). Más reciente primero.</div>
+      <div class="tablewrap"><table id="tblDeu"></table></div></div>
+  </section>
+</main>
+<footer>
+  Toca <b>Actualizar</b> para consultar los datos más recientes. Fuentes: Yahoo Finance (acciones BMV, retraso aprox. 15–20 min) y Banco de México, SIE cuadros CF107 y CF115 (subastas semanales).
+  <span id="ult"></span>
+</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const DEF = ["WALMEX.MX","AMXB.MX","KOFUBL.MX","KIMBERA.MX","OMAB.MX"];
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+};
+let tickers = store.get("tickers", DEF);
+let S = { acc: [], deu: [], selA: store.get("selA", DEF[0]), selD: 0, vista: "hist", abierto: false };
+let charts = {};
+
+const fmt = (n, d=2) => n == null ? "—" : n.toLocaleString("es-MX", {minimumFractionDigits:d, maximumFractionDigits:d});
+const pct = n => n == null ? "—" : (n > 0 ? "+" : "") + (n*100).toFixed(2) + "%";
+const cls = n => n == null || Math.abs(n) < 1e-9 ? "flat" : n > 0 ? "up" : "down";
+const fdate = s => { const [y,m,d] = s.split("-"); return `${d}/${m}/${y}`; };
+const qs = () => `desde=${$("#desde").value}&tickers=${encodeURIComponent(tickers.join(","))}`;
+
+async function api(path){
+  const r = await fetch(path, {cache:"no-store"});
+  const j = await r.json();
+  if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+  return j;
+}
+function showErr(msg){ const e = $("#err"); e.textContent = msg || ""; e.style.display = msg ? "block" : "none"; }
+
+function lineChart(id, labels, data, opts={}){
+  const ctx = document.getElementById(id);
+  charts[id]?.destroy();
+  const accent = css("--accent");
+  charts[id] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets: [{ data, borderColor: accent, backgroundColor: accent + "22", fill: true,
+            borderWidth: 2, pointRadius: opts.points ? 3 : 0, pointHoverRadius: 4, tension: .15, spanGaps: true }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => opts.fmt ? opts.fmt(c.parsed.y) : fmt(c.parsed.y) } } },
+      scales: {
+        x: { ticks: { color: css("--muted"), maxTicksLimit: 8 }, grid: { display: false } },
+        y: { ticks: { color: css("--muted") }, grid: { color: css("--line") } }
+      }
+    }
+  });
+}
+function spark(canvas, data, up){
+  new Chart(canvas, { type: "line",
+    data: { labels: data.map((_,i)=>i), datasets: [{ data, borderColor: up ? css("--up") : css("--down"), borderWidth: 1.5, pointRadius: 0, tension: .2 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, events: [],
+      plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } });
+}
+
+/* ---------- Acciones ---------- */
+function renderAcc(){
+  const box = $("#cardsAcc"); box.innerHTML = "";
+  S.acc.forEach(a => {
+    const h = a.historico, last = h.at(-1);
+    const c = document.createElement("div");
+    c.className = "card" + (a.ticker === S.selA ? " sel" : "");
+    c.innerHTML = a.error
+      ? `<div class="t">${a.ticker}</div><div class="p flat">—</div><div class="v down">Sin datos: ${a.error}</div><button class="x" title="Quitar">×</button>`
+      : `<div class="t" title="${a.nombre}">${a.ticker.replace(".MX","")} · ${a.nombre}</div>
+         <div class="p">$${fmt(last?.cierre)}</div>
+         <div class="v"><span class="${cls(last?.var)}">${last?.var>0?"+":""}${fmt(last?.var)} (${pct(last?.var_pct)}) hoy</span>
+         <span class="${cls(last?.var_acum_pct)}">${pct(last?.var_acum_pct)} periodo</span></div>
+         <canvas></canvas><button class="x" title="Quitar">×</button>`;
+    c.onclick = e => {
+      if (e.target.classList.contains("x")) { tickers = tickers.filter(t => t !== a.ticker); store.set("tickers", tickers); cargarAcc(); return; }
+      S.selA = a.ticker; store.set("selA", S.selA); renderAcc();
+    };
+    box.appendChild(c);
+    if (!a.error && h.length) spark(c.querySelector("canvas"), h.map(r => r.cierre), last.var_acum_pct >= 0);
+  });
+  renderAccDetalle();
+}
+async function renderAccDetalle(){
+  const a = S.acc.find(x => x.ticker === S.selA) || S.acc[0];
+  if (!a) return;
+  S.selA = a.ticker;
+  const h = a.historico;
+  $("#accTitulo").textContent = `${a.nombre} (${a.ticker})`;
+  $("#accSub").textContent = a.hora ? `Último precio: $${fmt(a.precio)} ${a.moneda||""} · ${new Date(a.hora).toLocaleString("es-MX")}` : "";
+  if (S.vista === "intra") {
+    try {
+      const d = await api(`/api/intradia?ticker=${encodeURIComponent(a.ticker)}`);
+      lineChart("chAcc", d.map(r => r.hora), d.map(r => r.precio), { fmt: v => "$" + fmt(v) });
+    } catch (e) { showErr("Intradía: " + e.message); }
+  } else {
+    lineChart("chAcc", h.map(r => fdate(r.fecha)), h.map(r => r.cierre), { fmt: v => "$" + fmt(v) });
+  }
+  $("#tblAcc").innerHTML = `<thead><tr><th>Fecha</th><th>Apertura</th><th>Máximo</th><th>Mínimo</th><th>Cierre</th><th>Var. $</th><th>Var. %</th><th>Var. acum.</th><th>Volumen</th></tr></thead><tbody>` +
+    [...h].reverse().map(r => `<tr><td>${fdate(r.fecha)}</td><td>${fmt(r.apertura)}</td><td>${fmt(r.maximo)}</td><td>${fmt(r.minimo)}</td>
+      <td><b>${fmt(r.cierre)}</b></td><td class="${cls(r.var)}">${fmt(r.var)}</td><td class="${cls(r.var_pct)}">${pct(r.var_pct)}</td>
+      <td class="${cls(r.var_acum_pct)}">${pct(r.var_acum_pct)}</td><td>${(r.volumen||0).toLocaleString("es-MX")}</td></tr>`).join("") + "</tbody>";
+}
+
+/* ---------- Deuda ---------- */
+function valDeu(d, v){ return d.tipo === "precio" ? "$" + fmt(v, 5) : fmt(v) + (d.unidad.startsWith("%") ? "%" : ""); }
+function varDeu(d, r){
+  if (!r || r.var == null) return "—";
+  return d.tipo === "tasa" ? `${r.var_pb > 0 ? "+" : ""}${r.var_pb.toFixed(0)} pb` : `${r.var > 0 ? "+" : ""}${fmt(r.var, 5)}`;
+}
+function renderDeu(){
+  const box = $("#cardsDeu"); box.innerHTML = "";
+  S.deu.forEach((d, i) => {
+    const s = d.datos, last = s.at(-1), first = s[0];
+    const tot = last && first ? (d.tipo === "tasa" ? `${((last.valor-first.valor)*100) > 0 ? "+" : ""}${((last.valor-first.valor)*100).toFixed(0)} pb periodo`
+                                                 : `${pct(last.valor/first.valor-1)} periodo`) : "";
+    const c = document.createElement("div");
+    c.className = "card" + (i === S.selD ? " sel" : "");
+    c.innerHTML = `<div class="t">${d.nombre} · ${d.emisor}</div>
+      <div class="p">${last ? valDeu(d, last.valor) : "—"}</div>
+      <div class="v"><span class="${cls(last?.var)}">${varDeu(d, last)} últ. subasta</span><span class="${cls(last && first ? last.valor-first.valor : null)}">${tot}</span></div>
+      <div class="v flat">${last ? "Subasta " + fdate(last.fecha) : "Sin subastas en el periodo"}</div><canvas></canvas>`;
+    c.onclick = () => { S.selD = i; renderDeu(); };
+    box.appendChild(c);
+    if (s.length > 1) spark(c.querySelector("canvas"), s.map(r => r.valor), last.valor >= first.valor);
+  });
+  const d = S.deu[S.selD]; if (!d) return;
+  $("#deuTitulo").textContent = `${d.nombre} — ${d.emisor}`;
+  $("#deuSub").textContent = `Valor: ${d.unidad}. ${d.datos.length} subastas en el periodo.` + (d.tipo === "tasa" ? " Si la tasa sube, el precio del bono baja." : "");
+  lineChart("chDeu", d.datos.map(r => fdate(r.fecha)), d.datos.map(r => r.valor), { points: true, fmt: v => valDeu(d, v) });
+  $("#tblDeu").innerHTML = `<thead><tr><th>Fecha subasta</th><th>${d.tipo === "precio" ? "Precio" : "Tasa"}</th><th>Variación</th><th>Var. %</th></tr></thead><tbody>` +
+    [...d.datos].reverse().map(r => `<tr><td>${fdate(r.fecha)}</td><td><b>${valDeu(d, r.valor)}</b></td>
+      <td class="${cls(r.var)}">${varDeu(d, r)}</td><td class="${cls(r.var_pct)}">${pct(r.var_pct)}</td></tr>`).join("") + "</tbody>";
+}
+
+/* ---------- Carga (solo al abrir y con el botón Actualizar) ---------- */
+async function estado(){
+  const e = await api("/api/estado");
+  S.abierto = e.mercado_abierto;
+  $("#estado").className = "pill" + (S.abierto ? " abierto" : "");
+  $("#estadoTxt").textContent = (S.abierto ? "BMV abierta" : "BMV cerrada") + " · " +
+    new Date(e.ahora).toLocaleTimeString("es-MX", { timeZone: "America/Mexico_City", hour: "2-digit", minute: "2-digit" }) + " CDMX";
+  $("#hasta").textContent = new Date(e.ahora).toLocaleDateString("es-MX", { timeZone: "America/Mexico_City" });
+}
+// fresco=1: el servidor ignora su caché y vuelve a consultar Yahoo y Banxico
+async function cargarAcc(fresco){ S.acc = await api(`/api/acciones?${qs()}${fresco ? "&fresco=1" : ""}`); renderAcc(); }
+async function cargarDeu(fresco){ S.deu = await api(`/api/deuda?${qs()}${fresco ? "&fresco=1" : ""}`); renderDeu(); }
+async function actualizar(fresco = true){
+  const b = $("#btnAct"); b.disabled = true; b.textContent = "Actualizando…"; showErr("");
+  const r = await Promise.allSettled([estado(), cargarAcc(fresco), cargarDeu(fresco)]);
+  const fallos = r.filter(x => x.status === "rejected").map(x => x.reason.message);
+  if (fallos.length) showErr("No se pudo actualizar: " + fallos.join(" · "));
+  $("#ult").textContent = " · Actualizado: " + new Date().toLocaleString("es-MX");
+  b.disabled = false; b.textContent = "Actualizar";
+}
+
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === t));
+  $("#acc").classList.toggle("hidden", t.dataset.tab !== "acc");
+  $("#deu").classList.toggle("hidden", t.dataset.tab !== "deu");
+});
+document.querySelectorAll("#vista button").forEach(b => b.onclick = () => {
+  S.vista = b.dataset.v;
+  document.querySelectorAll("#vista button").forEach(x => x.classList.toggle("on", x === b));
+  renderAccDetalle();
+});
+$("#btnAct").onclick = () => actualizar(true);
+$("#desde").onchange = () => actualizar(false);
+$("#btnXls").onclick = () => location.href = `/api/excel?${qs()}`;
+const agregar = () => {
+  let t = $("#nuevo").value.trim().toUpperCase(); if (!t) return;
+  if (!t.includes(".") && !t.startsWith("^")) t += ".MX";
+  if (!tickers.includes(t)) { tickers.push(t); store.set("tickers", tickers); }
+  S.selA = t; $("#nuevo").value = ""; cargarAcc().catch(e => showErr(e.message));
+};
+$("#btnAdd").onclick = agregar;
+$("#nuevo").onkeydown = e => e.key === "Enter" && agregar();
+
+actualizar(false);
+</script>
+</body>
+</html>

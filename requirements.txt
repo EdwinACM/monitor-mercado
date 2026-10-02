@@ -1,0 +1,2 @@
+openpyxl>=3.1
+truststore>=0.9
