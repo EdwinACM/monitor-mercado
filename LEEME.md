@@ -39,7 +39,7 @@ Deuda: compara el rendimiento de la última subasta con el promedio de las últi
 Mientras tanto, para agregar días: `python analisis_diario.py`, luego `git add static/data && git commit && git push`. Los reportes PDF y Excel de cualquier día se generan al momento, sin depender de ese proceso.
 
 ## Logo
-Kit en `static/marca/`: `marca.svg`, `logo-horizontal.svg`, `logo-horizontal-fondo-oscuro.svg` y `logo-vertical.svg` (nombre convertido a trazos desde Barlow Semi Condensed Bold, licencia OFL). Íconos de la app: `static/icon.svg`, `icon-180.png`, `icon-512.png`.
+Kit en `static/marca/` (ficha de pizarra con la letra P y una bisagra ámbar): `marca.svg`, `logo-horizontal.svg`, `logo-horizontal-fondo-oscuro.svg` y `logo-vertical.svg` (nombre convertido a trazos desde Barlow Semi Condensed Bold, licencia OFL). Íconos de la app: `static/icon.svg`, `icon-180.png`, `icon-512.png`.
 
 ## Archivos
 - `server.py`: consulta las fuentes y atiende las rutas `/api/*`.

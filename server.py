@@ -190,6 +190,13 @@ def acciones(tickers, desde):
         return list(ex.map(uno, tickers))
 
 
+def validar_desde(accs, desde):
+    """La fecha inicial debe ser anterior al último cierre disponible; si no, el periodo queda vacío."""
+    ult = max((a["historico"][-1]["fecha"] for a in accs if a.get("historico")), default=None)
+    if ult and desde.isoformat() >= ult:
+        raise ValueError(f"La fecha inicial ({desde.isoformat()}) debe ser anterior al último cierre ({ult}). Elige una fecha más antigua.")
+
+
 def ventana_historial():
     """Historial largo (≈14 meses) para que las medias y el backtest tengan datos."""
     return date.today() - timedelta(days=420)
@@ -226,6 +233,7 @@ def cotizaciones(tickers):
 def analisis_completo(tickers, desde):
     """Señales, estadística y series para el tablero (todo calculado en el servidor)."""
     accs = acciones(tickers, ventana_historial())
+    validar_desde(accs, desde)
     items = []
     for a in accs:
         if a.get("error") or len(a["historico"]) < 30:
@@ -255,13 +263,16 @@ def dia(fecha_iso):
 
 
 def simulacion(desde):
-    hist = {a["ticker"]: a["historico"] for a in acciones(list(ACCIONES), ventana_historial()) if a["historico"]}
+    accs = acciones(list(ACCIONES), ventana_historial())
+    validar_desde(accs, desde)
+    hist = {a["ticker"]: a["historico"] for a in accs if a["historico"]}
     return analisis.simular(hist, desde.isoformat())
 
 
 def comparacion(tickers, desde):
-    hist = {a["ticker"]: a["historico"] for a in acciones(tickers, ventana_historial())
-            if not a.get("error") and a["historico"]}
+    accs = acciones(tickers, ventana_historial())
+    validar_desde(accs, desde)
+    hist = {a["ticker"]: a["historico"] for a in accs if not a.get("error") and a["historico"]}
     return analisis.comparar(hist, desde.isoformat())
 
 
