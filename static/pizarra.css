@@ -273,3 +273,5 @@ details.more>.body{padding-top:12px}
 .btn.sm{padding:6px 12px;font-size:14px}
 .ok{color:var(--up)} .no{color:var(--down)}
 @media (max-width:600px){.tbl th{white-space:normal;line-height:1.15;vertical-align:bottom}.tbl td{white-space:normal}}
+/* los símbolos de emisora nunca se parten con guion */
+b,.tk,.alerta b,.cambio .t{hyphens:manual;-webkit-hyphens:manual;white-space:nowrap}

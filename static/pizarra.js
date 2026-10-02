@@ -43,10 +43,18 @@ async function api(path) {
 }
 const showErr = m => { const e = $("#err"); e.textContent = m || ""; e.hidden = !m; };
 const desde = () => $("#desde").value;
-function abiertoNY() {
+function relojNY() {
   const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(new Date());
-  const g = k => p.find(x => x.type === k).value, m = +g("hour") * 60 + +g("minute");
-  return !["Sat", "Sun"].includes(g("weekday")) && m >= 570 && m < 960;
+  const g = k => p.find(x => x.type === k).value;
+  return { finde: ["Sat", "Sun"].includes(g("weekday")), min: +g("hour") * 60 + +g("minute") };
+}
+// Horario de la BMV (igual al de Nueva York: 9:30 a 16:00). En días festivos de México el reloj diría «abierta»,
+// así que además se exige que haya cotizaciones recientes (o que apenas haya abierto la sesión).
+function abiertoNY() { const r = relojNY(); return !r.finde && r.min >= 570 && r.min < 960; }
+function abierto() {
+  if (!abiertoNY()) return false;
+  const t = Math.max(0, ...Object.values(S.quotes).map(q => q.hora ? Date.parse(q.hora) : 0));
+  return !t || Date.now() - t < 40 * 60000 || relojNY().min - 570 < 30;
 }
 
 /* ------------------------------------------------------------------- gráficas */
@@ -151,7 +159,7 @@ function cambioVivo(a) { const p = precioVivo(a); return [p - a.previo, (p / a.p
 
 function renderMercado() {
   const d = S.data, ok = d.acciones.find(a => !a.error);
-  $("#titulo").textContent = abiertoNY() ? "Sesión en curso" : ok ? `Cierre del ${fhumana(ok.fecha)}` : "Mercado";
+  $("#titulo").textContent = abierto() ? "Sesión en curso" : ok ? `Cierre del ${fhumana(ok.fecha)}` : "Mercado";
   $("#lectura").textContent = d.mercado.texto;
   $("#board").innerHTML = `<thead><tr><th>Emisora</th><th>Último</th><th class="c-chg">Cambio</th><th>%</th><th class="c-spark">30 sesiones</th><th class="c-sig">Señal</th></tr></thead><tbody class="${entra("mercado")}">` +
     d.acciones.map((a, i) => {
@@ -411,7 +419,7 @@ async function pollQuotes(force) {
 }
 function estadoLive() {
   // El estado de la bolsa depende SOLO del reloj (horario real de la BMV): ningún botón lo modifica.
-  const ab = abiertoNY(), m = $("#mkt");
+  const ab = abierto(), m = $("#mkt");
   m.dataset.open = ab;
   $("#mktTxt").innerHTML = `<span class="long">Bolsa </span>${ab ? "abierta" : "cerrada"}`;
   m.title = ab ? "La BMV está operando (lunes a viernes, hora de Nueva York 9:30 a 16:00)" : "La BMV no está operando; se muestra el último cierre";
@@ -421,11 +429,11 @@ function estadoLive() {
   a.title = S.auto ? "Actualización automática activa. Toca para pausar." : "Actualización en pausa. Toca para reanudar.";
   const u = $("#updTxt"); if (u) u.textContent = textoActualizado() + (S.auto ? "" : " · actualización en pausa");
 }
-let abiertoAntes = abiertoNY();
+let abiertoAntes = abierto();
 async function ciclo() {
   estadoLive();
   if (!S.auto || document.hidden || S.busy || !S.data) return;
-  const ab = abiertoNY(), now = Date.now();
+  const ab = abierto(), now = Date.now();
   try {
     if (abiertoAntes && !ab) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(true); render(); }       // cierre de sesión: toma el cierre final
     else if (ab && now - S.tData > 120000) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(true); render(); } // señales cada 2 min
@@ -442,6 +450,7 @@ function init() {
   $("#refresh").onclick = () => actualizar(true);
   $("#auto").onclick = () => { S.auto = !S.auto; store.set("auto", S.auto); estadoLive(); if (S.auto) ciclo(); };
   iniciarTema();
+  $("#desde").max = new Date().toLocaleDateString("en-CA");
   $("#desde").onchange = () => actualizar(false);
   $("#chkMedias").onchange = $("#chkBandas").onchange = () => S.data && renderDetalle();
   addEventListener("hashchange", () => setVista(location.hash.slice(1)));
@@ -465,7 +474,7 @@ function iniciarTema() {
     const t = TEMAS.includes(b.dataset.t) ? b.dataset.t : "claro";
     document.documentElement.dataset.theme = t; store.set("tema", t); marcar();
     $("#menuTema").open = false;
-    const mc = document.querySelector('meta[name="theme-color"]'); if (mc) mc.content = t === "oscuro" ? "#0B0F13" : "#15191D";
+    const mc = document.querySelector('meta[name="theme-color"]'); if (mc) mc.content = t === "oscuro" ? "#0B0F13" : "#F4F6F8";
     if (S.data) render();
   });
   document.addEventListener("click", e => { const m = $("#menuTema"); if (m.open && !m.contains(e.target)) m.open = false; });
@@ -473,9 +482,10 @@ function iniciarTema() {
 }
 
 /* ---------------------------------------------------- alertas y cambios de decisión */
+const VISTOS_INICIO = store.get("vistos", null);
 function renderAlertas() {
   const cambios = S.data.acciones.filter(a => !a.error && a.cambio);
-  let vistos = store.get("vistos", null);
+  const vistos = VISTOS_INICIO;
   const hoy = Object.fromEntries(S.data.acciones.filter(a => !a.error).map(a => [a.ticker, a.veredicto]));
   const desdeVisita = vistos ? S.data.acciones.filter(a => !a.error && vistos[a.ticker] && vistos[a.ticker] !== a.veredicto) : [];
   store.set("vistos", hoy);
@@ -488,11 +498,11 @@ function renderAlertas() {
 }
 async function cargarCambios() {
   try {
-    await cargarHistorial();
-    const R = S.hist.registros, lista = [];
-    for (let i = R.length - 1; i >= 0 && lista.length < 10; i--) for (const e of R[i].emisoras) if (e.cambio) lista.push([R[i].fecha, e]);
-    $("#histCambios").innerHTML = lista.length ? lista.map(([f, e]) => `<div class="cambio"><span class="f">${flarga(f)}</span><span class="t">${esc(e.ticker)}</span>
-      <span class="flecha">${esc((SIG[e.veredicto_ant] || SIG.MANTENER)[2])} ${ICON("chevron")} ${sig(e.veredicto)}</span></div>`).join("") : '<p class="note">Aún no hay cambios de decisión registrados.</p>';
+    const r = await fetch("/static/data/cambios.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error("sin archivo");
+    const lista = await r.json();
+    $("#histCambios").innerHTML = lista.length ? lista.slice(0, 10).map(c => `<div class="cambio"><span class="f">${flarga(c.fecha)}</span><span class="t">${esc(c.ticker)}</span>
+      <span class="flecha">${esc((SIG[c.de] || SIG.MANTENER)[2])} ${ICON("chevron")} ${sig(c.a)}</span></div>`).join("") : '<p class="note">Aún no hay cambios de decisión registrados.</p>';
   } catch { $("#histCambios").innerHTML = '<p class="note">El archivo de decisiones aún no está disponible.</p>'; }
 }
 

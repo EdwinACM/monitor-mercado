@@ -4,8 +4,8 @@
   "description": "Acciones de la BMV y deuda gubernamental con tendencias, señales y análisis diario.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#15191D",
-  "theme_color": "#15191D",
+  "background_color": "#F4F6F8",
+  "theme_color": "#F4F6F8",
   "icons": [
     {"src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
     {"src": "/static/icon-180.png", "sizes": "180x180", "type": "image/png"},

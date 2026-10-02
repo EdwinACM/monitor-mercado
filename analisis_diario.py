@@ -6,6 +6,7 @@
 Lo ejecuta GitHub Actions cada día hábil después del cierre (ver .github/workflows).
 Archivos generados:
     analisis_diario.json    lo lee la sección «Archivo» de la app
+    cambios.json            últimos cambios de decisión (archivo pequeño para la pantalla Mercado)
     analisis_acciones.csv   una fila por fecha y emisora, con la decisión y sus razones
     analisis_deuda.csv      una fila por fecha e instrumento
     analisis_diario.xlsx    las mismas tablas en Excel
@@ -129,6 +130,9 @@ def main():
         (OUT / "diario" / f"{reg['fecha']}.md").write_text(reportes.md_dia(reg), encoding="utf-8")
     ruta.write_text(json.dumps({"actualizado": datetime.now(server.TZ).isoformat(), "aviso": reportes.AVISO, "registros": registros},
                                ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    cambios = [{"fecha": r["fecha"], "ticker": e["ticker"], "de": e["veredicto_ant"], "a": e["veredicto"]}
+               for r in reversed(registros) for e in r["emisoras"] if e.get("cambio")][:20]
+    (OUT / "cambios.json").write_text(json.dumps(cambios, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     acc, deud = filas(registros)
     escribir_csv("analisis_acciones.csv", COLS_ACC, acc)
     escribir_csv("analisis_deuda.csv", COLS_DEU, deud)
