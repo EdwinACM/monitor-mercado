@@ -3,15 +3,13 @@
 Tablero web con 5 acciones de la BMV y 5 instrumentos de deuda. Los datos se consultan al abrir la página y cada vez que tocas **Actualizar**.
 
 ## Verla en el celular (Android o iPhone)
-La app vive en Vercel y se publica desde el repositorio `github.com/EdwinACM/monitor-mercado`.
+Dirección pública: **https://monitor-mercado-alpha.vercel.app**
 
-Primera vez (una sola vez):
-1. Entra a https://vercel.com/new y elige **Continue with GitHub**.
-2. Importa el repositorio **monitor-mercado** → **Deploy** (no cambies ninguna opción).
-3. Vercel te da una dirección tipo `monitor-mercado-xxxx.vercel.app`. Ábrela en el celular.
-4. Para tenerla como app: iPhone (Safari) → Compartir → **Agregar a pantalla de inicio**; Android (Chrome) → ⋮ → **Agregar a la pantalla principal**.
+Ábrela en el navegador del celular. Para tenerla como app:
+- iPhone (Safari): Compartir → **Agregar a pantalla de inicio**.
+- Android (Chrome): menú ⋮ → **Agregar a la pantalla principal**.
 
-Cada `git push` a `main` vuelve a publicar la app sola.
+La app corre en Vercel (nube): no necesita que la Mac esté encendida. Cada `git push` a `main` del repositorio `github.com/EdwinACM/monitor-mercado` la vuelve a publicar sola.
 
 ## Verla en la Mac (sin internet público)
 Doble clic en `iniciar.command` → abre `http://localhost:8765`.
