@@ -3,33 +3,31 @@
 Modo: Operate. Escena: un estudiante o su asesor revisan el mercado en el celular o en un escritorio con luz de día; la lectura rápida de cifras manda.
 
 ## Mundo
-La pizarra de una bolsa: una sola superficie oscura (el tablero) con las cotizaciones en filas fijas y columnas de cifras, sobre una página clara donde viven las gráficas y el análisis. Cuando cambia un precio, el dígito gira como una ficha de pizarra mecánica. No hay mosaicos de tarjetas: el tablero y las secciones separadas por filetes hacen la estructura.
+La pizarra de una bolsa: un tablero con las cotizaciones en filas fijas y columnas de cifras, y una página donde viven las gráficas y el análisis. Cuando cambia un precio, el dígito gira como una ficha de pizarra mecánica. Sin mosaicos de tarjetas: el tablero y las secciones separadas por filetes hacen la estructura.
 
-## Color (estrategia: Restringida)
-| Rol | Claro | Oscuro (preferencia del sistema) |
-|---|---|---|
-| Papel | #F3F4F1 | #0E1114 |
-| Superficie | #FFFFFF | #161B20 |
-| Tinta / tinta 2 / apagado | #14181C / #4A545E / #5F6A75 | #EEF1F3 / #B5BEC6 / #8A949D |
-| Filete | #D9DCD6 | #262D34 |
-| Tablero | #15191D (filas #1C2227, línea #2B333B) | #1D242A |
-| Acento ámbar (riel, punto en vivo, logo) | #F2A900 | #F2A900 |
-| Ámbar para texto | #8A5F00 | #F2B93B |
-| Sube / baja (papel) | #0B7A55 / #C62828 | #3DDC97 / #FF7A70 |
-| Sube / baja (tablero) | #3DDC97 / #FF7A70 | igual |
+## Temas (selector en la barra superior; abre en Claro)
+| Rol | Claro | Pizarra (tablero oscuro sobre papel claro) | Oscuro |
+|---|---|---|---|
+| Papel / superficie | #F4F6F8 / #FFFFFF | igual que Claro | #0B0F13 / #141A20 |
+| Tinta / tinta 2 / apagado | #0B1117 / #2F3A45 / #4A5663 | igual | #F2F5F7 / #CBD3DA / #A3AFBA |
+| Filete / borde de control | #CBD2D9 / #7B8794 | igual | #2B343D / #6B7886 |
+| Tablero / fila elegida | #FFFFFF / #EAEFF3 | #12171B / #1C242B | #1B2229 / #232C34 |
+| Sube / baja (texto) | #00643F / #B3261E | igual | #4BE3A1 / #FF8A80 |
+| Sube / baja (en tablero) | #00643F / #B3261E | #4BE3A1 / #FF8A80 | #4BE3A1 / #FF8A80 |
+| Ámbar para texto / decorativo | #7A5200 / #F2A900 | igual | #FFC24D / #F2A900 |
 
-Series de comparación (validadas con el validador de dataviz): azul #2A78D6, naranja #EB6834, aguamarina #1BAF7A, amarillo #EDA100, magenta #E87BA4 (oscuro: #3987E5, #D95926, #199E70, #C98500, #D55181). Cada emisora conserva su color en todas las vistas. Contraste bajo en tres series claras: siempre con etiquetas directas, leyenda y tabla.
+Contrastes calculados (WCAG): texto principal ≥ 14.67:1, texto secundario y apagado ≥ 6.80:1, sube/baja ≥ 5.65:1 sobre fondo y tablero, bordes de control ≥ 3.38:1. Cero incumplimientos en los tres temas.
 
-El ámbar se usa pocas veces por pantalla: riel del tablero, indicador en vivo, marca. Sube/baja nunca se comunican solo con color: siempre flecha dibujada y signo.
+Series de comparación (validador dataviz, superficie blanca): azul #1D63C1, naranja #C8480F, verde #0A7F58, ámbar #A86D00, magenta #C23B78 (oscuro: #3987E5, #D95926, #199E70, #C98500, #D55181). Contraste ≥ 3:1 en las cinco; separación para daltonismo en el piso permitido con etiquetas directas y leyenda. Cada emisora conserva su color en todas las vistas. Sube/baja nunca se comunican solo con color: siempre flecha dibujada, signo y texto.
 
-## Tipografía
-Barlow (UI y texto) y Barlow Semi Condensed (cifras del tablero y títulos de columna). Cifras tabulares. Cuerpo 15/1.5, tablero 28–32 px, títulos de sección 18 px semibold, sin sobretítulos ni numeración.
+## Tipografía y números
+Barlow (UI y texto) y Barlow Semi Condensed (cifras, títulos, marca). Cifras tabulares. Todo valor medido se muestra con dos decimales (precios, porcentajes, RSI, volatilidad, razones, puntos base); solo se dejan enteros los conteos y los puntos de la señal. Los textos corridos van justificados con separación silábica (idioma es).
 
-## Forma
-Radios 12 px (tablero), controles 8 px. Un solo recurso de elevación: el contraste entre tablero y papel; sin sombras decorativas. Íconos dibujados en SVG, trazo 1.75, nunca glifos Unicode ni emojis.
+## Forma y movimiento
+Radios 12 px (tablero) y 8 px (controles). Un solo recurso de elevación: borde o contraste de superficie; sin sombras decorativas. Íconos dibujados en SVG (trazo 1.75). Un momento firmado: las filas se acomodan en cascada al abrir y cada cifra que cambia gira (rotateX 450 ms, ease-out exponencial). Respeta prefers-reduced-motion.
 
-## Movimiento
-Un momento firmado: las filas del tablero se acomodan en cascada al cargar y cada cifra que cambia gira (rotateX, 450 ms, ease-out exponencial) con un destello breve de sube/baja. Respeta prefers-reduced-motion.
+## Estado de la bolsa
+El indicador «Bolsa abierta / cerrada» es de solo lectura: se calcula con el reloj y el horario real de la BMV (lunes a viernes, 9:30 a 16:00 hora de Nueva York) y ningún control lo modifica. La pausa de actualización es un control aparte («Auto»).
 
 ## Marca
-Nombre: Pizarra. Marca: ficha de pizarra partida por una ranura horizontal, con una línea ámbar ascendente que cruza la ranura y dos pernos de bisagra.
+Nombre: Pizarra. Marca: ficha de pizarra partida por una ranura, con una línea ámbar ascendente que la cruza y dos pernos de bisagra. Kit en `static/marca/`: marca, logo horizontal (claro y fondo oscuro) y logo vertical, con el nombre convertido a trazos desde Barlow Semi Condensed Bold (licencia OFL incluida).

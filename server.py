@@ -17,6 +17,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import analisis
+import diario
+import reportes
 import truststore
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -242,6 +244,21 @@ def analisis_completo(tickers, desde):
             "mercado": analisis.resumen_mercado(ok), "acciones": items, "deuda": deu}
 
 
+def dia(fecha_iso):
+    """Registro de un día: decisiones, porqué y qué pasó después (para descargar en PDF, Excel o Markdown)."""
+    hist = {a["ticker"]: a["historico"] for a in acciones(list(ACCIONES), ventana_historial()) if a["historico"]}
+    deu = deuda(date.today() - timedelta(days=300))
+    reg = diario.registro_dia(fecha_iso, hist, deu, ACCIONES)
+    if not reg:
+        raise ValueError("No hubo sesión de la BMV en esa fecha o no hay historial suficiente")
+    return diario.completar([reg], hist)[0]
+
+
+def simulacion(desde):
+    hist = {a["ticker"]: a["historico"] for a in acciones(list(ACCIONES), ventana_historial()) if a["historico"]}
+    return analisis.simular(hist, desde.isoformat())
+
+
 def comparacion(tickers, desde):
     hist = {a["ticker"]: a["historico"] for a in acciones(tickers, ventana_historial())
             if not a.get("error") and a["historico"]}
@@ -358,6 +375,23 @@ class Handler(SimpleHTTPRequestHandler):
                 data = comparacion(tickers, desde)
             elif u.path == "/api/cotizaciones":
                 data = cotizaciones(tickers)
+            elif u.path == "/api/simulacion":
+                data = cached(("sim", desde, date.today()), 120, lambda: simulacion(desde))
+            elif u.path == "/api/dia":
+                f = qs.get("fecha", [None])[0]
+                if not f:
+                    raise ValueError("Falta la fecha (AAAA-MM-DD)")
+                date.fromisoformat(f)
+                reg = cached(("dia", f, date.today()), 120, lambda: dia(f))
+                fmt = qs.get("formato", ["json"])[0]
+                if fmt == "pdf":
+                    return self.send(reportes.pdf_dia(reg), "application/pdf", extra={"Content-Disposition": f'attachment; filename="Pizarra_analisis_{f}.pdf"'})
+                if fmt == "xlsx":
+                    return self.send(reportes.xlsx_dia(reg), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                     extra={"Content-Disposition": f'attachment; filename="Pizarra_analisis_{f}.xlsx"'})
+                if fmt == "md":
+                    return self.send(reportes.md_dia(reg).encode(), "text/markdown; charset=utf-8", extra={"Content-Disposition": f'attachment; filename="Pizarra_analisis_{f}.md"'})
+                data = reg
             elif u.path == "/api/excel":
                 name = f"Mercado_{desde:%Y%m%d}_{datetime.now(TZ):%Y%m%d}.xlsx"
                 return self.send(excel(tickers, desde),
