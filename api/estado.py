@@ -1,6 +1,15 @@
-# Función de Vercel para /api/estado: reutiliza el manejador de server.py
+# Función de Vercel: reutiliza la lógica de server.py (rutas /api/*)
 import sys
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from server import Handler as handler  # noqa: E402,F401
+import server  # noqa: E402
+
+
+class handler(BaseHTTPRequestHandler):
+    do_GET = server.Handler.do_GET
+    send = server.Handler.send
+
+    def log_message(self, *args):
+        pass
