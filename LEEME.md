@@ -34,7 +34,8 @@ Deuda: compara el rendimiento de la última subasta con el promedio de las últi
 
 ## Análisis diario guardado
 `analisis_diario.py` guarda cada día en `static/data/`: `analisis_diario.json`, `analisis_acciones.csv`, `analisis_deuda.csv`, `analisis_diario.xlsx` y `diario/AAAA-MM-DD.md`.
-GitHub Actions (`.github/workflows/analisis-diario.yml`) lo ejecuta cada día hábil a las 16:00 (CDMX), guarda los archivos en el repositorio y Vercel republica la app.
+**Guardado automático (pendiente de activar):** el proceso `.github/workflows/analisis-diario.yml` ejecutaría esto cada día hábil a las 16:00 (CDMX), guardaría los archivos en el repositorio y Vercel republicaría la app. Para activarlo, GitHub exige el permiso `workflow`: ejecutar `gh auth refresh -h github.com -s workflow`, autorizar en el navegador y luego `git add .github && git commit -m "Activar análisis diario" && git push`.
+Mientras tanto el archivo trae el historial completo hasta el 2 de octubre de 2026; para agregar días: `python analisis_diario.py`, luego `git add static/data && git commit && git push`.
 Manual: `python analisis_diario.py` (agrega los días que falten) o `python analisis_diario.py --desde 2026-03-02` (reconstruye).
 
 ## De dónde salen los datos
