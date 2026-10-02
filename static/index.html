@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pizarra · Bolsa y deuda de México</title>
-<meta name="description" content="Acciones de la BMV e instrumentos de deuda con tendencias, señales técnicas, comparación de cierres y análisis diario archivado.">
+<meta name="description" content="Acciones de la BMV e instrumentos de deuda con tendencias, decisiones de comprar, mantener o vender con su porqué, comparación de cierres y análisis diario archivado.">
 <meta name="theme-color" content="#15191D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/pizarra.css">
+<script>try{document.documentElement.dataset.theme=JSON.parse(localStorage.getItem("tema")||'"claro"')}catch(e){document.documentElement.dataset.theme="claro"}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
@@ -33,9 +34,13 @@
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
   <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
   <symbol id="i-board" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
   <symbol id="i-compare" viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 8-9"/><path d="M3 21l6-4 4 2 8-7"/></symbol>
   <symbol id="i-debt" viewBox="0 0 24 24"><path d="M4 20h16M6 20v-9M12 20V7M18 20v-5"/><path d="M4 8l8-4 8 4"/></symbol>
+  <symbol id="i-sim" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 2 5-6"/></symbol>
   <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 4h16v4H4zM5 8v12h14V8M10 12h4"/></symbol>
 </svg>
 
@@ -43,13 +48,20 @@
   <div class="bar-in">
     <a class="brand" href="#mercado" aria-label="Pizarra, ir al mercado">
       <svg class="mark" aria-hidden="true"><use href="#i-mark"/></svg>
-      <span class="word">Pizarra</span>
+      <svg class="wordmark" viewBox="0 0 119.4 48" role="img" aria-label="Pizarra"><path d="M20.32 18.56Q20.32 21.04 19.3 22.939999999999998Q18.28 24.84 16.42 25.880000000000003Q14.56 26.92 12.16 26.92H7.84Q7.640000000000001 26.92 7.640000000000001 27.119999999999997V37.52Q7.640000000000001 37.72 7.5 37.86Q7.36 38.0 7.16 38.0H2.48Q2.2800000000000002 38.0 2.14 37.86Q2.0 37.72 2.0 37.52V10.439999999999998Q2.0 10.239999999999998 2.14 10.1Q2.2800000000000002 9.96 2.48 9.96H12.16Q14.56 9.96 16.42 11.040000000000001Q18.28 12.120000000000001 19.3 14.08Q20.32 16.04 20.32 18.56ZM14.68 18.68Q14.68 16.919999999999998 13.74 15.879999999999999Q12.8 14.84 11.24 14.84H7.84Q7.640000000000001 14.84 7.640000000000001 15.04V22.240000000000002Q7.640000000000001 22.439999999999998 7.84 22.439999999999998H11.24Q12.8 22.439999999999998 13.74 21.419999999999998Q14.68 20.4 14.68 18.68ZM23.240000000000002 11.96Q23.240000000000002 10.559999999999999 24.1 9.68Q24.96 8.8 26.36 8.8Q27.76 8.8 28.64 9.68Q29.52 10.559999999999999 29.52 11.96Q29.52 13.32 28.619999999999997 14.22Q27.72 15.120000000000001 26.36 15.120000000000001Q25.0 15.120000000000001 24.12 14.22Q23.240000000000002 13.32 23.240000000000002 11.96ZM23.560000000000002 37.52V17.919999999999998Q23.560000000000002 17.72 23.700000000000003 17.58Q23.84 17.44 24.04 17.44H28.72Q28.92 17.44 29.060000000000002 17.58Q29.200000000000003 17.72 29.200000000000003 17.919999999999998V37.52Q29.200000000000003 37.72 29.060000000000002 37.86Q28.92 38.0 28.72 38.0H24.04Q23.84 38.0 23.700000000000003 37.86Q23.560000000000002 37.72 23.560000000000002 37.52ZM32.36000000000001 37.52V33.2Q32.36000000000001 32.88 32.56 32.6L40.160000000000004 22.759999999999998Q40.24 22.68 40.2 22.6Q40.160000000000004 22.52 40.040000000000006 22.52H33.080000000000005Q32.88 22.52 32.74 22.380000000000003Q32.6 22.240000000000002 32.6 22.04V17.919999999999998Q32.6 17.72 32.74 17.58Q32.88 17.44 33.080000000000005 17.44H46.6Q46.800000000000004 17.44 46.940000000000005 17.58Q47.080000000000005 17.72 47.080000000000005 17.919999999999998V22.2Q47.080000000000005 22.52 46.88 22.799999999999997L39.0 32.64Q38.92 32.72 38.96 32.8Q39.0 32.88 39.120000000000005 32.88H46.800000000000004Q47.0 32.88 47.14 33.019999999999996Q47.28 33.16 47.28 33.36V37.52Q47.28 37.72 47.14 37.86Q47.0 38.0 46.800000000000004 38.0H32.84Q32.64 38.0 32.5 37.86Q32.36000000000001 37.72 32.36000000000001 37.52ZM66.48 23.88V37.52Q66.48 37.72 66.34 37.86Q66.2 38.0 66.0 38.0H61.32Q61.120000000000005 38.0 60.980000000000004 37.86Q60.84 37.72 60.84 37.52V36.4Q60.84 36.28 60.760000000000005 36.24Q60.68000000000001 36.2 60.6 36.32Q59.08 38.32 55.88 38.32Q53.160000000000004 38.32 51.34 36.92Q49.52 35.52 49.52 32.24Q49.52 25.72 57.68000000000001 25.72H60.64Q60.84 25.72 60.84 25.52V24.6Q60.84 23.4 60.14 22.68Q59.440000000000005 21.96 58.24 21.96Q57.28 21.96 56.64 22.4Q56.0 22.84 55.84 23.6Q55.72 24.0 55.28 24.0L50.440000000000005 23.72Q50.24 23.72 50.1 23.6Q49.96 23.48 50.0 23.28Q50.24 20.52 52.5 18.82Q54.760000000000005 17.12 58.2 17.12Q60.6 17.12 62.480000000000004 17.98Q64.36 18.84 65.42 20.38Q66.48 21.919999999999998 66.48 23.88ZM60.84 31.28V29.6Q60.84 29.4 60.64 29.4H58.400000000000006Q56.92 29.4 56.08 30.04Q55.24 30.68 55.24 31.88Q55.24 32.92 55.88 33.480000000000004Q56.52 34.04 57.56 34.04Q58.92 34.04 59.88 33.28Q60.84 32.519999999999996 60.84 31.28ZM81.96 17.64Q82.28 17.84 82.2 18.28L81.4 22.88Q81.36 23.36 80.84 23.16Q80.2 23.0 79.67999999999999 23.0Q79.2 23.0 78.64 23.119999999999997Q77.48 23.28 76.68 24.240000000000002Q75.88 25.2 75.88 26.560000000000002V37.52Q75.88 37.72 75.74 37.86Q75.6 38.0 75.39999999999999 38.0H70.72Q70.52 38.0 70.38 37.86Q70.24 37.72 70.24 37.52V17.919999999999998Q70.24 17.72 70.38 17.58Q70.52 17.44 70.72 17.44H75.39999999999999Q75.6 17.44 75.74 17.58Q75.88 17.72 75.88 17.919999999999998V19.52Q75.88 19.68 75.94 19.7Q76.0 19.72 76.08 19.599999999999998Q77.48 17.16 80.0 17.16Q81.08 17.16 81.96 17.64ZM96.52 17.64Q96.84 17.84 96.76 18.28L95.96000000000001 22.88Q95.92 23.36 95.4 23.16Q94.76 23.0 94.24 23.0Q93.76 23.0 93.2 23.119999999999997Q92.04 23.28 91.24000000000001 24.240000000000002Q90.44 25.2 90.44 26.560000000000002V37.52Q90.44 37.72 90.3 37.86Q90.16 38.0 89.96 38.0H85.28Q85.08 38.0 84.94 37.86Q84.8 37.72 84.8 37.52V17.919999999999998Q84.8 17.72 84.94 17.58Q85.08 17.44 85.28 17.44H89.96Q90.16 17.44 90.3 17.58Q90.44 17.72 90.44 17.919999999999998V19.52Q90.44 19.68 90.5 19.7Q90.56 19.72 90.64 19.599999999999998Q92.04 17.16 94.56 17.16Q95.64 17.16 96.52 17.64ZM115.48 23.88V37.52Q115.48 37.72 115.34 37.86Q115.2 38.0 115.0 38.0H110.32000000000001Q110.12 38.0 109.98 37.86Q109.84 37.72 109.84 37.52V36.4Q109.84 36.28 109.76 36.24Q109.68 36.2 109.60000000000001 36.32Q108.08 38.32 104.88 38.32Q102.16 38.32 100.34 36.92Q98.52 35.52 98.52 32.24Q98.52 25.72 106.68 25.72H109.64Q109.84 25.72 109.84 25.52V24.6Q109.84 23.4 109.14 22.68Q108.44 21.96 107.24000000000001 21.96Q106.28 21.96 105.64 22.4Q105.0 22.84 104.84 23.6Q104.72 24.0 104.28 24.0L99.44 23.72Q99.24000000000001 23.72 99.10000000000001 23.6Q98.96000000000001 23.48 99.0 23.28Q99.24000000000001 20.52 101.5 18.82Q103.76 17.12 107.2 17.12Q109.60000000000001 17.12 111.48 17.98Q113.36 18.84 114.42 20.38Q115.48 21.919999999999998 115.48 23.88ZM109.84 31.28V29.6Q109.84 29.4 109.64 29.4H107.4Q105.92 29.4 105.08000000000001 30.04Q104.24000000000001 30.68 104.24000000000001 31.88Q104.24000000000001 32.92 104.88 33.480000000000004Q105.52 34.04 106.56 34.04Q107.92 34.04 108.88 33.28Q109.84 32.519999999999996 109.84 31.28Z" fill="currentColor"/></svg>
     </a>
     <nav class="nav" id="nav" aria-label="Secciones"></nav>
     <div class="status">
-      <button class="live" id="live" data-on="true" data-open="false" aria-pressed="true" title="Actualización automática">
-        <span class="pulse" aria-hidden="true"></span><span class="t" id="liveTxt">Conectando</span>
-      </button>
+      <span class="mkt" id="mkt" data-open="false" role="status"><i class="pulse" aria-hidden="true"></i><span id="mktTxt">Bolsa</span></span>
+      <button class="auto" id="auto" aria-pressed="true" title="Pausar la actualización automática"><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg><span class="t" id="autoTxt">Auto</span></button>
+      <details class="menu" id="menuTema">
+        <summary aria-label="Cambiar tema de color" title="Tema de color"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg></summary>
+        <div class="menu-pop" role="radiogroup" aria-label="Tema de color">
+          <button role="radio" data-t="claro" aria-checked="true">Claro</button>
+          <button role="radio" data-t="pizarra" aria-checked="false">Pizarra (tablero oscuro)</button>
+          <button role="radio" data-t="oscuro" aria-checked="false">Oscuro</button>
+        </div>
+      </details>
       <button class="icon-btn" id="refresh" aria-label="Actualizar ahora" title="Actualizar ahora"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></button>
     </div>
   </div>
@@ -64,6 +76,7 @@
       <div><h1 id="titulo">Mercado</h1><p id="lectura"></p></div>
       <label class="period" for="desde">Periodo desde <input type="date" id="desde" value="2026-03-01" min="2025-11-01"></label>
     </div>
+    <div id="alertas" aria-live="polite"></div>
     <div class="board"><table id="board" aria-label="Cotizaciones de acciones"></table><div class="board-foot" id="boardFoot"></div></div>
 
     <div class="detail" id="detalle" hidden>
@@ -84,23 +97,24 @@
       </div>
 
       <div class="split">
+        <section class="sec"><h3>Decisión del día y por qué</h3><div class="prose" id="texto"></div>
+          <div class="row-btns" id="descDia"></div></section>
         <section class="sec"><h3>Estadística</h3><dl class="dl" id="stats"></dl></section>
+      </div>
+      <div class="split">
         <section class="sec"><h3>RSI y MACD</h3>
           <div class="chartbox sm"><canvas id="chRsi" role="img" aria-label="RSI de 14 sesiones"></canvas></div>
           <div class="chartbox sm" style="margin-top:12px"><canvas id="chMacd" role="img" aria-label="MACD"></canvas></div></section>
-      </div>
-      <div class="split">
-        <section class="sec"><h3>Análisis del día</h3><div class="prose" id="texto"></div>
-          <div class="row-btns"><button class="btn" id="btnMd"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descargar análisis (.md)</button></div></section>
         <section class="sec"><h3>Prueba histórica de la señal</h3><div id="bt"></div></section>
       </div>
+      <section class="sec" style="margin-top:44px"><h3>Últimos cambios de decisión</h3><div id="histCambios"><p class="note">Cargando…</p></div></section>
     </div>
-    <p class="aviso">Herramienta educativa. Las señales se calculan con indicadores técnicos del historial de precios y no constituyen asesoría financiera; el rendimiento pasado no garantiza resultados futuros. Fuentes: Yahoo Finance (posible retraso de 15 a 20 minutos) y Banco de México.</p>
+    <p class="aviso">Herramienta educativa. Las decisiones se calculan con indicadores técnicos del historial de precios y no constituyen asesoría financiera; el rendimiento pasado no garantiza resultados futuros. Fuentes: Yahoo Finance (posible retraso de 15 a 20 minutos) y Banco de México.</p>
   </section>
 
   <!-- ================= COMPARAR ================= -->
   <section id="v-comparar" class="view" hidden>
-    <div class="head"><div><h1>Comparar</h1><p>Rendimiento acumulado desde el inicio del periodo (base 100) y precios de cierre por fecha.</p></div></div>
+    <div class="head"><div><h1>Comparar</h1><p>Rendimiento acumulado desde el inicio del periodo (base 100.00) y precios de cierre por fecha.</p></div></div>
     <div class="chips" id="chips" role="group" aria-label="Emisoras a comparar"></div>
     <div class="legend" id="legComparar"></div>
     <div class="chartbox"><canvas id="chComparar" role="img" aria-label="Comparación de rendimiento acumulado"></canvas></div>
@@ -112,13 +126,13 @@
           <label>A <input type="date" id="fechaB"></label>
           <div class="seg" id="atajos"><button data-a="ini">Periodo</button><button data-a="sem">1 semana</button><button data-a="mes">1 mes</button></div>
         </div>
-        <table class="tbl" id="tblConsulta"></table>
+        <div class="scrollx"><table class="tbl" id="tblConsulta"></table></div>
         <p class="note" style="margin-top:8px">Si la fecha no fue día hábil se usa el cierre anterior.</p></section>
       <section class="sec"><h2>Ranking del periodo</h2><div style="overflow-x:auto"><table class="tbl" id="tblRanking"></table></div></section>
     </div>
     <div class="split">
       <section class="sec"><h2>Correlación de rendimientos diarios</h2><div class="heat" id="heat"></div>
-        <p class="note" style="margin-top:10px">+1 se mueven igual, 0 sin relación, −1 en sentido contrario. Valores bajos diversifican.</p></section>
+        <p class="note" style="margin-top:10px">+1.00 se mueven igual, 0.00 sin relación, -1.00 en sentido contrario. Valores bajos diversifican.</p></section>
       <section class="sec"><h2>Cierres diarios</h2>
         <details class="more" style="margin-top:0"><summary>Ver tabla completa<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary><div class="body scroll"><table class="tbl" id="tblCierres"></table></div></details></section>
     </div>
@@ -136,7 +150,19 @@
       </div>
       <details class="more"><summary>Resultados de cada subasta<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary><div class="body scroll"><table class="tbl" id="tblDeuda"></table></div></details>
     </div>
-    <p class="aviso">Si las tasas suben, el precio de los bonos ya emitidos baja. La señal es un apoyo educativo y no constituye asesoría financiera.</p>
+    <p class="aviso">Si las tasas suben, el precio de los bonos ya emitidos baja. La decisión es un apoyo educativo y no constituye asesoría financiera.</p>
+  </section>
+
+  <!-- ================= SIMULACIÓN ================= -->
+  <section id="v-simulacion" class="view" hidden>
+    <div class="head"><div><h1>Simulación</h1><p id="simTexto">Qué habría pasado si hubieras seguido las decisiones de Pizarra contra comprar y mantener.</p></div></div>
+    <div class="legend" id="legSim"></div>
+    <div class="chartbox"><canvas id="chSim" role="img" aria-label="Valor del portafolio simulado"></canvas></div>
+    <div class="split">
+      <section class="sec"><h2>Resultado del periodo</h2><div class="scrollx"><table class="tbl" id="tblSim"></table></div></section>
+      <section class="sec"><h2>Por emisora</h2><div style="overflow-x:auto"><table class="tbl" id="tblSimEm"></table></div></section>
+    </div>
+    <p class="aviso" id="simAviso"></p>
   </section>
 
   <!-- ================= ARCHIVO ================= -->
@@ -144,11 +170,14 @@
     <div class="head"><div><h1>Archivo</h1><p id="archResumen">Cargando análisis guardados…</p></div></div>
     <div class="downloads" id="descargas"></div>
     <div class="split one" style="margin-top:28px">
-      <section class="sec"><h2>Mapa de señales por día</h2><div class="legend" id="legTl" style="margin-bottom:12px"></div><div class="tl" id="timeline"></div></section>
+      <section class="sec"><h2>¿Acertaron las decisiones?</h2><div id="aciertos"></div></section>
+    </div>
+    <div class="split one" style="margin-top:32px">
+      <section class="sec"><h2>Mapa de decisiones por día</h2><div class="legend" id="legTl" style="margin-bottom:12px"></div><div class="tl" id="timeline"></div></section>
     </div>
     <div class="split one" style="margin-top:32px">
       <section class="sec"><h2 id="diaTitulo">Un día</h2>
-        <div class="daybar" style="margin-bottom:12px"><button class="icon-btn" id="diaPrev" aria-label="Día anterior"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chevron"/></svg></button><input type="date" id="diaSel"><button class="icon-btn" id="diaNext" aria-label="Día siguiente"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
+        <div class="daybar" style="margin-bottom:12px"><button class="icon-btn" id="diaPrev" aria-label="Día anterior"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chevron"/></svg></button><input type="date" id="diaSel" aria-label="Elegir día"><button class="icon-btn" id="diaNext" aria-label="Día siguiente"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button><span class="daydl" id="diaDl"></span></div>
         <div id="diaDetalle"></div></section>
     </div>
   </section>

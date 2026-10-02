@@ -28,9 +28,9 @@ const SIG = { "COMPRA FUERTE": ["buy", "up", "Compra fuerte"], COMPRAR: ["buy", 
 const sig = v => { const [k, i, t] = SIG[v] || SIG.MANTENER; return `<span class="sig ${k}">${ICON(i)}${t}</span>`; };
 const sigK = v => (SIG[v] || SIG.MANTENER)[0];
 
-const VISTAS = [["mercado", "Mercado", "board"], ["comparar", "Comparar", "compare"], ["deuda", "Deuda", "debt"], ["archivo", "Archivo", "archive"]];
+const VISTAS = [["mercado", "Mercado", "board"], ["comparar", "Comparar", "compare"], ["deuda", "Deuda", "debt"], ["simulacion", "Simulación", "sim"], ["archivo", "Archivo", "archive"]];
 const RANGOS = [["hoy", "Hoy"], ["21", "1M"], ["63", "3M"], ["126", "6M"], ["0", "Periodo"]];
-const S = { vista: "mercado", data: null, sel: null, selD: 0, rango: "63", cmp: null, hist: null, quotes: {}, shown: {}, intra: null,
+const S = { vista: "mercado", data: null, sel: null, selD: 0, rango: "63", cmp: null, hist: null, sim: null, quotes: {}, shown: {}, intra: null,
   auto: store.get("auto", true), tData: 0, tQuote: 0, busy: false, selCmp: new Set(), fechaDia: null, charts: {} };
 
 /* ---------------------------------------------------------------- utilidades */
@@ -117,6 +117,7 @@ async function render() {
     if (S.vista === "mercado") renderMercado();
     else if (S.vista === "comparar") { await cargarComparar(); renderComparar(); }
     else if (S.vista === "deuda") renderDeuda();
+    else if (S.vista === "simulacion") await renderSimulacion();
   } catch (e) { showErr(`No se pudo mostrar esta sección. ${e.message}. Intenta actualizar de nuevo.`); }
 }
 
@@ -131,7 +132,7 @@ async function cargar(fresco) {
 async function actualizar(fresco = true) {
   if (S.busy) return;
   S.busy = true; $("#refresh").classList.add("spin");
-  try { S.cmp = null; S.hist = null; await cargar(fresco); await pollQuotes(true); await render(); showErr(""); }
+  try { S.cmp = null; S.hist = null; S.sim = null; await cargar(fresco); await pollQuotes(true); await render(); showErr(""); }
   catch (e) { showErr(`No se pudo actualizar. Revisa tu conexión e intenta de nuevo (${e.message}).`); }
   S.busy = false; $("#refresh").classList.remove("spin"); estadoLive();
 }
@@ -171,6 +172,8 @@ function renderMercado() {
     S.shown[a.ticker] = nw;
   });
   pieTablero();
+  renderAlertas();
+  cargarCambios();
   renderDetalle();
 }
 function pieTablero() {
@@ -213,19 +216,23 @@ async function renderDetalle() {
 
   const s = a.stats, row = (l, v, c) => `<div><dt>${l}</dt><dd class="${c || ""}">${v}</dd></div>`;
   $("#stats").innerHTML = [
-    row("Rendimiento 5 sesiones", pct(a.ret5, 1), cls(a.ret5)), row("Rendimiento 20 sesiones", pct(a.ret20, 1), cls(a.ret20)),
-    row("Rendimiento del periodo", pct(a.ret_periodo, 1), cls(a.ret_periodo)), row("RSI (14)", a.rsi == null ? "—" : a.rsi.toFixed(0)),
-    row("Volatilidad anual", s.vol_anual == null ? "—" : s.vol_anual.toFixed(1) + "%"), row("Caída máxima (120 ses.)", pct(s.max_drawdown, 1), "down"),
+    row("Rendimiento 5 sesiones", pct(a.ret5), cls(a.ret5)), row("Rendimiento 20 sesiones", pct(a.ret20), cls(a.ret20)),
+    row("Rendimiento del periodo", pct(a.ret_periodo), cls(a.ret_periodo)), row("RSI (14)", a.rsi == null ? "—" : a.rsi.toFixed(2)),
+    row("Volatilidad anual", s.vol_anual == null ? "—" : s.vol_anual.toFixed(2) + "%"), row("Caída máxima (120 ses.)", pct(s.max_drawdown), "down"),
     row("Soporte (20 ses.)", fmt(s.soporte)), row("Resistencia (20 ses.)", fmt(s.resistencia)),
-    row("Rendimiento / riesgo", s.ratio_rend_riesgo == null ? "—" : fmt(s.ratio_rend_riesgo), cls(s.ratio_rend_riesgo)), row("Z del precio vs. media 20", (s.z_precio > 0 ? "+" : s.z_precio < 0 ? MINUS : "") + Math.abs(s.z_precio)),
-    row("Tendencia 30 ses.", a.tendencia.pendiente == null ? "—" : pct(a.tendencia.pendiente, 2) + "/día", cls(a.tendencia.pendiente)), row("Volumen vs. promedio", s.vol_relativo == null ? "—" : s.vol_relativo.toFixed(1) + "×")].join("");
-  $("#texto").innerHTML = `<p>${esc(a.texto)}</p>`;
-  const b = a.backtest, fila = (t, n, ac, r, ok, bueno) => `<tr><td>${t}</td><td>${n}</td><td class="${ok ? "up" : "down"}">${n < 8 ? "—" : ac + "%"}</td><td class="${cls(r)}">${n < 8 ? "—" : pct(r)}</td><td>${n < 8 ? "pocos casos" : bueno}</td></tr>`;
+    row("Rendimiento / riesgo", s.ratio_rend_riesgo == null ? "—" : fmt(s.ratio_rend_riesgo), cls(s.ratio_rend_riesgo)), row("Z del precio vs. media 20", sg(s.z_precio) + Math.abs(s.z_precio).toFixed(2)),
+    row("Tendencia 30 ses.", a.tendencia.pendiente == null ? "—" : pct(a.tendencia.pendiente, 2) + "/día", cls(a.tendencia.pendiente)), row("Volumen vs. promedio", s.vol_relativo == null ? "—" : s.vol_relativo.toFixed(2) + "×")].join("");
+  $("#texto").innerHTML = `<div class="decision ${sigK(a.veredicto)}">${esc(a.decision)}</div>
+    <p>${esc(a.texto)}</p><p class="que"><b>Por qué:</b></p><ul>${a.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+    <p class="que"><b>Qué hacer:</b> ${esc(a.accion)}</p>` + (a.cambio ? `<p class="que"><b>Cambio de decisión:</b> ayer era ${esc((SIG[a.veredicto_ant] || SIG.MANTENER)[2].toLowerCase())}, hoy es ${esc(a.decision.toLowerCase())}.</p>` : "");
+  $("#descDia").innerHTML = ["pdf:PDF", "xlsx:Excel"].map(x => { const [f, t] = x.split(":");
+    return `<a class="btn" href="/api/dia?fecha=${a.fecha}&formato=${f}" download>${ICON("download")}Descargar análisis del ${flarga(a.fecha)} (${t})</a>`; }).join("") +
+    `<p class="note" style="flex-basis:100%">Incluye las 5 emisoras y la deuda: decisión, por qué y qué hacer, con lo que pasó después cuando ya hay datos.</p>`;
+  const b = a.backtest, fila = (t, n, ac, r, ok, bueno) => `<tr><td>${t}</td><td>${n}</td><td class="${ok ? "up" : "down"}">${n < 8 ? "—" : fmt(ac) + "%"}</td><td class="${cls(r)}">${n < 8 ? "—" : pct(r)}</td><td>${n < 8 ? "pocos casos" : bueno}</td></tr>`;
   const okC = b.aciertos_compra >= 55 && b.rend_medio_compra > b.base_rend_medio, okV = b.aciertos_venta >= 55 && b.rend_medio_venta < b.base_rend_medio;
   $("#bt").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Señal</th><th>Casos</th><th>Aciertos</th><th>Rend. a ${b.horizonte} ses.</th><th>Lectura</th></tr></thead><tbody>` +
     fila("Compra", b.n_compra, b.aciertos_compra, b.rend_medio_compra, okC, okC ? "respaldada" : "sin respaldo") + fila("Venta", b.n_venta, b.aciertos_venta, b.rend_medio_venta, okV, okV ? "respaldada" : "sin respaldo") +
     `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Prueba dentro de la misma muestra (${b.muestra} sesiones): sirve para calibrar la confianza, no la garantiza.</p>`;
-  $("#btnMd").onclick = () => descargarMd(a);
   await graficaPrecio(a);
 }
 
@@ -251,7 +258,7 @@ async function graficaPrecio(a) {
     const o = opts({ ftip: v => "$" + fmt(v), right: 76, extra: { endLabels: { on: true } }, title: it => flarga(L[it[0].dataIndex]) });
     mk("chPrecio", { type: "line", data: { labels: L.map(fcorta), datasets: ds }, options: o });
     $("#legPrecio").innerHTML = `<span style="--c:${ink}"><i></i>Cierre</span>` + (medias ? `<span style="--c:${css("--amber-ink")}"><i class="d"></i>Media de 20 sesiones</span><span style="--c:${css("--muted")}"><i class="t"></i>Media de 50</span>` : "") + (bandas ? `<span style="--c:${ink}"><i class="f"></i>Bollinger (20, 2σ)</span>` : "");
-    const orsi = opts({ fy: v => v, ftip: v => v?.toFixed(0), min: 0, max: 100, step: 25, title: it => flarga(L[it[0].dataIndex]) });
+    const orsi = opts({ fy: v => fmt(v), ftip: v => v?.toFixed(2), min: 0, max: 100, step: 25, title: it => flarga(L[it[0].dataIndex]) });
     mk("chRsi", { type: "line", data: { labels: L.map(fcorta), datasets: [linea("RSI", sl(sr.rsi), ink, { w: 1.8 }),
       linea("70", L.map(() => 70), css("--down"), { w: 1, borderDash: [4, 4], tip: false }), linea("30", L.map(() => 30), css("--up"), { w: 1, borderDash: [4, 4], tip: false })] }, options: orsi });
     const h = sl(sr.hist), om = opts({ fy: v => fmt(v, 1), ftip: v => fmt(v, 3), title: it => flarga(L[it[0].dataIndex]) });
@@ -260,16 +267,6 @@ async function graficaPrecio(a) {
       linea("MACD", sl(sr.macd), ink, { type: "line", w: 1.6 }), linea("Señal", sl(sr.macd_signal), css("--amber-ink"), { type: "line", w: 1.3, borderDash: [4, 3] })] }, options: om });
   }
 }
-function descargarMd(a) {
-  const L = [`# ${a.nombre} (${tk(a.ticker)}): análisis del ${a.fecha}`, "", a.texto, "", `## Señal: ${a.veredicto} (puntaje ${a.score}/100, confianza ${a.confianza})`, "",
-    "| Criterio | Puntos | Detalle |", "|---|---:|---|", ...a.componentes.map(c => `| ${c.criterio} | ${c.puntos} | ${c.detalle} |`), "",
-    "## Estadística", "", `- Volatilidad anual: ${a.stats.vol_anual}%`, `- Caída máxima (120 sesiones): ${a.stats.max_drawdown}%`, `- Soporte y resistencia (20 sesiones): ${a.stats.soporte} y ${a.stats.resistencia}`,
-    `- Rendimiento/riesgo anualizado: ${a.stats.ratio_rend_riesgo}`, "", "_Herramienta educativa; no constituye asesoría financiera._", ""];
-  const url = URL.createObjectURL(new Blob([L.join("\n")], { type: "text/markdown;charset=utf-8" }));
-  Object.assign(document.createElement("a"), { href: url, download: `analisis_${tk(a.ticker)}_${a.fecha}.md` }).click();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
-}
-
 /* --------------------------------------------------------------------- comparar */
 async function cargarComparar() {
   const tks = [...S.selCmp], clave = tks.join(",") + desde();
@@ -287,8 +284,8 @@ function renderComparar() {
   const c = S.cmp; if (!c || !c.fechas.length) return;
   const nom = t => d.acciones.find(a => a.ticker === t)?.nombre || t, colr = t => serie(d.acciones.findIndex(a => a.ticker === t));
   const L = c.fechas, tks = Object.keys(c.base100);
-  const o = opts({ fy: v => v.toFixed(0), ftip: v => v.toFixed(1), right: 112, extra: { endLabels: { on: true }, refLine: { valor: 100 } }, title: it => flarga(L[it[0].dataIndex]) });
-  mk("chComparar", { type: "line", data: { labels: L.map(fcorta), datasets: tks.map(t => linea(tk(t), c.base100[t], colr(t), { w: 2.2, endLabel: `${tk(t)} ${c.base100[t].at(-1).toFixed(0)}` })) }, options: o });
+  const o = opts({ fy: v => fmt(v), ftip: v => fmt(v), right: 128, extra: { endLabels: { on: true }, refLine: { valor: 100 } }, title: it => flarga(L[it[0].dataIndex]) });
+  mk("chComparar", { type: "line", data: { labels: L.map(fcorta), datasets: tks.map(t => linea(tk(t), c.base100[t], colr(t), { w: 2.2, endLabel: `${tk(t)} ${fmt(c.base100[t].at(-1))}` })) }, options: o });
   $("#legComparar").innerHTML = tks.map(t => `<span style="--c:${colr(t)}"><i class="sq"></i>${esc(nom(t))}</span>`).join("");
 
   const fa = $("#fechaA"), fb = $("#fechaB");
@@ -308,7 +305,7 @@ function renderComparar() {
   $$("#atajos button").forEach(b => b.onclick = () => { const u = L.length - 1; fb.value = L[u]; fa.value = b.dataset.a === "ini" ? L[0] : L[Math.max(0, u - (b.dataset.a === "sem" ? 5 : 21))]; tabla(); });
 
   $("#tblRanking").innerHTML = `<thead><tr><th>Emisora</th><th>Rend.</th><th>Vol.</th><th>R/R</th><th>Caída</th><th>Días al alza</th></tr></thead><tbody>` +
-    [...c.ranking].sort((a, b) => b.ret - a.ret).map(r => `<tr><td><b>${tk(r.ticker)}</b></td><td class="${cls(r.ret)}"><b>${pct(r.ret, 1)}</b></td><td>${r.vol_anual.toFixed(0)}%</td><td>${r.ratio == null ? "—" : fmt(r.ratio)}</td><td class="down">${pct(r.max_drawdown, 1)}</td><td>${r.dias_alza}%</td></tr>`).join("") + "</tbody>";
+    [...c.ranking].sort((a, b) => b.ret - a.ret).map(r => `<tr><td><b>${tk(r.ticker)}</b></td><td class="${cls(r.ret)}"><b>${pct(r.ret)}</b></td><td>${fmt(r.vol_anual)}%</td><td>${r.ratio == null ? "—" : fmt(r.ratio)}</td><td class="down">${pct(r.max_drawdown)}</td><td>${fmt(r.dias_alza)}%</td></tr>`).join("") + "</tbody>";
   const m = c.corr.matriz, n = c.corr.tickers.length, g = $("#heat");
   g.style.gridTemplateColumns = `auto repeat(${n},minmax(0,1fr))`;
   g.innerHTML = `<div class="h"></div>` + c.corr.tickers.map(t => `<div class="h">${tk(t)}</div>`).join("") +
@@ -327,8 +324,8 @@ function renderDeuda() {
     d.deuda.map((x, i) => `<tr tabindex="0" data-d="${i}" aria-selected="${i === S.selD}" style="--i:${i}">
       <td><div class="who"><span class="sw" style="--c:${serie(i)}"></span><div><div class="tk">${esc(x.nombre)}</div><div class="nm">${esc(x.emisor)}</div><div class="m-only">${sig(x.senal)}</div></div></div></td>
       <td><span class="px num">${valDeuda(x)}</span></td>
-      <td class="c-chg"><span class="chg num ${cls(x.var_pb ?? x.var)}">${x.var_pb != null ? sg(x.var_pb) + Math.abs(x.var_pb).toFixed(0) + " pb" : x.var != null ? sg(x.var) + Math.abs(x.var).toFixed(5) : "—"}</span></td>
-      <td class="c-z"><span class="chg num flat">${x.z != null ? sg(x.z) + Math.abs(x.z).toFixed(1) : "—"}</span></td>
+      <td class="c-chg"><span class="chg num ${cls(x.var_pb ?? x.var)}">${x.var_pb != null ? sg(x.var_pb) + Math.abs(x.var_pb).toFixed(2) + " pb" : x.var != null ? sg(x.var) + Math.abs(x.var).toFixed(5) : "—"}</span></td>
+      <td class="c-z"><span class="chg num flat">${x.z != null ? sg(x.z) + Math.abs(x.z).toFixed(2) : "—"}</span></td>
       <td class="c-trend"><span class="flat">${esc(x.tendencia)}</span></td>
       <td class="c-sig">${sig(x.senal)}</td></tr>`).join("") + "</tbody>";
   $("#footDeuda").innerHTML = `<span>Banco de México · subastas semanales (cuadros CF107 y CF115)</span><span>${ok ? "Última subasta " + fhumana(ok.fecha) : ""}</span>`;
@@ -347,9 +344,9 @@ function renderDeuda() {
     linea(es ? "Rendimiento" : "Precio", v, col, { w: 2.2, pr: 3, endLabel: valDeuda(x) }), linea("Promedio móvil", ma, css("--amber-ink"), { w: 1.6, borderDash: [6, 4] })] }, options: o });
   $("#deuLectura").innerHTML = `<div class="word ${sigK(x.senal)}">${(SIG[x.senal] || SIG.MANTENER)[2]}</div>
     <p class="meta">${esc(x.texto)}</p>
-    <p class="note" style="margin-top:14px">Z: desviaciones estándar frente al promedio de las últimas 12 subastas. Pendiente: regresión de las últimas 8 subastas (${x.pendiente != null ? sg(x.pendiente) + Math.abs(x.pendiente) + (es ? " pb" : " $") + " por subasta" : "sin datos"}).</p>`;
+    <p class="note" style="margin-top:14px">Z: desviaciones estándar frente al promedio de las últimas 12 subastas. Pendiente: regresión de las últimas 8 subastas (${x.pendiente != null ? sg(x.pendiente) + Math.abs(x.pendiente).toFixed(2) + (es ? " pb" : " $") + " por subasta" : "sin datos"}).</p>`;
   $("#tblDeuda").innerHTML = `<thead><tr><th>Subasta</th><th>${es ? "Tasa" : "Precio"}</th><th>${es ? "Cambio (pb)" : "Cambio"}</th></tr></thead><tbody>` +
-    [...x.datos].reverse().map(r => `<tr><td>${flarga(r.fecha)}</td><td><b>${es ? fmt(r.valor) : fmt(r.valor, 5)}</b></td><td class="${cls(es ? r.var_pb : r.var)}">${es ? (r.var_pb == null ? "—" : sg(r.var_pb) + Math.abs(r.var_pb).toFixed(0)) : (r.var == null ? "—" : sg(r.var) + Math.abs(r.var).toFixed(5))}</td></tr>`).join("") + "</tbody>";
+    [...x.datos].reverse().map(r => `<tr><td>${flarga(r.fecha)}</td><td><b>${es ? fmt(r.valor) : fmt(r.valor, 5)}</b></td><td class="${cls(es ? r.var_pb : r.var)}">${es ? (r.var_pb == null ? "—" : sg(r.var_pb) + Math.abs(r.var_pb).toFixed(2)) : (r.var == null ? "—" : sg(r.var) + Math.abs(r.var).toFixed(5))}</td></tr>`).join("") + "</tbody>";
 }
 
 /* ---------------------------------------------------------------------- archivo */
@@ -380,11 +377,19 @@ function renderArchivo() {
   $("#diaPrev").onclick = () => { if (ix > 0) { S.fechaDia = R[ix - 1].fecha; renderArchivo(); } };
   $("#diaNext").onclick = () => { if (ix < R.length - 1) { S.fechaDia = R[ix + 1].fecha; renderArchivo(); } };
   const r = R[ix]; $("#diaTitulo").textContent = fhumana(r.fecha).replace(/^./, c => c.toUpperCase());
+  $("#diaDl").innerHTML = ["pdf:PDF", "xlsx:Excel"].map(x => { const [f, t] = x.split(":");
+    return `<a class="btn sm" href="/api/dia?fecha=${r.fecha}&formato=${f}" download>${ICON("download")}${t} de este día</a>`; }).join("");
+  const ev = R.flatMap(q => q.emisoras).filter(e => e.acierto !== null && e.acierto !== undefined), grupo = k => ev.filter(e => k(e.veredicto));
+  const fila = (t, xs) => { const n = xs.length, ok = xs.filter(e => e.acierto).length, med = n ? xs.reduce((s, e) => s + e.ret_5, 0) / n : null;
+    return `<tr><td><b>${t}</b></td><td>${n}</td><td>${n ? fmt(100 * ok / n) + "%" : "—"}</td><td class="${cls(med)}">${med == null ? "—" : pct(med)}</td></tr>`; };
+  $("#aciertos").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Decisión</th><th>Casos evaluados</th><th>Aciertos a 5 sesiones</th><th>Rend. medio a 5 ses.</th></tr></thead><tbody>` +
+    fila("Comprar", grupo(v => v.startsWith("COMPR"))) + fila("Mantener", grupo(v => v === "MANTENER")) + fila("Vender", grupo(v => v.startsWith("VEN"))) + fila("Todas", ev) +
+    `</tbody></table></div><p class="note" style="margin-top:10px">Comprar acierta si el precio subió a 5 sesiones; vender, si bajó; mantener, si se movió 2.00 % o menos. Un acierto cercano a 50.00 % significa que la decisión no superó al azar en este periodo.</p>`;
   $("#diaDetalle").innerHTML = `<p class="prose">${esc(r.mercado.texto)}</p>
-    <div class="scrollx" style="margin-top:14px"><table class="tbl"><thead><tr><th>Emisora</th><th>Cierre</th><th>Var.</th><th>Tendencia</th><th>RSI</th><th>Puntaje</th><th>Señal</th></tr></thead><tbody>` +
-    r.emisoras.map(e => `<tr><td><b>${e.ticker}</b></td><td>$${fmt(e.cierre)}</td><td class="${cls(e.var_pct)}">${pct(e.var_pct)}</td><td>${e.tendencia}</td><td>${e.rsi == null ? "—" : Math.round(e.rsi)}</td><td>${sg(e.score)}${Math.abs(e.score)}</td><td>${sig(e.veredicto)}</td></tr>`).join("") + `</tbody></table></div>
-    <div style="margin-top:18px">` + r.emisoras.map(e => `<div class="day-item"><b>${esc(e.nombre)}</b><p class="note" style="font-size:14.5px;color:var(--ink-2)">${esc(e.texto)}</p></div>`).join("") +
-    r.deuda.map(x => `<div class="day-item"><b>${esc(x.nombre)}</b> ${sig(x.senal)}<p class="note" style="font-size:14.5px;color:var(--ink-2)">${esc(x.texto)}</p></div>`).join("") + `</div>`;
+    <div class="scrollx" style="margin-top:14px"><table class="tbl"><thead><tr><th>Emisora</th><th>Cierre</th><th>Var.</th><th>RSI</th><th>Puntaje</th><th>Decisión</th><th>5 ses.</th><th>¿Acertó?</th></tr></thead><tbody>` +
+    r.emisoras.map(e => `<tr><td><b>${e.ticker}</b></td><td>$${fmt(e.cierre)}</td><td class="${cls(e.var_pct)}">${pct(e.var_pct)}</td><td>${e.rsi == null ? "—" : fmt(e.rsi)}</td><td>${sg(e.score)}${Math.abs(e.score)}</td><td>${sig(e.veredicto)}</td><td class="${cls(e.ret_5)}">${e.ret_5 == null ? "—" : pct(e.ret_5)}</td><td class="${e.acierto ? "ok" : e.acierto === false ? "no" : ""}">${e.acierto == null ? "por evaluar" : e.acierto ? "Sí" : "No"}</td></tr>`).join("") + `</tbody></table></div>
+    <div style="margin-top:18px">` + r.emisoras.map(e => `<div class="day-item"><b>${esc(e.nombre)}</b> ${sig(e.veredicto)}<div class="prose" style="margin-top:6px"><ul>${e.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul><p class="que"><b>Qué hacer:</b> ${esc(e.accion)}</p></div></div>`).join("") +
+    r.deuda.map(x => `<div class="day-item"><b>${esc(x.nombre)}</b> ${sig(x.senal)}<div class="prose" style="margin-top:6px"><ul>${x.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul></div></div>`).join("") + `</div>`;
 }
 
 /* ---------------------------------------------------------- actualización automática */
@@ -405,11 +410,16 @@ async function pollQuotes(force) {
   if (S.rango === "hoy") { const a = S.data.acciones.find(x => x.ticker === S.sel); if (a && !a.error) await graficaPrecio(a); }
 }
 function estadoLive() {
-  const ab = abiertoNY(), b = $("#live");
-  b.dataset.on = S.auto; b.dataset.open = ab; b.setAttribute("aria-pressed", S.auto);
-  $("#liveTxt").textContent = !S.auto ? "En pausa" : ab ? "En vivo" : "Bolsa cerrada";
-  b.title = S.auto ? "Actualización automática activa. Toca para pausar." : "Actualización en pausa. Toca para reanudar.";
-  const u = $("#updTxt"); if (u) u.textContent = textoActualizado();
+  // El estado de la bolsa depende SOLO del reloj (horario real de la BMV): ningún botón lo modifica.
+  const ab = abiertoNY(), m = $("#mkt");
+  m.dataset.open = ab;
+  $("#mktTxt").innerHTML = `<span class="long">Bolsa </span>${ab ? "abierta" : "cerrada"}`;
+  m.title = ab ? "La BMV está operando (lunes a viernes, hora de Nueva York 9:30 a 16:00)" : "La BMV no está operando; se muestra el último cierre";
+  const a = $("#auto");
+  a.setAttribute("aria-pressed", S.auto);
+  a.innerHTML = `${ICON(S.auto ? "pause" : "play")}<span class="t">${S.auto ? "Auto" : "Pausado"}</span>`;
+  a.title = S.auto ? "Actualización automática activa. Toca para pausar." : "Actualización en pausa. Toca para reanudar.";
+  const u = $("#updTxt"); if (u) u.textContent = textoActualizado() + (S.auto ? "" : " · actualización en pausa");
 }
 let abiertoAntes = abiertoNY();
 async function ciclo() {
@@ -430,7 +440,8 @@ async function ciclo() {
 function init() {
   renderNav();
   $("#refresh").onclick = () => actualizar(true);
-  $("#live").onclick = () => { S.auto = !S.auto; store.set("auto", S.auto); estadoLive(); if (S.auto) ciclo(); };
+  $("#auto").onclick = () => { S.auto = !S.auto; store.set("auto", S.auto); estadoLive(); if (S.auto) ciclo(); };
+  iniciarTema();
   $("#desde").onchange = () => actualizar(false);
   $("#chkMedias").onchange = $("#chkBandas").onchange = () => S.data && renderDetalle();
   addEventListener("hashchange", () => setVista(location.hash.slice(1)));
@@ -443,3 +454,64 @@ function init() {
   setInterval(ciclo, 1000);
 }
 init();
+
+/* -------------------------------------------------------------------------- tema */
+const TEMAS = ["claro", "pizarra", "oscuro"];
+function iniciarTema() {
+  const actual = () => document.documentElement.dataset.theme;
+  const marcar = () => $$("#menuTema button").forEach(b => b.setAttribute("aria-checked", b.dataset.t === actual()));
+  marcar();
+  $$("#menuTema button").forEach(b => b.onclick = () => {
+    const t = TEMAS.includes(b.dataset.t) ? b.dataset.t : "claro";
+    document.documentElement.dataset.theme = t; store.set("tema", t); marcar();
+    $("#menuTema").open = false;
+    const mc = document.querySelector('meta[name="theme-color"]'); if (mc) mc.content = t === "oscuro" ? "#0B0F13" : "#15191D";
+    if (S.data) render();
+  });
+  document.addEventListener("click", e => { const m = $("#menuTema"); if (m.open && !m.contains(e.target)) m.open = false; });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") $("#menuTema").open = false; });
+}
+
+/* ---------------------------------------------------- alertas y cambios de decisión */
+function renderAlertas() {
+  const cambios = S.data.acciones.filter(a => !a.error && a.cambio);
+  let vistos = store.get("vistos", null);
+  const hoy = Object.fromEntries(S.data.acciones.filter(a => !a.error).map(a => [a.ticker, a.veredicto]));
+  const desdeVisita = vistos ? S.data.acciones.filter(a => !a.error && vistos[a.ticker] && vistos[a.ticker] !== a.veredicto) : [];
+  store.set("vistos", hoy);
+  const lin = a => `<b>${tk(a.ticker)}</b>: de ${esc((SIG[a.veredicto_ant] || SIG.MANTENER)[2].toLowerCase())} a ${esc(a.decision.toLowerCase())}`;
+  const nombre = (a, v) => (SIG[v] || SIG.MANTENER)[2].toLowerCase();
+  let html = "";
+  if (cambios.length) html += `<div class="alerta">${ICON("wait")}<div><b>Cambió la decisión en la última sesión</b><p>${cambios.map(lin).join("; ")}.</p></div></div>`;
+  if (desdeVisita.length) html += `<div class="alerta">${ICON("wait")}<div><b>Desde tu última visita</b><p>${desdeVisita.map(a => `<b>${tk(a.ticker)}</b>: de ${nombre(a, vistos[a.ticker])} a ${nombre(a, a.veredicto)}`).join("; ")}.</p></div></div>`;
+  $("#alertas").innerHTML = html;
+}
+async function cargarCambios() {
+  try {
+    await cargarHistorial();
+    const R = S.hist.registros, lista = [];
+    for (let i = R.length - 1; i >= 0 && lista.length < 10; i--) for (const e of R[i].emisoras) if (e.cambio) lista.push([R[i].fecha, e]);
+    $("#histCambios").innerHTML = lista.length ? lista.map(([f, e]) => `<div class="cambio"><span class="f">${flarga(f)}</span><span class="t">${esc(e.ticker)}</span>
+      <span class="flecha">${esc((SIG[e.veredicto_ant] || SIG.MANTENER)[2])} ${ICON("chevron")} ${sig(e.veredicto)}</span></div>`).join("") : '<p class="note">Aún no hay cambios de decisión registrados.</p>';
+  } catch { $("#histCambios").innerHTML = '<p class="note">El archivo de decisiones aún no está disponible.</p>'; }
+}
+
+/* ------------------------------------------------------------------- simulación */
+async function renderSimulacion() {
+  if (!S.sim) { $("#simTexto").textContent = "Calculando la simulación…"; S.sim = await api(`/api/simulacion?desde=${desde()}`); }
+  const s = S.sim, m = s.metricas;
+  if (!s.fechas.length) { $("#simTexto").textContent = s.error || "No hay datos suficientes."; return; }
+  const peso = n => "$" + fmt(n), ink = css("--ink"), acc = css("--s2");
+  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las 5 emisoras, desde ${fhumana(s.fechas[0])}: seguir las decisiones de Pizarra terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
+  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones de Pizarra</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
+  const o = opts({ fy: v => fmt(v, 2), ftip: v => peso(v), right: 8, title: it => flarga(s.fechas[it[0].dataIndex]) });
+  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Pizarra", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] }, options: o });
+  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Pizarra</th><th>Comprar y mantener</th></tr></thead><tbody>
+    <tr><td>Rendimiento del periodo</td><td class="${cls(m.ret_estrategia)}"><b>${pct(m.ret_estrategia)}</b></td><td class="${cls(m.ret_comprar_mantener)}"><b>${pct(m.ret_comprar_mantener)}</b></td></tr>
+    <tr><td>Valor final</td><td>${peso(s.estrategia.at(-1))}</td><td>${peso(s.comprar_mantener.at(-1))}</td></tr>
+    <tr><td>Caída máxima</td><td class="down">${pct(m.caida_estrategia)}</td><td class="down">${pct(m.caida_comprar_mantener)}</td></tr>
+    <tr><td>Operaciones</td><td>${m.operaciones}</td><td>1 por emisora</td></tr></tbody>`;
+  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Pizarra</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
+    s.por_emisora.map(p => `<tr><td><b>${tk(p.ticker)}</b></td><td class="${cls(p.ret_estrategia)}">${pct(p.ret_estrategia)}</td><td class="${cls(p.ret_comprar_mantener)}">${pct(p.ret_comprar_mantener)}</td><td>${p.operaciones}</td><td>${fmt(p.tiempo_en_mercado)}%</td></tr>`).join("") + "</tbody>";
+  $("#simAviso").textContent = `Reglas: se compra cuando el puntaje llega a +20 o más y se sale a efectivo cuando baja a -20 o menos; la decisión de un día se ejecuta al cierre del día siguiente y cada operación paga ${fmt(s.costo_pct)}% de comisión. Es una prueba dentro de la misma muestra, sin impuestos ni deslizamiento, con fines educativos; no constituye asesoría financiera y el resultado pasado no garantiza resultados futuros.`;
+}

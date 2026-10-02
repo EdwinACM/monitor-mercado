@@ -123,7 +123,7 @@ def evaluar(i, c, ind):
         pts = 20 if r < 30 else 8 if r < 40 else -20 if r > 70 else -8 if r > 60 else 0
         zona = ("sobreventa (posible rebote)" if r < 30 else "cerca de sobreventa" if r < 40
                 else "sobrecompra (posible corrección)" if r > 70 else "cerca de sobrecompra" if r > 60 else "zona neutral")
-        txt = f"RSI {r:.0f}: {zona}"
+        txt = f"RSI {r:.2f}: {zona}"
     else:
         pts, txt = 0, "Historial insuficiente"
     comp.append({"criterio": "Sobrecompra / sobreventa (RSI)", "puntos": pts, "max": 20, "detalle": txt})
@@ -140,7 +140,7 @@ def evaluar(i, c, ind):
 
     if i >= 20:
         r20 = c[i] / c[i - 20] - 1
-        pts, txt = round(_tope(r20 / 0.05 * 10, 10)), f"Rendimiento a 20 sesiones: {r20 * 100:+.1f}%"
+        pts, txt = round(_tope(r20 / 0.05 * 10, 10)), f"Rendimiento a 20 sesiones: {r20 * 100:+.2f}%"
     else:
         pts, txt = 0, "Historial insuficiente"
     comp.append({"criterio": "Momentum (20 sesiones)", "puntos": pts, "max": 10, "detalle": txt})
@@ -164,6 +164,37 @@ def veredicto(score):
             else "VENTA FUERTE" if score <= -45 else "VENDER" if score <= -20 else "MANTENER")
 
 
+DECISION = {"COMPRA FUERTE": "Comprar (señal fuerte)", "COMPRAR": "Comprar", "MANTENER": "Mantener",
+            "VENDER": "Vender", "VENTA FUERTE": "Vender (señal fuerte)"}
+ACCION = {
+    "COMPRA FUERTE": "Si no tenías la acción, era un buen momento para entrar; si ya la tenías, mantener o aumentar la posición.",
+    "COMPRAR": "Si no tenías la acción, considerar entrar; si ya la tenías, mantenerla.",
+    "MANTENER": "No operar: no hay ventaja clara. Si tenías la acción, conservarla; si no, esperar una señal más definida.",
+    "VENDER": "Si tenías la acción, considerar salir o reducir; si no la tenías, no entrar todavía.",
+    "VENTA FUERTE": "Si tenías la acción, era momento de salir; si no la tenías, no entrar.",
+}
+
+
+def razonar(veredicto_, score, comp, anterior=None):
+    """Explica en español por qué se tomó la decisión: criterios que empujan a favor o en contra."""
+    if score >= 20:
+        por_que = [f"El puntaje total fue {score:+d} de ±100: supera el umbral de +20, por eso la decisión es comprar."]
+    elif score <= -20:
+        por_que = [f"El puntaje total fue {score:+d} de ±100: cae por debajo del umbral de -20, por eso la decisión es vender."]
+    else:
+        por_que = [f"El puntaje total fue {score:+d} de ±100: queda entre -20 y +20, sin ventaja clara, por eso la decisión es mantener."]
+    for c in sorted(comp, key=lambda x: -abs(x["puntos"])):
+        if c["puntos"]:
+            lado = "a favor de comprar" if c["puntos"] > 0 else "a favor de vender"
+            por_que.append(f"{c['criterio']} ({c['puntos']:+d}, {lado}): {c['detalle']}.")
+    neutros = [c["criterio"] for c in comp if not c["puntos"]]
+    if neutros:
+        por_que.append("Sin aporte hoy: " + ", ".join(neutros) + ".")
+    if anterior and anterior != veredicto_:
+        por_que.append(f"Cambio de señal: el día anterior era {DECISION.get(anterior, anterior).lower()}.")
+    return por_que
+
+
 def confianza(score, comp, i):
     activos = [x["puntos"] for x in comp if x["puntos"]]
     if i < 59 or not activos:
@@ -183,7 +214,7 @@ def backtest(c, ind, h=HORIZONTE):
             compras.append(fr)
         elif s <= -20:
             ventas.append(fr)
-    pct = lambda xs, f: round(100 * sum(1 for x in xs if f(x)) / len(xs)) if xs else None
+    pct = lambda xs, f: round(100 * sum(1 for x in xs if f(x)) / len(xs), 2) if xs else None
     med = lambda xs: round(mean(xs) * 100, 2) if xs else None
     return {"horizonte": h, "muestra": len(todos), "base_rend_medio": med(todos),
             "n_compra": len(compras), "aciertos_compra": pct(compras, lambda x: x > 0), "rend_medio_compra": med(compras),
@@ -203,9 +234,9 @@ def estadisticas(i, c, vol):
     sd20 = pstdev(v20) if len(v20) >= 5 else 0
     vols = [x for x in vol[max(0, i - 20):i] if x]
     return {
-        "vol_anual": round(sd * math.sqrt(DIAS_ANIO) * 100, 1) if sd else None,
+        "vol_anual": round(sd * math.sqrt(DIAS_ANIO) * 100, 2) if sd else None,
         "ratio_rend_riesgo": round(mean(w) / sd * math.sqrt(DIAS_ANIO), 2) if sd else None,
-        "max_drawdown": round(dd * 100, 1),
+        "max_drawdown": round(dd * 100, 2),
         "soporte": round(min(v20), 2), "resistencia": round(max(v20), 2),
         "z_precio": round((c[i] - mean(v20)) / sd20, 2) if sd20 else 0.0,
         "vol_relativo": round(vol[i] / mean(vols), 2) if vols and vol[i] else None,
@@ -224,17 +255,17 @@ def _texto(nombre, d):
     t = d["tendencia"]
     partes = [f"{nombre} cerró en ${d['cierre']:.2f}, {'sube' if d['var_pct'] >= 0 else 'baja'} {abs(d['var_pct']):.2f}% vs. la sesión anterior."]
     if d["ret5"] is not None and d["ret20"] is not None:
-        partes.append(f"En 5 sesiones acumula {d['ret5']:+.1f}% y en 20 sesiones {d['ret20']:+.1f}%.")
+        partes.append(f"En 5 sesiones acumula {d['ret5']:+.2f}% y en 20 sesiones {d['ret20']:+.2f}%.")
     if t["pendiente"] is not None:
         partes.append(f"Tendencia {t['etiqueta']} (pendiente {t['pendiente']:+.2f}%/día, R² {t['r2']:.2f}).")
     if d.get("rsi") is not None:
         zona = "sobreventa" if d["rsi"] < 30 else "sobrecompra" if d["rsi"] > 70 else "zona neutral"
-        partes.append(f"RSI {d['rsi']:.0f} ({zona}).")
+        partes.append(f"RSI {d['rsi']:.2f} ({zona}).")
     s = d["stats"]
     if s["vol_anual"] is not None:
-        partes.append(f"Volatilidad anualizada {s['vol_anual']:.0f}%; caída máxima reciente {s['max_drawdown']:.1f}%.")
+        partes.append(f"Volatilidad anualizada {s['vol_anual']:.2f}%; caída máxima reciente {s['max_drawdown']:.2f}%.")
     if s["vol_relativo"] is not None and (s["vol_relativo"] > 1.5 or s["vol_relativo"] < 0.6):
-        partes.append(f"Volumen {s['vol_relativo']:.1f}× su promedio de 20 sesiones.")
+        partes.append(f"Volumen {s['vol_relativo']:.2f}× su promedio de 20 sesiones.")
     partes.append(f"Señal técnica: {d['veredicto']} (puntaje {d['score']:+d}/100, confianza {d['confianza'].lower()}).")
     return " ".join(partes)
 
@@ -254,12 +285,21 @@ def analizar_serie(nombre, rows, desde_vista=None, con_serie=True, con_backtest=
         "ret5": round((c[i] / c[i - 5] - 1) * 100, 2) if i >= 5 else None,
         "ret20": round((c[i] / c[i - 20] - 1) * 100, 2) if i >= 20 else None,
         "ret_periodo": round((c[i] / c[ini] - 1) * 100, 2),
-        "rsi": round(ind["rsi"][i], 1) if ind["rsi"][i] is not None else None,
+        "rsi": round(ind["rsi"][i], 2) if ind["rsi"][i] is not None else None,
         "macd_hist": round(ind["hist"][i], 3) if ind["hist"][i] is not None else None,
         "pctb": round(ind["pctb"][i], 2) if ind["pctb"][i] is not None else None,
         "score": score, "veredicto": veredicto(score), "confianza": confianza(score, comp, i),
         "componentes": comp, "tendencia": _tendencia(c, i), "stats": estadisticas(i, c, vol),
     }
+    if i >= 1:
+        sc_ant, _ = evaluar(i - 1, c, ind)
+        d["veredicto_ant"] = veredicto(sc_ant)
+    else:
+        d["veredicto_ant"] = None
+    d["cambio"] = d["veredicto_ant"] is not None and d["veredicto_ant"] != d["veredicto"]
+    d["decision"] = DECISION[d["veredicto"]]
+    d["por_que"] = razonar(d["veredicto"], score, comp, d["veredicto_ant"])
+    d["accion"] = ACCION[d["veredicto"]]
     d["texto"] = _texto(nombre, d)
     if con_backtest:
         d["backtest"] = backtest(c, ind)
@@ -287,11 +327,12 @@ def resumen_mercado(items):
         cuenta[k] = cuenta.get(k, 0) + 1
     prom = mean(x["score"] for x in items)
     sesgo = "positivo" if prom >= 10 else "negativo" if prom <= -10 else "neutral"
-    texto = (f"De {len(items)} emisoras, {len(suben)} subieron y {len(bajan)} bajaron. "
+    ver = lambda n, s, p: f"{n} {s if n == 1 else p}"
+    texto = (f"De {len(items)} emisoras, {ver(len(suben), 'subió', 'subieron')} y {ver(len(bajan), 'bajó', 'bajaron')}. "
              f"Mejor: {mejor['nombre']} ({mejor['var_pct']:+.2f}%); peor: {peor['nombre']} ({peor['var_pct']:+.2f}%). "
-             f"Señales: {cuenta.get('COMPRAR', 0)} de compra, {cuenta.get('MANTENER', 0)} de mantener, "
-             f"{cuenta.get('VENDER', 0)} de venta (puntaje promedio {prom:+.0f}, sesgo {sesgo}).")
-    return {"texto": texto, "suben": len(suben), "bajan": len(bajan), "puntaje_promedio": round(prom),
+             f"Decisiones: {cuenta.get('COMPRAR', 0)} de comprar, {cuenta.get('MANTENER', 0)} de mantener, "
+             f"{cuenta.get('VENDER', 0)} de vender (puntaje promedio {prom:+.2f}, sesgo {sesgo}).")
+    return {"texto": texto, "suben": len(suben), "bajan": len(bajan), "puntaje_promedio": round(prom, 2),
             "sesgo": sesgo, "senales": cuenta}
 
 
@@ -325,11 +366,11 @@ def comparar(hist, desde):
             pico = max(pico, x)
             dd = min(dd, x / pico - 1)
         ranking.append({"ticker": t, "ret": round((v[-1] / v[0] - 1) * 100, 2),
-                        "vol_anual": round(sd * math.sqrt(DIAS_ANIO) * 100, 1),
+                        "vol_anual": round(sd * math.sqrt(DIAS_ANIO) * 100, 2),
                         "ratio": round(mean(r) / sd * math.sqrt(DIAS_ANIO), 2) if sd else None,
-                        "max_drawdown": round(dd * 100, 1),
+                        "max_drawdown": round(dd * 100, 2),
                         "mejor_dia": round(max(r) * 100, 2), "peor_dia": round(min(r) * 100, 2),
-                        "dias_alza": round(100 * sum(1 for x in r if x > 0) / len(r))})
+                        "dias_alza": round(100 * sum(1 for x in r if x > 0) / len(r), 2)})
     return {"fechas": fechas, "cierres": cierres, "base100": base,
             "corr": {"tickers": orden, "matriz": matriz}, "ranking": ranking}
 
@@ -340,6 +381,7 @@ def analizar_deuda(d, hasta=None):
     base = {"nombre": d["nombre"], "emisor": d["emisor"], "unidad": d["unidad"], "tipo": d["tipo"]}
     if not datos:
         return {**base, "fecha": None, "valor": None, "senal": "SIN DATOS", "tendencia": "sin datos",
+                "decision": "Sin datos", "por_que": ["No hubo subastas del instrumento en el periodo."],
                 "texto": f"{d['nombre']}: sin subastas en el periodo."}
     vals = [x["valor"] for x in datos]
     last, prev = vals[-1], (vals[-2] if len(vals) > 1 else None)
@@ -352,7 +394,7 @@ def analizar_deuda(d, hasta=None):
     umbral = 1.5 if es_tasa else 0.004
     tend = "al alza" if sl_u > umbral else "a la baja" if sl_u < -umbral else "estable"
     var = (last - prev) if prev is not None else None
-    var_txt = "" if var is None else (f" ({var * 100:+.0f} pb vs. la subasta previa)" if es_tasa else f" ({var:+.5f} vs. la previa)")
+    var_txt = "" if var is None else (f" ({var * 100:+.2f} pb vs. la subasta previa)" if es_tasa else f" ({var:+.5f} vs. la previa)")
     if len(vals) < 4:
         senal, razon = "MANTENER", "Hay pocas subastas en el periodo para estimar una tendencia confiable."
     elif not es_tasa:
@@ -365,7 +407,71 @@ def analizar_deuda(d, hasta=None):
         senal, razon = "MANTENER", "El rendimiento está en su rango reciente."
     val_txt = f"{last:.2f}%" if es_tasa and d["unidad"].startswith("%") else (f"{last:.2f} pp" if es_tasa else f"${last:.5f}")
     texto = (f"{d['nombre']} ({d['emisor']}): {val_txt}{var_txt}. Tendencia {tend} "
-             f"({sl_u:+.1f} {'pb' if es_tasa else '$'}/subasta, z={z:+.1f}). {razon}")
+             f"({sl_u:+.2f} {'pb' if es_tasa else '$'}/subasta, z={z:+.2f}). {razon}")
+    decision = {"COMPRAR": "Comprar (fijar tasa)", "ESPERAR": "Esperar", "MANTENER": "Mantener"}.get(senal, senal.title())
+    por_que = [f"El rendimiento de la última subasta fue {val_txt}{var_txt}.",
+               f"Frente al promedio de las últimas 12 subastas su puntaje z es {z:+.2f}.",
+               f"La tendencia es {tend} ({sl_u:+.2f} {'pb' if es_tasa else '$'} por subasta).", razon]
     return {**base, "fecha": datos[-1]["fecha"], "valor": last, "var": None if var is None else round(var, 5),
-            "var_pb": round(var * 100, 1) if var is not None and es_tasa else None, "z": z,
+            "decision": decision, "por_que": por_que,
+            "var_pb": round(var * 100, 2) if var is not None and es_tasa else None, "z": z,
             "pendiente": round(sl_u, 2), "tendencia": tend, "senal": senal, "n": len(vals), "texto": texto}
+
+
+# ------------------------------------------------------------------- simulación
+def simular(hist, desde, capital=100000.0, costo=0.002):
+    """Qué habría pasado siguiendo las señales (comprar cuando puntaje >= 20, salir a efectivo cuando <= -20).
+
+    La señal calculada al cierre del día j se ejecuta al cierre del día j+1 (sin ver el futuro) y cada
+    operación paga `costo` (0.20 % por defecto). Se compara contra comprar y mantener en partes iguales.
+    """
+    tks = list(hist)
+    conj = [{r["fecha"] for r in rows if r["fecha"] >= desde} for rows in hist.values()]
+    fechas = sorted(set.intersection(*conj)) if conj else []
+    if len(fechas) < 3:
+        return {"fechas": [], "error": "Periodo demasiado corto"}
+    parte = capital / len(tks)
+    estrategia = [0.0] * len(fechas)
+    comprarmant = [0.0] * len(fechas)
+    por = []
+    for t in tks:
+        rows = hist[t]
+        c = [r["cierre"] for r in rows]
+        ind = indicadores(c)
+        pos_idx = {r["fecha"]: k for k, r in enumerate(rows)}
+        valor, pos, pend, ops, dias_pos = parte, 0, 0, 0, 0
+        serie_v = [valor]
+        for j in range(1, len(fechas)):
+            k, kp = pos_idx[fechas[j]], pos_idx[fechas[j - 1]]
+            if pos:
+                valor *= c[k] / c[kp]
+                dias_pos += 1
+            if pend != pos:                      # ejecución de la decisión del día anterior
+                valor *= (1 - costo)
+                pos, ops = pend, ops + 1
+            sc, _ = evaluar(k, c, ind)          # decisión de hoy, se ejecuta al cierre de mañana
+            pend = 1 if sc >= 20 else 0 if sc <= -20 else pend
+            serie_v.append(valor)
+        k0, kn = pos_idx[fechas[0]], pos_idx[fechas[-1]]
+        bh = [parte * c[pos_idx[f]] / c[k0] for f in fechas]
+        for j in range(len(fechas)):
+            estrategia[j] += serie_v[j]
+            comprarmant[j] += bh[j]
+        por.append({"ticker": t, "ret_estrategia": round((serie_v[-1] / parte - 1) * 100, 2),
+                    "ret_comprar_mantener": round((c[kn] / c[k0] - 1) * 100, 2), "operaciones": ops,
+                    "tiempo_en_mercado": round(100 * dias_pos / (len(fechas) - 1), 2)})
+
+    def dd(v):
+        pico, m = v[0], 0.0
+        for x in v:
+            pico = max(pico, x)
+            m = min(m, x / pico - 1)
+        return round(m * 100, 2)
+
+    return {"fechas": fechas, "capital": capital, "costo_pct": round(costo * 100, 2),
+            "estrategia": [round(x, 2) for x in estrategia], "comprar_mantener": [round(x, 2) for x in comprarmant],
+            "metricas": {"ret_estrategia": round((estrategia[-1] / capital - 1) * 100, 2),
+                         "ret_comprar_mantener": round((comprarmant[-1] / capital - 1) * 100, 2),
+                         "caida_estrategia": dd(estrategia), "caida_comprar_mantener": dd(comprarmant),
+                         "operaciones": sum(p["operaciones"] for p in por)},
+            "por_emisora": por}
