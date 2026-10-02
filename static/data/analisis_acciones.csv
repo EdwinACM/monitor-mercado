@@ -1,0 +1,746 @@
+﻿fecha,ticker,nombre,cierre,var,var_pct,ret5,ret20,rsi,macd_hist,pctb,tendencia,pendiente,r2,vol_anual,max_drawdown,score,veredicto,confianza
+2026-03-02,WALMEX,Walmart de México,56.16,0.26,0.47,-2.04,1.26,42.4,-0.2,0.2,lateral,-0.027,0.02,20.8,-13.1,-5,MANTENER,Baja
+2026-03-02,AMXB,América Móvil,22.42,-0.03,-0.13,8.94,24.07,77.3,0.208,0.91,alcista,0.807,0.91,27.3,-18.4,27,COMPRAR,Media
+2026-03-02,KOFUBL,Coca-Cola FEMSA,190.39,-1.12,-0.58,4.8,3.88,53.5,-0.943,0.45,lateral,0.258,0.5,26.3,-7.8,20,COMPRAR,Media
+2026-03-02,KIMBERA,Kimberly-Clark de México,43.06,-0.13,-0.3,1.17,11.24,61.9,-0.016,0.72,alcista,0.412,0.8,24.8,-11.3,29,COMPRAR,Media
+2026-03-02,OMAB,Grupo Aeroportuario Centro Norte,257.86,-5.3,-2.01,-8.42,1.05,41.5,-2.956,0.1,alcista,0.418,0.57,27.4,-10.9,35,COMPRAR,Alta
+2026-03-03,WALMEX,Walmart de México,55.68,-0.48,-0.85,-4.17,-0.13,39.9,-0.231,0.09,lateral,-0.034,0.03,20.8,-13.1,6,MANTENER,Media
+2026-03-03,AMXB,América Móvil,21.72,-0.7,-3.12,-1.0,15.78,65.4,0.143,0.74,alcista,0.816,0.92,27.1,-18.4,45,COMPRA FUERTE,Alta
+2026-03-03,KOFUBL,Coca-Cola FEMSA,186.9,-3.49,-1.83,-1.73,0.56,48.5,-1.134,0.21,lateral,0.212,0.39,26.6,-7.8,13,MANTENER,Media
+2026-03-03,KIMBERA,Kimberly-Clark de México,42.11,-0.95,-2.21,-0.54,6.63,53.8,-0.094,0.49,alcista,0.378,0.75,25.1,-11.3,36,COMPRAR,Media
+2026-03-03,OMAB,Grupo Aeroportuario Centro Norte,248.55,-9.31,-3.61,-9.19,-3.59,35.2,-3.944,-0.09,lateral,0.307,0.34,28.3,-13.4,8,MANTENER,Baja
+2026-03-04,WALMEX,Walmart de México,56.79,1.11,1.99,0.14,2.47,47.5,-0.166,0.33,lateral,-0.031,0.02,20.9,-13.1,-3,MANTENER,Baja
+2026-03-04,AMXB,América Móvil,22.06,0.34,1.57,1.66,18.54,68.0,0.109,0.79,alcista,0.831,0.93,27.3,-18.4,45,COMPRA FUERTE,Alta
+2026-03-04,KOFUBL,Coca-Cola FEMSA,190.96,4.06,2.17,-0.09,4.1,53.9,-0.964,0.45,lateral,0.175,0.32,26.8,-7.8,20,COMPRAR,Media
+2026-03-04,KIMBERA,Kimberly-Clark de México,43.12,1.01,2.4,0.98,10.06,59.8,-0.082,0.74,alcista,0.353,0.73,25.5,-11.3,35,COMPRAR,Media
+2026-03-04,OMAB,Grupo Aeroportuario Centro Norte,254.03,5.48,2.2,-6.29,-0.67,40.9,-4.055,0.06,lateral,0.218,0.19,28.4,-13.4,-3,MANTENER,Media
+2026-03-05,WALMEX,Walmart de México,56.3,-0.49,-0.86,-0.12,-0.3,44.8,-0.146,0.2,lateral,-0.038,0.03,21.0,-13.1,-9,MANTENER,Alta
+2026-03-05,AMXB,América Móvil,21.6,-0.46,-2.09,-1.14,16.25,61.3,0.046,0.67,alcista,0.822,0.92,27.5,-18.4,45,COMPRA FUERTE,Alta
+2026-03-05,KOFUBL,Coca-Cola FEMSA,187.42,-3.54,-1.85,-1.26,-0.32,49.1,-1.058,0.18,lateral,0.129,0.21,27.0,-7.8,17,MANTENER,Baja
+2026-03-05,KIMBERA,Kimberly-Clark de México,42.45,-0.67,-1.55,-1.74,5.89,54.7,-0.121,0.5,alcista,0.33,0.69,25.7,-11.3,34,COMPRAR,Media
+2026-03-05,OMAB,Grupo Aeroportuario Centro Norte,250.94,-3.09,-1.22,-6.83,-3.62,38.8,-4.148,0.03,lateral,0.146,0.09,28.4,-13.4,-1,MANTENER,Baja
+2026-03-06,WALMEX,Walmart de México,55.69,-0.61,-1.08,-0.38,-4.8,41.7,-0.163,0.09,lateral,-0.045,0.04,21.1,-13.1,-12,MANTENER,Media
+2026-03-06,AMXB,América Móvil,21.14,-0.46,-2.13,-5.84,14.09,55.4,-0.032,0.54,alcista,0.793,0.89,27.9,-18.4,30,COMPRAR,Media
+2026-03-06,KOFUBL,Coca-Cola FEMSA,186.9,-0.52,-0.28,-2.41,-2.4,48.4,-1.118,0.18,lateral,0.099,0.13,26.7,-7.8,13,MANTENER,Baja
+2026-03-06,KIMBERA,Kimberly-Clark de México,41.54,-0.91,-2.14,-3.82,0.87,48.7,-0.205,0.1,alcista,0.315,0.63,26.1,-11.3,32,COMPRAR,Alta
+2026-03-06,OMAB,Grupo Aeroportuario Centro Norte,245.52,-5.42,-2.16,-6.7,-8.55,35.4,-4.364,-0.01,lateral,0.055,0.01,28.8,-14.4,5,MANTENER,Baja
+2026-03-09,WALMEX,Walmart de México,55.63,-0.06,-0.11,-0.94,-4.47,41.3,-0.166,0.12,lateral,-0.051,0.06,21.1,-13.1,-31,VENDER,Media
+2026-03-09,AMXB,América Móvil,21.24,0.1,0.47,-5.26,11.44,56.4,-0.079,0.54,alcista,0.755,0.86,27.8,-18.4,30,COMPRAR,Media
+2026-03-09,KOFUBL,Coca-Cola FEMSA,182.21,-4.69,-2.51,-4.3,-5.23,42.6,-1.417,-0.04,lateral,0.061,0.05,27.3,-7.8,-3,MANTENER,Media
+2026-03-09,KIMBERA,Kimberly-Clark de México,41.29,-0.25,-0.6,-4.11,-0.51,47.1,-0.27,0.01,alcista,0.282,0.53,26.2,-11.3,28,COMPRAR,Media
+2026-03-09,OMAB,Grupo Aeroportuario Centro Norte,244.32,-1.2,-0.49,-5.25,-10.94,34.7,-4.366,0.04,lateral,-0.037,0.0,28.7,-14.8,-4,MANTENER,Baja
+2026-03-10,WALMEX,Walmart de México,55.33,-0.3,-0.54,-0.63,-3.72,39.8,-0.176,0.1,lateral,-0.068,0.09,21.1,-13.2,-21,VENDER,Media
+2026-03-10,AMXB,América Móvil,21.01,-0.23,-1.08,-3.27,8.41,53.5,-0.126,0.43,alcista,0.701,0.81,27.9,-18.4,30,COMPRAR,Media
+2026-03-10,KOFUBL,Coca-Cola FEMSA,180.92,-1.29,-0.71,-3.2,-6.2,41.1,-1.629,-0.02,lateral,0.011,0.0,27.3,-8.1,-3,MANTENER,Media
+2026-03-10,KIMBERA,Kimberly-Clark de México,41.5,0.21,0.51,-1.45,-1.78,48.6,-0.29,0.14,lateral,0.246,0.44,26.1,-11.3,14,MANTENER,Baja
+2026-03-10,OMAB,Grupo Aeroportuario Centro Norte,247.03,2.71,1.11,-0.61,-9.76,37.8,-3.976,0.14,lateral,-0.112,0.04,28.8,-14.8,-4,MANTENER,Baja
+2026-03-11,WALMEX,Walmart de México,56.61,1.28,2.31,-0.32,-2.19,48.8,-0.088,0.41,lateral,-0.06,0.07,21.5,-13.2,-32,VENDER,Alta
+2026-03-11,AMXB,América Móvil,20.95,-0.06,-0.29,-5.03,3.46,52.7,-0.16,0.39,alcista,0.644,0.75,27.9,-18.4,34,COMPRAR,Media
+2026-03-11,KOFUBL,Coca-Cola FEMSA,181.14,0.22,0.12,-5.14,-6.61,41.5,-1.677,0.06,lateral,-0.026,0.01,27.2,-8.1,-12,MANTENER,Media
+2026-03-11,KIMBERA,Kimberly-Clark de México,41.75,0.25,0.6,-3.18,-0.24,50.4,-0.277,0.24,lateral,0.217,0.37,25.7,-11.3,12,MANTENER,Baja
+2026-03-11,OMAB,Grupo Aeroportuario Centro Norte,243.78,-3.25,-1.32,-4.03,-12.09,35.6,-3.73,0.13,lateral,-0.185,0.11,26.8,-15.0,-4,MANTENER,Baja
+2026-03-12,WALMEX,Walmart de México,56.12,-0.49,-0.87,-0.32,-3.04,46.0,-0.056,0.32,lateral,-0.06,0.07,21.5,-13.2,-34,VENDER,Alta
+2026-03-12,AMXB,América Móvil,20.52,-0.43,-2.05,-5.0,-0.53,47.5,-0.205,0.24,alcista,0.584,0.66,28.1,-18.4,26,COMPRAR,Baja
+2026-03-12,KOFUBL,Coca-Cola FEMSA,176.53,-4.61,-2.54,-5.81,-10.38,36.4,-1.923,-0.07,lateral,-0.086,0.07,27.8,-10.4,5,MANTENER,Baja
+2026-03-12,KIMBERA,Kimberly-Clark de México,41.81,0.06,0.14,-1.51,-2.08,50.8,-0.257,0.28,lateral,0.185,0.29,25.7,-11.3,8,MANTENER,Baja
+2026-03-12,OMAB,Grupo Aeroportuario Centro Norte,236.41,-7.37,-3.02,-5.79,-13.04,31.2,-3.842,0.07,lateral,-0.277,0.21,27.4,-17.6,-4,MANTENER,Baja
+2026-03-13,WALMEX,Walmart de México,57.11,0.99,1.76,2.55,-2.07,52.0,0.033,0.57,lateral,-0.07,0.1,21.1,-13.2,-9,MANTENER,Media
+2026-03-13,AMXB,América Móvil,20.62,0.1,0.49,-2.46,0.83,48.7,-0.223,0.27,alcista,0.52,0.58,27.9,-18.4,29,COMPRAR,Media
+2026-03-13,KOFUBL,Coca-Cola FEMSA,174.74,-1.79,-1.01,-6.51,-9.96,34.6,-2.096,-0.04,lateral,-0.171,0.24,27.8,-11.3,5,MANTENER,Baja
+2026-03-13,KIMBERA,Kimberly-Clark de México,41.8,-0.01,-0.02,0.63,-0.97,50.7,-0.236,0.29,lateral,0.154,0.22,25.5,-11.3,10,MANTENER,Baja
+2026-03-13,OMAB,Grupo Aeroportuario Centro Norte,235.55,-0.86,-0.36,-4.06,-14.5,30.8,-3.75,0.11,lateral,-0.376,0.34,26.9,-17.9,-4,MANTENER,Baja
+2026-03-17,WALMEX,Walmart de México,57.53,0.42,0.74,3.42,-0.96,54.4,0.118,0.69,lateral,-0.081,0.14,20.5,-13.2,13,MANTENER,Baja
+2026-03-17,AMXB,América Móvil,20.93,0.31,1.5,-1.46,3.05,52.6,-0.207,0.37,alcista,0.444,0.5,27.8,-18.4,33,COMPRAR,Media
+2026-03-17,KOFUBL,Coca-Cola FEMSA,171.94,-2.8,-1.6,-5.64,-11.83,31.9,-2.274,-0.05,lateral,-0.249,0.4,27.9,-12.7,5,MANTENER,Baja
+2026-03-17,KIMBERA,Kimberly-Clark de México,42.7,0.9,2.15,3.41,-2.49,57.3,-0.157,0.67,lateral,0.112,0.16,24.4,-11.3,7,MANTENER,Baja
+2026-03-17,OMAB,Grupo Aeroportuario Centro Norte,238.85,3.3,1.4,-2.24,-13.79,34.9,-3.259,0.19,lateral,-0.458,0.46,27.0,-17.9,-4,MANTENER,Baja
+2026-03-18,WALMEX,Walmart de México,55.94,-1.59,-2.76,1.1,-5.35,45.3,0.066,0.29,lateral,-0.108,0.26,21.1,-13.2,-15,MANTENER,Media
+2026-03-18,AMXB,América Móvil,21.19,0.26,1.24,0.86,1.68,55.6,-0.174,0.46,lateral,0.396,0.44,27.8,-18.4,15,MANTENER,Media
+2026-03-18,KOFUBL,Coca-Cola FEMSA,170.71,-1.23,-0.72,-5.64,-11.89,30.8,-2.34,-0.0,bajista,-0.319,0.52,27.9,-13.3,-7,MANTENER,Media
+2026-03-18,KIMBERA,Kimberly-Clark de México,41.89,-0.81,-1.9,0.94,-1.55,50.8,-0.155,0.34,lateral,0.068,0.07,24.2,-11.3,9,MANTENER,Baja
+2026-03-18,OMAB,Grupo Aeroportuario Centro Norte,241.5,2.65,1.11,-2.24,-14.38,38.0,-2.578,0.26,bajista,-0.523,0.57,27.0,-17.9,-25,VENDER,Media
+2026-03-19,WALMEX,Walmart de México,56.67,0.73,1.3,0.11,-1.8,49.5,0.08,0.53,lateral,-0.131,0.42,21.3,-13.2,-16,MANTENER,Media
+2026-03-19,AMXB,América Móvil,21.21,0.02,0.09,1.24,2.86,55.8,-0.147,0.46,lateral,0.337,0.38,27.7,-18.4,18,MANTENER,Media
+2026-03-19,KOFUBL,Coca-Cola FEMSA,173.07,2.36,1.38,-4.46,-10.84,35.5,-2.098,0.12,bajista,-0.386,0.67,26.9,-13.3,-18,MANTENER,Media
+2026-03-19,KIMBERA,Kimberly-Clark de México,41.03,-0.86,-2.05,-1.72,-2.01,44.9,-0.204,0.03,lateral,0.003,0.0,24.5,-11.3,14,MANTENER,Baja
+2026-03-19,OMAB,Grupo Aeroportuario Centro Norte,247.29,5.79,2.4,1.44,-11.93,44.4,-1.608,0.36,bajista,-0.576,0.68,27.3,-17.9,-53,VENTA FUERTE,Alta
+2026-03-20,WALMEX,Walmart de México,55.87,-0.8,-1.41,-0.45,-3.34,45.4,0.036,0.3,bajista,-0.151,0.54,21.5,-13.2,-25,VENDER,Media
+2026-03-20,AMXB,América Móvil,20.97,-0.24,-1.13,2.19,1.99,52.3,-0.142,0.34,lateral,0.264,0.29,27.8,-18.4,16,MANTENER,Media
+2026-03-20,KOFUBL,Coca-Cola FEMSA,170.08,-2.99,-1.73,-3.65,-12.14,32.5,-2.013,0.08,bajista,-0.444,0.75,26.9,-13.7,-39,VENDER,Media
+2026-03-20,KIMBERA,Kimberly-Clark de México,39.16,-1.87,-4.56,-6.34,-6.65,35.3,-0.347,-0.29,lateral,-0.079,0.11,26.1,-11.3,5,MANTENER,Baja
+2026-03-20,OMAB,Grupo Aeroportuario Centro Norte,243.99,-3.3,-1.33,3.21,-12.7,41.8,-1.084,0.33,bajista,-0.624,0.76,27.4,-17.9,-53,VENTA FUERTE,Alta
+2026-03-23,WALMEX,Walmart de México,56.02,0.15,0.27,-1.91,-3.33,46.3,0.019,0.37,bajista,-0.145,0.52,21.4,-13.2,-24,VENDER,Media
+2026-03-23,AMXB,América Móvil,21.09,0.12,0.57,2.28,2.48,53.9,-0.127,0.38,lateral,0.187,0.2,27.8,-18.4,17,MANTENER,Media
+2026-03-23,KOFUBL,Coca-Cola FEMSA,165.71,-4.37,-2.57,-5.17,-14.77,28.7,-2.114,0.01,bajista,-0.503,0.79,27.2,-15.9,-27,VENDER,Media
+2026-03-23,KIMBERA,Kimberly-Clark de México,40.17,1.01,2.58,-3.9,-5.68,42.5,-0.356,0.05,lateral,-0.125,0.24,26.6,-11.3,-12,MANTENER,Media
+2026-03-23,OMAB,Grupo Aeroportuario Centro Norte,241.56,-2.43,-1.0,2.55,-15.81,39.9,-0.809,0.3,bajista,-0.654,0.8,26.6,-17.9,-45,VENTA FUERTE,Alta
+2026-03-24,WALMEX,Walmart de México,56.15,0.13,0.23,-2.4,-2.06,47.1,0.018,0.43,lateral,-0.138,0.49,21.4,-13.2,-16,MANTENER,Media
+2026-03-24,AMXB,América Móvil,22.07,0.98,4.65,5.45,7.24,64.2,-0.052,0.79,lateral,0.154,0.16,29.2,-18.4,14,MANTENER,Baja
+2026-03-24,KOFUBL,Coca-Cola FEMSA,167.71,2.0,1.21,-2.46,-7.68,32.6,-1.915,0.12,bajista,-0.544,0.83,27.3,-15.9,-39,VENDER,Media
+2026-03-24,KIMBERA,Kimberly-Clark de México,40.61,0.44,1.1,-4.89,-4.58,45.3,-0.317,0.2,lateral,-0.158,0.36,26.7,-11.3,-11,MANTENER,Media
+2026-03-24,OMAB,Grupo Aeroportuario Centro Norte,250.13,8.57,3.55,4.72,-11.16,48.7,-0.0,0.5,bajista,-0.642,0.78,27.6,-17.9,-53,VENTA FUERTE,Alta
+2026-03-25,WALMEX,Walmart de México,57.74,1.59,2.83,3.22,-0.62,55.8,0.121,1.08,lateral,-0.121,0.37,22.2,-13.2,-8,MANTENER,Media
+2026-03-25,AMXB,América Móvil,22.59,0.52,2.36,6.61,2.96,68.3,0.028,0.97,lateral,0.14,0.15,29.4,-18.4,27,COMPRAR,Media
+2026-03-25,KOFUBL,Coca-Cola FEMSA,172.52,4.81,2.87,1.06,-9.29,40.9,-1.354,0.28,bajista,-0.558,0.85,27.9,-15.9,-53,VENTA FUERTE,Alta
+2026-03-25,KIMBERA,Kimberly-Clark de México,41.77,1.16,2.86,-0.29,-1.35,52.0,-0.202,0.48,lateral,-0.159,0.37,27.2,-10.6,9,MANTENER,Baja
+2026-03-25,OMAB,Grupo Aeroportuario Centro Norte,259.39,9.26,3.7,7.41,-5.22,56.1,1.144,0.75,bajista,-0.603,0.71,28.6,-17.9,-10,MANTENER,Media
+2026-03-26,WALMEX,Walmart de México,57.39,-0.35,-0.61,1.27,1.2,53.7,0.159,0.9,lateral,-0.103,0.28,22.2,-13.2,4,MANTENER,Media
+2026-03-26,AMXB,América Móvil,22.36,-0.23,-1.02,5.42,3.04,64.8,0.059,0.84,lateral,0.143,0.15,29.6,-18.4,27,COMPRAR,Media
+2026-03-26,KOFUBL,Coca-Cola FEMSA,170.22,-2.3,-1.33,-1.65,-10.94,38.5,-1.047,0.24,bajista,-0.573,0.87,28.1,-15.9,-45,VENTA FUERTE,Alta
+2026-03-26,KIMBERA,Kimberly-Clark de México,41.19,-0.58,-1.39,0.39,-3.54,48.8,-0.157,0.36,lateral,-0.175,0.43,27.4,-10.6,5,MANTENER,Baja
+2026-03-26,OMAB,Grupo Aeroportuario Centro Norte,254.35,-5.04,-1.94,2.85,-6.17,51.7,1.524,0.66,bajista,-0.566,0.65,28.7,-17.9,-30,VENDER,Media
+2026-03-27,WALMEX,Walmart de México,58.02,0.63,1.1,3.85,2.93,56.9,0.217,1.03,lateral,-0.078,0.15,22.2,-13.2,-1,MANTENER,Baja
+2026-03-27,AMXB,América Móvil,22.51,0.15,0.67,7.34,3.02,66.0,0.082,0.87,lateral,0.159,0.18,29.6,-18.4,27,COMPRAR,Media
+2026-03-27,KOFUBL,Coca-Cola FEMSA,172.94,2.72,1.6,1.68,-8.89,42.8,-0.592,0.34,bajista,-0.561,0.85,28.2,-15.9,-53,VENTA FUERTE,Alta
+2026-03-27,KIMBERA,Kimberly-Clark de México,41.34,0.15,0.36,5.57,-4.31,49.6,-0.111,0.41,lateral,-0.174,0.43,27.3,-10.6,3,MANTENER,Baja
+2026-03-27,OMAB,Grupo Aeroportuario Centro Norte,258.2,3.85,1.51,5.82,-4.13,54.7,1.969,0.83,bajista,-0.53,0.59,28.5,-17.9,-14,MANTENER,Media
+2026-03-30,WALMEX,Walmart de México,57.98,-0.04,-0.07,3.5,3.72,56.6,0.241,0.94,lateral,-0.048,0.06,22.1,-13.2,9,MANTENER,Media
+2026-03-30,AMXB,América Móvil,22.31,-0.2,-0.89,5.78,-0.62,62.9,0.075,0.8,lateral,0.159,0.18,29.6,-18.4,19,MANTENER,Baja
+2026-03-30,KOFUBL,Coca-Cola FEMSA,173.86,0.92,0.53,4.92,-9.22,44.3,-0.182,0.39,bajista,-0.549,0.84,28.2,-15.9,-53,VENTA FUERTE,Alta
+2026-03-30,KIMBERA,Kimberly-Clark de México,42.11,0.77,1.86,4.83,-2.5,54.0,-0.027,0.63,lateral,-0.167,0.4,27.5,-10.6,7,MANTENER,Baja
+2026-03-30,OMAB,Grupo Aeroportuario Centro Norte,254.53,-3.67,-1.42,5.37,-3.28,51.5,1.946,0.75,bajista,-0.491,0.53,28.7,-17.9,-34,VENDER,Media
+2026-03-31,WALMEX,Walmart de México,58.44,0.46,0.79,4.08,4.06,59.0,0.273,0.99,lateral,-0.015,0.01,22.2,-13.2,10,MANTENER,Media
+2026-03-31,AMXB,América Móvil,22.79,0.48,2.15,3.26,1.65,66.9,0.094,0.96,lateral,0.165,0.19,29.8,-18.4,17,MANTENER,Media
+2026-03-31,KOFUBL,Coca-Cola FEMSA,174.53,0.67,0.39,4.07,-8.33,45.3,0.163,0.43,bajista,-0.528,0.81,28.1,-15.9,-30,VENDER,Media
+2026-03-31,KIMBERA,Kimberly-Clark de México,42.44,0.33,0.78,4.51,-1.44,55.7,0.048,0.74,lateral,-0.131,0.27,27.5,-10.6,32,COMPRAR,Media
+2026-03-31,OMAB,Grupo Aeroportuario Centro Norte,257.11,2.58,1.01,2.79,-0.29,53.5,2.027,0.84,lateral,-0.438,0.44,28.7,-17.9,-19,MANTENER,Media
+2026-04-01,WALMEX,Walmart de México,58.99,0.55,0.94,2.16,5.94,61.7,0.315,1.04,lateral,0.035,0.03,22.2,-13.2,-5,MANTENER,Baja
+2026-04-01,AMXB,América Móvil,22.77,-0.02,-0.09,0.8,4.83,66.6,0.096,0.9,lateral,0.182,0.21,29.8,-18.4,24,COMPRAR,Media
+2026-04-01,KOFUBL,Coca-Cola FEMSA,176.72,2.19,1.25,2.43,-5.45,48.8,0.546,0.53,bajista,-0.497,0.76,28.2,-15.9,-30,VENDER,Media
+2026-04-01,KIMBERA,Kimberly-Clark de México,43.15,0.71,1.67,3.3,2.47,59.3,0.139,0.9,lateral,-0.102,0.16,27.6,-10.6,34,COMPRAR,Media
+2026-04-01,OMAB,Grupo Aeroportuario Centro Norte,257.16,0.05,0.02,-0.86,3.46,53.6,2.001,0.81,lateral,-0.369,0.35,28.6,-17.9,-11,MANTENER,Baja
+2026-04-06,WALMEX,Walmart de México,58.5,-0.49,-0.83,1.93,3.01,58.0,0.293,0.87,lateral,0.064,0.1,21.4,-13.2,8,MANTENER,Media
+2026-04-06,AMXB,América Móvil,22.46,-0.31,-1.36,0.45,1.81,61.6,0.068,0.78,lateral,0.179,0.21,29.4,-18.4,24,COMPRAR,Media
+2026-04-06,KOFUBL,Coca-Cola FEMSA,175.82,-0.9,-0.51,3.29,-7.93,47.5,0.733,0.52,bajista,-0.465,0.71,28.2,-15.9,-30,VENDER,Media
+2026-04-06,KIMBERA,Kimberly-Clark de México,42.86,-0.29,-0.67,4.05,-0.6,57.3,0.169,0.84,lateral,-0.089,0.12,27.5,-10.6,28,COMPRAR,Baja
+2026-04-06,OMAB,Grupo Aeroportuario Centro Norte,255.38,-1.78,-0.69,0.4,0.53,51.8,1.789,0.75,lateral,-0.304,0.27,28.3,-17.9,-11,MANTENER,Baja
+2026-04-07,WALMEX,Walmart de México,57.9,-0.6,-1.03,-0.21,2.84,53.8,0.224,0.71,lateral,0.086,0.18,21.5,-13.2,14,MANTENER,Alta
+2026-04-07,AMXB,América Móvil,22.74,0.28,1.25,1.02,5.28,64.2,0.061,0.84,lateral,0.179,0.21,29.5,-18.4,24,COMPRAR,Media
+2026-04-07,KOFUBL,Coca-Cola FEMSA,175.2,-0.62,-0.35,1.31,-6.52,46.5,0.806,0.53,bajista,-0.432,0.66,28.2,-15.9,-37,VENDER,Media
+2026-04-07,KIMBERA,Kimberly-Clark de México,42.08,-0.78,-1.82,1.79,-0.87,52.1,0.129,0.63,lateral,-0.087,0.11,27.6,-10.6,26,COMPRAR,Media
+2026-04-07,OMAB,Grupo Aeroportuario Centro Norte,245.78,-9.6,-3.76,-4.81,-2.06,43.5,0.968,0.43,lateral,-0.263,0.22,29.3,-17.9,-16,MANTENER,Media
+2026-04-08,WALMEX,Walmart de México,59.1,1.2,2.07,1.93,6.12,60.0,0.244,0.93,lateral,0.124,0.33,21.5,-13.2,24,COMPRAR,Media
+2026-04-08,AMXB,América Móvil,22.89,0.15,0.66,2.6,8.28,65.6,0.058,0.84,lateral,0.179,0.21,29.4,-18.4,24,COMPRAR,Media
+2026-04-08,KOFUBL,Coca-Cola FEMSA,182.05,6.85,3.91,4.71,-2.59,56.8,1.276,0.92,bajista,-0.367,0.53,29.2,-15.9,-37,VENDER,Alta
+2026-04-08,KIMBERA,Kimberly-Clark de México,41.91,-0.17,-0.4,-0.47,0.89,51.0,0.086,0.58,lateral,-0.078,0.09,27.6,-10.6,30,COMPRAR,Alta
+2026-04-08,OMAB,Grupo Aeroportuario Centro Norte,255.0,9.22,3.75,0.18,3.86,51.5,1.008,0.72,lateral,-0.174,0.12,30.2,-17.9,-4,MANTENER,Baja
+2026-04-09,WALMEX,Walmart de México,58.59,-0.51,-0.86,0.26,5.32,56.6,0.21,0.79,lateral,0.147,0.44,21.5,-13.2,38,COMPRAR,Alta
+2026-04-09,AMXB,América Móvil,23.57,0.68,2.97,3.42,10.97,71.0,0.092,0.97,lateral,0.193,0.22,29.8,-18.4,12,MANTENER,Media
+2026-04-09,KOFUBL,Coca-Cola FEMSA,183.47,1.42,0.78,5.12,0.69,58.6,1.622,0.99,lateral,-0.341,0.46,28.6,-15.9,3,MANTENER,Media
+2026-04-09,KIMBERA,Kimberly-Clark de México,41.46,-0.45,-1.07,-2.31,0.41,48.1,0.025,0.45,lateral,-0.076,0.09,27.6,-10.6,9,MANTENER,Alta
+2026-04-09,OMAB,Grupo Aeroportuario Centro Norte,253.5,-1.5,-0.59,-1.4,3.76,50.3,0.898,0.66,lateral,-0.096,0.05,30.3,-17.9,-4,MANTENER,Baja
+2026-04-10,WALMEX,Walmart de México,57.79,-0.8,-1.37,-2.03,4.45,51.5,0.123,0.59,alcista,0.17,0.59,21.6,-13.2,43,COMPRAR,Alta
+2026-04-10,AMXB,América Móvil,23.58,0.01,0.04,3.56,12.23,71.0,0.105,0.91,lateral,0.246,0.31,29.8,-18.4,12,MANTENER,Media
+2026-04-10,KOFUBL,Coca-Cola FEMSA,181.35,-2.12,-1.16,2.62,0.24,54.9,1.643,0.87,lateral,-0.291,0.35,28.7,-15.9,-18,MANTENER,Media
+2026-04-10,KIMBERA,Kimberly-Clark de México,41.19,-0.27,-0.65,-4.54,-0.75,46.4,-0.034,0.38,lateral,-0.08,0.1,27.7,-10.6,-36,VENDER,Alta
+2026-04-10,OMAB,Grupo Aeroportuario Centro Norte,251.43,-2.07,-0.82,-2.23,1.78,48.5,0.662,0.58,lateral,-0.039,0.01,30.2,-17.9,-8,MANTENER,Baja
+2026-04-13,WALMEX,Walmart de México,58.44,0.65,1.12,-0.1,3.23,55.0,0.101,0.72,alcista,0.184,0.66,21.8,-13.2,41,COMPRAR,Alta
+2026-04-13,AMXB,América Móvil,23.04,-0.54,-2.29,2.58,9.98,62.1,0.068,0.75,lateral,0.272,0.36,30.3,-18.4,30,COMPRAR,Media
+2026-04-13,KOFUBL,Coca-Cola FEMSA,181.89,0.54,0.3,3.45,0.41,55.7,1.624,0.89,lateral,-0.234,0.25,28.7,-15.9,-17,MANTENER,Baja
+2026-04-13,KIMBERA,Kimberly-Clark de México,41.26,0.07,0.17,-3.73,-1.17,47.0,-0.065,0.41,lateral,-0.076,0.09,27.7,-10.6,-37,VENDER,Alta
+2026-04-13,OMAB,Grupo Aeroportuario Centro Norte,244.87,-6.56,-2.61,-4.12,0.45,43.4,0.071,0.36,lateral,-0.001,0.0,30.2,-17.9,-11,MANTENER,Baja
+2026-04-14,WALMEX,Walmart de México,57.38,-1.06,-1.81,-0.9,2.25,48.8,0.011,0.45,alcista,0.18,0.63,21.8,-13.2,39,COMPRAR,Alta
+2026-04-14,AMXB,América Móvil,22.68,-0.36,-1.56,-0.26,10.53,57.0,0.013,0.63,lateral,0.291,0.41,30.5,-18.4,38,COMPRAR,Alta
+2026-04-14,KOFUBL,Coca-Cola FEMSA,177.89,-4.0,-2.2,1.54,0.77,49.1,1.289,0.67,lateral,-0.194,0.19,29.0,-15.9,-10,MANTENER,Baja
+2026-04-14,KIMBERA,Kimberly-Clark de México,40.86,-0.4,-0.97,-2.9,-2.27,44.3,-0.107,0.31,lateral,-0.069,0.08,27.4,-10.6,-40,VENDER,Alta
+2026-04-14,OMAB,Grupo Aeroportuario Centro Norte,242.34,-2.53,-1.03,-1.4,2.51,41.5,-0.454,0.25,lateral,0.029,0.01,29.9,-17.9,-30,VENDER,Media
+2026-04-15,WALMEX,Walmart de México,57.32,-0.06,-0.1,-3.01,0.37,48.5,-0.053,0.43,alcista,0.169,0.58,21.8,-13.2,12,MANTENER,Media
+2026-04-15,AMXB,América Móvil,22.72,0.04,0.18,-0.74,10.18,57.4,-0.025,0.62,alcista,0.328,0.51,29.3,-18.4,27,COMPRAR,Media
+2026-04-15,KOFUBL,Coca-Cola FEMSA,178.21,0.32,0.18,-2.11,1.99,49.7,1.045,0.68,lateral,-0.144,0.12,29.0,-15.9,-8,MANTENER,Baja
+2026-04-15,KIMBERA,Kimberly-Clark de México,42.01,1.15,2.81,0.24,0.5,52.6,-0.055,0.62,lateral,-0.042,0.03,28.0,-10.6,-7,MANTENER,Baja
+2026-04-15,OMAB,Grupo Aeroportuario Centro Norte,244.99,2.65,1.09,-3.93,4.01,44.2,-0.579,0.31,lateral,0.056,0.03,30.0,-17.9,-27,VENDER,Media
+2026-04-16,WALMEX,Walmart de México,56.74,-0.58,-1.01,-3.16,-1.37,45.3,-0.13,0.3,lateral,0.154,0.49,21.5,-13.2,-18,MANTENER,Alta
+2026-04-16,AMXB,América Móvil,22.55,-0.17,-0.75,-4.33,7.74,54.9,-0.063,0.55,alcista,0.358,0.61,28.9,-18.4,28,COMPRAR,Media
+2026-04-16,KOFUBL,Coca-Cola FEMSA,177.02,-1.19,-0.67,-3.52,2.95,47.7,0.772,0.6,lateral,-0.098,0.06,28.8,-15.9,-6,MANTENER,Baja
+2026-04-16,KIMBERA,Kimberly-Clark de México,41.34,-0.67,-1.59,-0.29,-3.19,48.1,-0.063,0.46,lateral,-0.025,0.01,28.2,-10.6,-34,VENDER,Alta
+2026-04-16,OMAB,Grupo Aeroportuario Centro Norte,247.32,2.33,0.95,-2.44,3.55,46.5,-0.466,0.37,lateral,0.078,0.07,29.5,-17.9,-28,VENDER,Media
+2026-04-17,WALMEX,Walmart de México,56.23,-0.51,-0.9,-2.7,0.52,42.6,-0.207,0.16,lateral,0.126,0.34,21.4,-13.2,-8,MANTENER,Baja
+2026-04-17,AMXB,América Móvil,22.86,0.31,1.37,-3.05,7.88,58.4,-0.069,0.64,alcista,0.376,0.65,28.9,-18.4,29,COMPRAR,Media
+2026-04-17,KOFUBL,Coca-Cola FEMSA,180.08,3.06,1.73,-0.7,5.49,52.8,0.766,0.74,lateral,-0.052,0.02,28.9,-15.9,-2,MANTENER,Baja
+2026-04-17,KIMBERA,Kimberly-Clark de México,41.32,-0.02,-0.05,0.32,-1.36,48.0,-0.066,0.46,lateral,-0.023,0.01,27.9,-10.6,-31,VENDER,Alta
+2026-04-17,OMAB,Grupo Aeroportuario Centro Norte,252.23,4.91,1.99,0.32,4.44,51.1,-0.043,0.56,lateral,0.089,0.09,29.7,-17.9,-19,MANTENER,Media
+2026-04-20,WALMEX,Walmart de México,55.65,-0.58,-1.03,-4.77,-1.8,39.7,-0.283,0.05,lateral,0.105,0.22,21.5,-13.2,2,MANTENER,Baja
+2026-04-20,AMXB,América Móvil,22.75,-0.11,-0.48,-1.26,7.26,56.7,-0.081,0.57,alcista,0.398,0.71,29.0,-18.4,37,COMPRAR,Media
+2026-04-20,KOFUBL,Coca-Cola FEMSA,177.47,-2.61,-1.45,-2.43,2.54,48.5,0.562,0.59,lateral,0.002,0.0,29.1,-15.9,-7,MANTENER,Baja
+2026-04-20,KIMBERA,Kimberly-Clark de México,41.8,0.48,1.16,1.31,1.88,51.4,-0.035,0.58,lateral,0.004,0.0,27.9,-10.6,-24,VENDER,Media
+2026-04-20,OMAB,Grupo Aeroportuario Centro Norte,253.68,1.45,0.57,3.6,2.58,52.4,0.33,0.62,lateral,0.118,0.15,29.6,-17.9,0,MANTENER,Baja
+2026-04-21,WALMEX,Walmart de México,55.37,-0.28,-0.5,-3.5,-0.89,38.4,-0.336,0.01,lateral,0.075,0.11,21.5,-13.2,4,MANTENER,Baja
+2026-04-21,AMXB,América Móvil,22.31,-0.44,-1.93,-1.63,6.39,50.5,-0.117,0.34,alcista,0.392,0.69,29.4,-18.4,37,COMPRAR,Media
+2026-04-21,KOFUBL,Coca-Cola FEMSA,174.86,-2.61,-1.47,-1.7,2.81,44.6,0.245,0.44,lateral,0.037,0.01,29.2,-15.9,-6,MANTENER,Baja
+2026-04-21,KIMBERA,Kimberly-Clark de México,41.31,-0.49,-1.17,1.1,5.49,47.9,-0.044,0.39,lateral,0.014,0.0,27.6,-10.6,-18,MANTENER,Media
+2026-04-21,OMAB,Grupo Aeroportuario Centro Norte,250.05,-3.63,-1.43,3.18,2.48,48.9,0.329,0.43,lateral,0.129,0.18,28.6,-17.9,0,MANTENER,Baja
+2026-04-23,WALMEX,Walmart de México,54.14,-1.23,-2.22,-5.55,-3.36,33.1,-0.431,-0.14,lateral,0.025,0.01,21.8,-15.1,8,MANTENER,Baja
+2026-04-23,AMXB,América Móvil,22.73,0.42,1.88,0.04,7.78,55.5,-0.111,0.51,alcista,0.382,0.67,29.5,-18.4,36,COMPRAR,Media
+2026-04-23,KOFUBL,Coca-Cola FEMSA,177.45,2.59,1.48,-0.43,7.08,49.0,0.205,0.56,lateral,0.082,0.08,28.7,-15.9,-2,MANTENER,Baja
+2026-04-23,KIMBERA,Kimberly-Clark de México,41.6,0.29,0.7,-0.98,3.56,50.1,-0.029,0.47,lateral,0.014,0.0,26.6,-10.6,-21,VENDER,Media
+2026-04-23,OMAB,Grupo Aeroportuario Centro Norte,247.6,-2.45,-0.98,1.07,2.5,46.6,0.166,0.28,lateral,0.119,0.16,28.6,-17.9,0,MANTENER,Baja
+2026-04-24,WALMEX,Walmart de México,54.3,0.16,0.3,-4.3,-3.29,34.3,-0.457,-0.03,lateral,-0.024,0.01,21.8,-15.1,8,MANTENER,Baja
+2026-04-24,AMXB,América Móvil,23.18,0.45,1.98,2.79,5.03,60.2,-0.076,0.8,alcista,0.384,0.68,29.6,-18.4,28,COMPRAR,Media
+2026-04-24,KOFUBL,Coca-Cola FEMSA,178.15,0.7,0.39,0.64,6.23,50.1,0.219,0.58,lateral,0.115,0.16,28.6,-15.9,-2,MANTENER,Baja
+2026-04-24,KIMBERA,Kimberly-Clark de México,41.61,0.01,0.02,0.65,2.46,50.1,-0.018,0.45,lateral,0.011,0.0,26.3,-10.6,-23,VENDER,Media
+2026-04-24,OMAB,Grupo Aeroportuario Centro Norte,254.79,7.19,2.9,3.02,1.86,53.4,0.526,0.64,lateral,0.124,0.17,29.2,-17.9,-8,MANTENER,Baja
+2026-04-27,WALMEX,Walmart de México,53.54,-0.76,-1.4,-4.78,-7.27,31.3,-0.497,-0.04,lateral,-0.084,0.08,21.9,-16.0,5,MANTENER,Baja
+2026-04-27,AMXB,América Móvil,22.44,-0.74,-3.19,-1.84,-0.66,50.7,-0.102,0.27,alcista,0.354,0.61,30.5,-18.4,24,COMPRAR,Baja
+2026-04-27,KOFUBL,Coca-Cola FEMSA,175.14,-3.01,-1.69,-2.74,1.52,45.4,0.029,0.34,lateral,0.132,0.22,28.7,-15.9,-9,MANTENER,Baja
+2026-04-27,KIMBERA,Kimberly-Clark de México,41.35,-0.26,-0.62,0.07,-1.01,48.1,-0.026,0.34,lateral,0.007,0.0,26.3,-10.6,-30,VENDER,Alta
+2026-04-27,OMAB,Grupo Aeroportuario Centro Norte,242.42,-12.37,-4.85,-3.89,-6.54,43.2,-0.054,0.06,lateral,0.102,0.11,30.8,-17.9,-39,VENDER,Media
+2026-04-28,WALMEX,Walmart de México,53.28,-0.26,-0.49,-4.26,-7.16,30.3,-0.51,0.01,lateral,-0.13,0.17,21.7,-16.4,-4,MANTENER,Baja
+2026-04-28,AMXB,América Móvil,22.75,0.31,1.38,0.0,1.74,54.0,-0.097,0.48,alcista,0.329,0.57,30.6,-18.4,27,COMPRAR,Media
+2026-04-28,KOFUBL,Coca-Cola FEMSA,175.7,0.56,0.32,-1.0,3.22,46.4,-0.051,0.34,lateral,0.154,0.32,28.5,-15.9,-29,VENDER,Media
+2026-04-28,KIMBERA,Kimberly-Clark de México,41.09,-0.26,-0.63,-1.7,-0.24,46.1,-0.046,0.24,lateral,0.003,0.0,26.3,-10.6,-28,VENDER,Alta
+2026-04-28,OMAB,Grupo Aeroportuario Centro Norte,229.8,-12.62,-5.21,-9.41,-9.65,35.7,-1.21,-0.25,lateral,0.038,0.01,32.5,-19.9,-22,VENDER,Media
+2026-04-29,WALMEX,Walmart de México,55.4,2.12,3.98,0.05,-4.52,45.4,-0.353,0.32,lateral,-0.154,0.23,23.2,-16.4,-37,VENDER,Alta
+2026-04-29,AMXB,América Móvil,22.98,0.23,1.01,3.0,2.09,56.3,-0.077,0.63,alcista,0.291,0.52,30.3,-18.4,27,COMPRAR,Media
+2026-04-29,KOFUBL,Coca-Cola FEMSA,173.39,-2.31,-1.31,-0.84,0.26,42.9,-0.241,0.14,lateral,0.152,0.31,28.6,-15.9,-28,VENDER,Baja
+2026-04-29,KIMBERA,Kimberly-Clark de México,39.47,-1.62,-3.94,-4.45,-4.52,35.9,-0.16,-0.21,lateral,-0.026,0.01,27.6,-10.6,-14,MANTENER,Media
+2026-04-29,OMAB,Grupo Aeroportuario Centro Norte,232.0,2.2,0.96,-7.22,-10.15,37.7,-1.717,-0.05,lateral,-0.039,0.01,32.6,-19.9,-22,VENDER,Media
+2026-04-30,WALMEX,Walmart de México,55.23,-0.17,-0.31,2.01,-4.74,44.6,-0.243,0.31,lateral,-0.167,0.26,22.2,-16.4,-37,VENDER,Alta
+2026-04-30,AMXB,América Móvil,23.24,0.26,1.13,2.24,4.17,58.8,-0.047,0.79,lateral,0.259,0.49,30.3,-18.4,20,COMPRAR,Media
+2026-04-30,KOFUBL,Coca-Cola FEMSA,176.95,3.56,2.05,-0.28,1.78,49.3,-0.115,0.43,lateral,0.156,0.32,28.3,-15.9,-31,VENDER,Media
+2026-04-30,KIMBERA,Kimberly-Clark de México,39.45,-0.02,-0.05,-5.17,-6.32,35.8,-0.223,-0.08,lateral,-0.052,0.04,27.5,-10.6,-15,MANTENER,Media
+2026-04-30,OMAB,Grupo Aeroportuario Centro Norte,230.5,-1.5,-0.65,-6.91,-9.44,36.9,-2.022,-0.01,lateral,-0.121,0.1,32.5,-19.9,-15,MANTENER,Media
+2026-05-04,WALMEX,Walmart de México,53.99,-1.24,-2.25,-0.57,-7.61,39.0,-0.235,0.18,lateral,-0.189,0.31,22.6,-16.4,-24,VENDER,Media
+2026-05-04,AMXB,América Móvil,23.25,0.01,0.04,0.3,2.02,58.9,-0.029,0.78,lateral,0.233,0.46,29.8,-18.4,16,MANTENER,Media
+2026-05-04,KOFUBL,Coca-Cola FEMSA,177.93,0.98,0.55,-0.12,1.95,50.9,0.038,0.51,lateral,0.151,0.31,28.0,-15.9,-1,MANTENER,Baja
+2026-05-04,KIMBERA,Kimberly-Clark de México,39.14,-0.31,-0.79,-5.94,-7.78,34.1,-0.269,-0.05,lateral,-0.066,0.06,26.8,-10.6,-15,MANTENER,Media
+2026-05-04,OMAB,Grupo Aeroportuario Centro Norte,227.28,-3.22,-1.4,-10.8,-11.6,35.1,-2.292,-0.01,lateral,-0.202,0.24,32.6,-20.8,-15,MANTENER,Media
+2026-05-05,WALMEX,Walmart de México,55.5,1.51,2.8,3.66,-5.92,47.6,-0.116,0.4,lateral,-0.209,0.37,23.3,-16.4,-38,VENDER,Alta
+2026-05-05,AMXB,América Móvil,23.67,0.42,1.81,5.48,3.95,62.9,0.008,0.99,lateral,0.222,0.45,29.1,-18.4,29,COMPRAR,Media
+2026-05-05,KOFUBL,Coca-Cola FEMSA,185.05,7.12,4.0,5.66,4.71,60.8,0.592,1.06,lateral,0.166,0.34,29.0,-15.9,1,MANTENER,Baja
+2026-05-05,KIMBERA,Kimberly-Clark de México,39.86,0.72,1.84,-3.6,-7.62,41.0,-0.237,0.16,lateral,-0.078,0.08,26.8,-10.6,-32,VENDER,Media
+2026-05-05,OMAB,Grupo Aeroportuario Centro Norte,232.38,5.1,2.24,-4.14,-9.64,40.1,-1.987,0.16,lateral,-0.259,0.37,32.9,-20.8,-32,VENDER,Media
+2026-05-06,WALMEX,Walmart de México,55.82,0.32,0.58,4.77,-4.58,49.3,-0.009,0.46,lateral,-0.216,0.4,23.3,-16.4,-37,VENDER,Alta
+2026-05-06,AMXB,América Móvil,23.39,-0.28,-1.18,2.81,4.14,58.8,0.01,0.78,lateral,0.198,0.42,29.2,-18.4,43,COMPRAR,Alta
+2026-05-06,KOFUBL,Coca-Cola FEMSA,184.02,-1.03,-0.56,4.74,4.66,59.0,0.847,0.91,lateral,0.183,0.38,28.9,-15.9,18,MANTENER,Media
+2026-05-06,KIMBERA,Kimberly-Clark de México,39.75,-0.11,-0.28,-3.26,-7.26,40.3,-0.209,0.16,lateral,-0.103,0.13,26.7,-10.6,-32,VENDER,Media
+2026-05-06,OMAB,Grupo Aeroportuario Centro Norte,229.33,-3.05,-1.31,-0.2,-10.2,38.2,-1.855,0.13,lateral,-0.307,0.46,32.9,-20.8,-24,VENDER,Media
+2026-05-07,WALMEX,Walmart de México,56.83,1.01,1.81,2.58,-1.85,54.2,0.128,0.62,lateral,-0.221,0.42,23.3,-16.4,11,MANTENER,Baja
+2026-05-07,AMXB,América Móvil,23.15,-0.24,-1.03,0.74,1.8,55.5,-0.008,0.61,lateral,0.156,0.36,29.3,-18.4,16,MANTENER,Media
+2026-05-07,KOFUBL,Coca-Cola FEMSA,183.49,-0.53,-0.29,5.83,4.73,58.0,0.931,0.83,lateral,0.183,0.38,28.4,-15.9,11,MANTENER,Media
+2026-05-07,KIMBERA,Kimberly-Clark de México,39.13,-0.62,-1.56,-0.86,-7.01,36.5,-0.217,0.05,lateral,-0.169,0.34,26.5,-10.6,-24,VENDER,Media
+2026-05-07,OMAB,Grupo Aeroportuario Centro Norte,230.26,0.93,0.41,-0.75,-6.31,39.2,-1.58,0.19,bajista,-0.358,0.57,32.7,-20.8,-37,VENDER,Media
+2026-05-08,WALMEX,Walmart de México,56.86,0.03,0.05,2.95,-3.79,54.3,0.215,0.65,lateral,-0.225,0.43,22.1,-16.4,7,MANTENER,Baja
+2026-05-08,AMXB,América Móvil,23.45,0.3,1.3,0.9,2.45,58.6,-0.003,0.78,lateral,0.122,0.35,29.4,-18.4,10,MANTENER,Media
+2026-05-08,KOFUBL,Coca-Cola FEMSA,182.28,-1.21,-0.66,3.01,0.13,55.7,0.857,0.74,lateral,0.158,0.34,28.2,-15.9,8,MANTENER,Alta
+2026-05-08,KIMBERA,Kimberly-Clark de México,39.25,0.12,0.31,-0.51,-6.35,37.7,-0.2,0.13,bajista,-0.216,0.51,25.9,-10.6,-32,VENDER,Media
+2026-05-08,OMAB,Grupo Aeroportuario Centro Norte,231.89,1.63,0.71,0.6,-9.06,40.9,-1.18,0.25,bajista,-0.408,0.7,32.0,-20.8,-53,VENTA FUERTE,Alta
+2026-05-11,WALMEX,Walmart de México,57.4,0.54,0.95,6.32,-2.03,56.9,0.297,0.77,lateral,-0.221,0.42,22.2,-16.4,11,MANTENER,Baja
+2026-05-11,AMXB,América Móvil,23.63,0.18,0.77,1.63,0.25,60.5,0.009,0.89,lateral,0.12,0.34,28.9,-18.4,15,MANTENER,Media
+2026-05-11,KOFUBL,Coca-Cola FEMSA,180.6,-1.68,-0.92,1.5,-1.56,52.6,0.658,0.63,lateral,0.131,0.29,28.2,-15.9,5,MANTENER,Baja
+2026-05-11,KIMBERA,Kimberly-Clark de México,38.94,-0.31,-0.79,-0.51,-6.08,35.9,-0.195,0.1,bajista,-0.26,0.65,25.9,-11.1,-34,VENDER,Media
+2026-05-11,OMAB,Grupo Aeroportuario Centro Norte,232.0,0.11,0.05,2.08,-8.48,41.0,-0.819,0.28,bajista,-0.432,0.74,31.7,-20.8,-53,VENTA FUERTE,Alta
+2026-05-12,WALMEX,Walmart de México,55.62,-1.78,-3.1,0.22,-3.75,47.4,0.224,0.48,lateral,-0.219,0.41,22.9,-14.5,-20,VENDER,Media
+2026-05-12,AMXB,América Móvil,23.35,-0.28,-1.18,-1.35,-0.98,56.3,-0.005,0.73,lateral,0.122,0.35,29.0,-18.1,10,MANTENER,Baja
+2026-05-12,KOFUBL,Coca-Cola FEMSA,181.39,0.79,0.44,-1.98,0.02,53.9,0.545,0.69,lateral,0.123,0.27,28.2,-15.9,8,MANTENER,Alta
+2026-05-12,KIMBERA,Kimberly-Clark de México,38.82,-0.12,-0.31,-2.61,-5.75,35.1,-0.185,0.12,bajista,-0.284,0.69,25.6,-11.3,-35,VENDER,Media
+2026-05-12,OMAB,Grupo Aeroportuario Centro Norte,230.42,-1.58,-0.68,-0.84,-8.36,39.8,-0.606,0.26,bajista,-0.433,0.74,31.7,-20.8,-45,VENTA FUERTE,Alta
+2026-05-13,WALMEX,Walmart de México,55.53,-0.09,-0.16,-0.52,-4.98,47.0,0.164,0.48,lateral,-0.221,0.42,22.9,-14.1,-22,VENDER,Media
+2026-05-13,AMXB,América Móvil,23.36,0.01,0.04,-0.13,1.39,56.4,-0.016,0.72,lateral,0.117,0.33,27.7,-18.1,15,MANTENER,Media
+2026-05-13,KOFUBL,Coca-Cola FEMSA,181.67,0.28,0.15,-1.28,-0.12,54.4,0.459,0.72,lateral,0.104,0.22,28.2,-15.9,28,COMPRAR,Alta
+2026-05-13,KIMBERA,Kimberly-Clark de México,38.76,-0.06,-0.15,-2.49,-6.06,34.7,-0.168,0.15,bajista,-0.315,0.77,25.5,-11.5,-36,VENDER,Media
+2026-05-13,OMAB,Grupo Aeroportuario Centro Norte,227.48,-2.94,-1.28,-0.81,-7.1,37.4,-0.583,0.21,bajista,-0.45,0.76,31.6,-20.8,-45,VENTA FUERTE,Alta
+2026-05-14,WALMEX,Walmart de México,54.5,-1.03,-1.85,-4.1,-5.02,42.3,0.056,0.3,lateral,-0.226,0.43,23.2,-14.1,-22,VENDER,Media
+2026-05-14,AMXB,América Móvil,23.41,0.05,0.21,1.12,3.22,57.0,-0.022,0.73,lateral,0.115,0.33,27.5,-18.1,11,MANTENER,Media
+2026-05-14,KOFUBL,Coca-Cola FEMSA,181.78,0.11,0.06,-0.93,2.19,54.6,0.383,0.71,lateral,0.094,0.19,28.0,-15.9,32,COMPRAR,Alta
+2026-05-14,KIMBERA,Kimberly-Clark de México,38.39,-0.37,-0.95,-1.89,-6.05,32.4,-0.167,0.12,bajista,-0.348,0.83,25.2,-12.3,-37,VENDER,Media
+2026-05-14,OMAB,Grupo Aeroportuario Centro Norte,223.88,-3.6,-1.58,-2.77,-7.62,34.8,-0.72,0.16,bajista,-0.462,0.77,31.5,-22.0,-39,VENDER,Media
+2026-05-15,WALMEX,Walmart de México,54.82,0.32,0.59,-3.59,-4.36,44.2,0.008,0.38,lateral,-0.225,0.43,23.1,-13.8,-21,VENDER,Media
+2026-05-15,AMXB,América Móvil,23.13,-0.28,-1.2,-1.36,1.8,52.6,-0.046,0.53,lateral,0.098,0.27,27.6,-18.1,16,MANTENER,Media
+2026-05-15,KOFUBL,Coca-Cola FEMSA,180.84,-0.94,-0.52,-0.79,1.48,52.5,0.249,0.62,lateral,0.082,0.16,27.9,-15.9,31,COMPRAR,Alta
+2026-05-15,KIMBERA,Kimberly-Clark de México,38.28,-0.11,-0.29,-2.47,-8.88,31.7,-0.16,0.14,bajista,-0.366,0.86,25.1,-12.6,-38,VENDER,Media
+2026-05-15,OMAB,Grupo Aeroportuario Centro Norte,222.96,-0.92,-0.41,-3.85,-8.99,34.1,-0.779,0.17,bajista,-0.48,0.79,31.3,-22.3,-39,VENDER,Media
+2026-05-18,WALMEX,Walmart de México,55.96,1.14,2.08,-2.51,-1.37,50.3,0.054,0.65,lateral,-0.203,0.37,23.5,-13.8,-15,MANTENER,Media
+2026-05-18,AMXB,América Móvil,23.22,0.09,0.39,-1.74,2.97,53.8,-0.055,0.57,lateral,0.096,0.26,27.5,-18.0,18,MANTENER,Media
+2026-05-18,KOFUBL,Coca-Cola FEMSA,182.76,1.92,1.06,1.2,3.24,56.2,0.267,0.75,lateral,0.077,0.15,27.9,-15.9,34,COMPRAR,Alta
+2026-05-18,KIMBERA,Kimberly-Clark de México,37.99,-0.29,-0.76,-2.44,-8.1,29.9,-0.159,0.12,bajista,-0.38,0.87,23.9,-13.2,-26,VENDER,Media
+2026-05-18,OMAB,Grupo Aeroportuario Centro Norte,226.41,3.45,1.55,-2.41,-8.45,38.8,-0.504,0.28,bajista,-0.475,0.78,31.5,-22.3,-45,VENTA FUERTE,Alta
+2026-05-19,WALMEX,Walmart de México,55.5,-0.46,-0.82,-0.22,-1.3,48.0,0.054,0.56,lateral,-0.178,0.31,23.3,-13.8,-15,MANTENER,Media
+2026-05-19,AMXB,América Móvil,23.23,0.01,0.04,-0.51,1.62,54.0,-0.061,0.57,lateral,0.094,0.25,27.1,-18.0,15,MANTENER,Media
+2026-05-19,KOFUBL,Coca-Cola FEMSA,183.2,0.44,0.24,1.0,1.73,57.0,0.285,0.76,lateral,0.081,0.16,27.9,-15.9,31,COMPRAR,Alta
+2026-05-19,KIMBERA,Kimberly-Clark de México,38.56,0.57,1.5,-0.67,-6.68,37.4,-0.108,0.26,bajista,-0.367,0.86,23.5,-13.2,-44,VENDER,Alta
+2026-05-19,OMAB,Grupo Aeroportuario Centro Norte,224.8,-1.61,-0.71,-2.44,-10.87,37.5,-0.357,0.26,bajista,-0.469,0.78,31.2,-22.3,-45,VENTA FUERTE,Alta
+2026-05-20,WALMEX,Walmart de México,55.59,0.09,0.16,0.11,-0.11,48.5,0.059,0.58,lateral,-0.154,0.25,22.8,-13.8,-12,MANTENER,Baja
+2026-05-20,AMXB,América Móvil,23.1,-0.13,-0.56,-1.11,1.54,51.7,-0.072,0.47,lateral,0.077,0.18,27.0,-18.0,15,MANTENER,Media
+2026-05-20,KOFUBL,Coca-Cola FEMSA,184.15,0.95,0.52,1.37,3.76,58.8,0.334,0.8,lateral,0.083,0.16,27.9,-15.9,36,COMPRAR,Alta
+2026-05-20,KIMBERA,Kimberly-Clark de México,38.82,0.26,0.67,0.15,-7.13,40.6,-0.048,0.33,bajista,-0.35,0.84,23.4,-13.2,-51,VENTA FUERTE,Alta
+2026-05-20,OMAB,Grupo Aeroportuario Centro Norte,227.0,2.2,0.98,-0.21,-10.52,40.6,-0.053,0.34,bajista,-0.456,0.76,31.3,-22.3,-53,VENTA FUERTE,Alta
+2026-05-21,WALMEX,Walmart de México,55.16,-0.43,-0.77,1.21,-0.38,46.3,0.035,0.48,lateral,-0.141,0.22,22.9,-13.8,-13,MANTENER,Media
+2026-05-21,AMXB,América Móvil,22.82,-0.28,-1.21,-2.52,2.29,47.2,-0.095,0.21,lateral,0.06,0.11,27.2,-18.0,17,MANTENER,Media
+2026-05-21,KOFUBL,Coca-Cola FEMSA,185.08,0.93,0.51,1.82,5.84,60.6,0.397,0.83,lateral,0.084,0.16,28.0,-15.9,24,COMPRAR,Media
+2026-05-21,KIMBERA,Kimberly-Clark de México,38.08,-0.74,-1.91,-0.81,-7.82,35.2,-0.048,0.2,bajista,-0.354,0.84,23.6,-13.2,-43,VENDER,Alta
+2026-05-21,OMAB,Grupo Aeroportuario Centro Norte,225.94,-1.06,-0.47,0.92,-9.64,39.5,0.125,0.32,bajista,-0.466,0.78,31.3,-22.3,-22,VENDER,Media
+2026-05-22,WALMEX,Walmart de México,55.53,0.37,0.67,1.3,2.57,48.5,0.044,0.55,lateral,-0.107,0.15,22.9,-13.8,-7,MANTENER,Baja
+2026-05-22,AMXB,América Móvil,22.66,-0.16,-0.7,-2.03,-0.31,44.7,-0.118,0.08,lateral,0.042,0.05,27.2,-17.6,17,MANTENER,Baja
+2026-05-22,KOFUBL,Coca-Cola FEMSA,185.71,0.63,0.34,2.69,4.65,61.8,0.446,0.84,lateral,0.111,0.26,28.0,-15.9,23,COMPRAR,Media
+2026-05-22,KIMBERA,Kimberly-Clark de México,37.6,-0.48,-1.26,-1.78,-9.62,32.2,-0.07,0.12,bajista,-0.364,0.85,23.5,-14.1,-38,VENDER,Media
+2026-05-22,OMAB,Grupo Aeroportuario Centro Norte,222.78,-3.16,-1.4,-0.08,-10.02,36.6,0.081,0.24,bajista,-0.457,0.77,30.8,-22.4,-22,VENDER,Media
+2026-05-25,WALMEX,Walmart de México,55.26,-0.27,-0.49,-1.25,1.77,47.0,0.033,0.47,lateral,-0.079,0.1,22.8,-13.8,-8,MANTENER,Baja
+2026-05-25,AMXB,América Móvil,22.25,-0.41,-1.81,-4.18,-4.01,39.1,-0.154,-0.1,lateral,0.034,0.03,27.5,-16.2,7,MANTENER,Baja
+2026-05-25,KOFUBL,Coca-Cola FEMSA,187.98,2.27,1.22,2.86,5.52,65.7,0.588,0.93,lateral,0.15,0.43,24.4,-15.9,24,COMPRAR,Media
+2026-05-25,KIMBERA,Kimberly-Clark de México,37.65,0.05,0.13,-0.89,-9.52,32.8,-0.07,0.14,bajista,-0.376,0.86,23.5,-14.1,-38,VENDER,Media
+2026-05-25,OMAB,Grupo Aeroportuario Centro Norte,227.49,4.71,2.11,0.48,-10.71,43.3,0.401,0.42,bajista,-0.432,0.74,31.0,-22.4,-30,VENDER,Media
+2026-05-26,WALMEX,Walmart de México,54.48,-0.78,-1.41,-1.84,1.76,42.7,-0.023,0.25,lateral,-0.067,0.08,22.8,-13.8,-31,VENDER,Media
+2026-05-26,AMXB,América Móvil,22.48,0.23,1.03,-3.23,0.18,43.4,-0.155,0.05,lateral,0.035,0.03,24.4,-16.1,-2,MANTENER,Baja
+2026-05-26,KOFUBL,Coca-Cola FEMSA,187.97,-0.01,-0.01,2.6,7.33,65.7,0.633,0.89,alcista,0.18,0.54,22.5,-15.9,31,COMPRAR,Media
+2026-05-26,KIMBERA,Kimberly-Clark de México,37.73,0.08,0.21,-2.15,-8.75,33.9,-0.054,0.17,bajista,-0.387,0.88,23.5,-14.1,-38,VENDER,Media
+2026-05-26,OMAB,Grupo Aeroportuario Centro Norte,220.55,-6.94,-3.05,-1.89,-9.02,37.1,0.189,-0.03,bajista,-0.429,0.74,31.1,-23.1,-14,MANTENER,Baja
+2026-05-27,WALMEX,Walmart de México,54.75,0.27,0.5,-1.51,2.76,44.6,-0.037,0.27,lateral,-0.042,0.04,22.3,-13.8,-29,VENDER,Media
+2026-05-27,AMXB,América Móvil,22.68,0.2,0.89,-1.82,-0.31,46.9,-0.136,0.2,lateral,0.027,0.02,24.3,-16.1,17,MANTENER,Baja
+2026-05-27,KOFUBL,Coca-Cola FEMSA,190.56,2.59,1.38,3.48,8.46,69.9,0.779,1.0,alcista,0.219,0.67,22.7,-15.9,23,COMPRAR,Media
+2026-05-27,KIMBERA,Kimberly-Clark de México,39.05,1.32,3.5,0.59,-4.96,48.5,0.05,0.62,bajista,-0.37,0.84,24.5,-14.1,-29,VENDER,Media
+2026-05-27,OMAB,Grupo Aeroportuario Centro Norte,221.73,1.18,0.54,-2.32,-3.51,38.7,0.172,0.11,bajista,-0.434,0.75,31.2,-23.1,-20,VENDER,Baja
+2026-05-28,WALMEX,Walmart de México,52.6,-2.15,-3.93,-4.64,-5.05,34.9,-0.178,-0.17,lateral,-0.053,0.05,23.7,-14.0,-22,VENDER,Media
+2026-05-28,AMXB,América Móvil,22.35,-0.33,-1.46,-2.06,-2.74,42.3,-0.14,0.04,lateral,0.001,0.0,24.5,-14.3,-7,MANTENER,Media
+2026-05-28,KOFUBL,Coca-Cola FEMSA,185.6,-4.96,-2.6,0.28,7.04,55.9,0.498,0.67,alcista,0.224,0.69,23.3,-15.9,46,COMPRA FUERTE,Alta
+2026-05-28,KIMBERA,Kimberly-Clark de México,38.26,-0.79,-2.02,0.47,-3.07,42.5,0.069,0.34,bajista,-0.371,0.84,24.7,-14.1,-25,VENDER,Media
+2026-05-28,OMAB,Grupo Aeroportuario Centro Norte,218.65,-3.08,-1.39,-3.23,-5.75,36.1,0.007,-0.01,bajista,-0.451,0.77,31.2,-23.8,-14,MANTENER,Baja
+2026-05-29,WALMEX,Walmart de México,52.48,-0.12,-0.23,-5.49,-4.98,34.5,-0.262,-0.07,lateral,-0.061,0.06,23.7,-13.5,-15,MANTENER,Media
+2026-05-29,AMXB,América Móvil,22.08,-0.27,-1.21,-2.56,-4.99,38.9,-0.152,-0.02,lateral,-0.032,0.02,24.0,-14.3,5,MANTENER,Baja
+2026-05-29,KOFUBL,Coca-Cola FEMSA,187.08,1.48,0.8,0.74,5.72,58.6,0.374,0.77,alcista,0.233,0.71,23.3,-15.9,47,COMPRA FUERTE,Alta
+2026-05-29,KIMBERA,Kimberly-Clark de México,38.4,0.14,0.37,2.13,-2.66,43.8,0.093,0.41,bajista,-0.347,0.8,24.7,-14.1,-23,VENDER,Media
+2026-05-29,OMAB,Grupo Aeroportuario Centro Norte,217.77,-0.88,-0.4,-2.25,-5.52,35.4,-0.104,0.01,bajista,-0.458,0.78,31.0,-24.1,-46,VENTA FUERTE,Media
+2026-06-01,WALMEX,Walmart de México,52.14,-0.34,-0.65,-5.65,-3.43,33.2,-0.319,-0.05,lateral,-0.077,0.09,23.7,-13.0,-12,MANTENER,Media
+2026-06-01,AMXB,América Móvil,21.93,-0.15,-0.68,-1.44,-5.68,37.1,-0.162,-0.01,lateral,-0.073,0.1,24.0,-11.6,5,MANTENER,Baja
+2026-06-01,KOFUBL,Coca-Cola FEMSA,185.07,-2.01,-1.07,-1.55,4.01,53.8,0.131,0.57,alcista,0.229,0.7,23.3,-15.9,45,COMPRA FUERTE,Alta
+2026-06-01,KIMBERA,Kimberly-Clark de México,38.58,0.18,0.47,2.47,-1.43,45.6,0.121,0.49,bajista,-0.328,0.76,24.7,-14.1,-27,VENDER,Media
+2026-06-01,OMAB,Grupo Aeroportuario Centro Norte,217.51,-0.26,-0.12,-4.39,-4.3,35.2,-0.133,0.07,bajista,-0.454,0.78,30.8,-24.2,-45,VENTA FUERTE,Media
+2026-06-02,WALMEX,Walmart de México,51.83,-0.31,-0.59,-4.86,-6.61,32.0,-0.353,-0.01,lateral,-0.099,0.12,23.6,-12.4,-15,MANTENER,Media
+2026-06-02,AMXB,América Móvil,22.22,0.29,1.32,-1.16,-6.13,42.6,-0.141,0.17,lateral,-0.095,0.16,23.3,-11.6,-12,MANTENER,Media
+2026-06-02,KOFUBL,Coca-Cola FEMSA,187.88,2.81,1.52,-0.05,1.53,58.8,0.133,0.82,alcista,0.244,0.75,23.2,-15.9,34,COMPRAR,Alta
+2026-06-02,KIMBERA,Kimberly-Clark de México,38.3,-0.28,-0.73,1.51,-3.91,43.3,0.12,0.4,bajista,-0.31,0.73,24.4,-14.1,-32,VENDER,Media
+2026-06-02,OMAB,Grupo Aeroportuario Centro Norte,222.76,5.25,2.41,1.0,-4.14,43.1,0.241,0.37,bajista,-0.416,0.74,30.4,-24.2,-35,VENDER,Media
+2026-06-03,WALMEX,Walmart de México,52.05,0.22,0.42,-4.93,-6.75,33.8,-0.337,0.09,lateral,-0.122,0.16,23.3,-12.4,-24,VENDER,Media
+2026-06-03,AMXB,América Móvil,22.14,-0.08,-0.36,-2.38,-5.34,41.5,-0.126,0.17,lateral,-0.122,0.24,23.1,-10.3,-12,MANTENER,Media
+2026-06-03,KOFUBL,Coca-Cola FEMSA,186.51,-1.37,-0.73,-2.13,1.35,55.7,0.022,0.68,alcista,0.243,0.75,22.9,-15.9,40,COMPRAR,Alta
+2026-06-03,KIMBERA,Kimberly-Clark de México,38.1,-0.2,-0.52,-2.43,-4.15,41.7,0.107,0.32,bajista,-0.285,0.7,23.9,-14.1,-31,VENDER,Media
+2026-06-03,OMAB,Grupo Aeroportuario Centro Norte,220.05,-2.71,-1.22,-0.76,-4.05,40.3,0.34,0.24,bajista,-0.376,0.72,30.1,-24.2,-27,VENDER,Media
+2026-06-04,WALMEX,Walmart de México,51.57,-0.48,-0.92,-1.96,-9.26,31.8,-0.334,0.07,lateral,-0.152,0.22,23.3,-12.8,-24,VENDER,Media
+2026-06-04,AMXB,América Móvil,21.9,-0.24,-1.08,-2.01,-5.4,38.4,-0.124,0.11,lateral,-0.168,0.41,22.8,-10.1,-24,VENDER,Media
+2026-06-04,KOFUBL,Coca-Cola FEMSA,184.6,-1.91,-1.02,-0.54,0.6,51.5,-0.189,0.5,alcista,0.222,0.69,22.6,-15.9,14,MANTENER,Media
+2026-06-04,KIMBERA,Kimberly-Clark de México,37.71,-0.39,-1.02,-1.44,-3.63,38.7,0.074,0.15,bajista,-0.27,0.68,23.8,-14.1,-15,MANTENER,Baja
+2026-06-04,OMAB,Grupo Aeroportuario Centro Norte,215.43,-4.62,-2.1,-1.47,-6.44,36.1,0.139,0.04,bajista,-0.354,0.72,30.3,-24.9,-14,MANTENER,Baja
+2026-06-05,WALMEX,Walmart de México,51.11,-0.46,-0.89,-2.61,-10.11,30.0,-0.337,0.06,lateral,-0.2,0.32,23.2,-13.6,-12,MANTENER,Media
+2026-06-05,AMXB,América Móvil,21.68,-0.22,-1.0,-1.81,-7.55,35.7,-0.129,0.07,bajista,-0.206,0.53,22.4,-9.3,-32,VENDER,Media
+2026-06-05,KOFUBL,Coca-Cola FEMSA,185.04,0.44,0.24,-1.09,1.51,52.4,-0.301,0.52,alcista,0.211,0.65,22.6,-15.9,16,MANTENER,Media
+2026-06-05,KIMBERA,Kimberly-Clark de México,36.92,-0.79,-2.09,-3.85,-5.94,33.5,0.005,-0.13,bajista,-0.26,0.68,23.7,-15.7,-9,MANTENER,Baja
+2026-06-05,OMAB,Grupo Aeroportuario Centro Norte,211.83,-3.6,-1.67,-2.73,-8.65,33.2,-0.175,-0.06,bajista,-0.342,0.72,30.1,-26.2,-35,VENDER,Media
+2026-06-08,WALMEX,Walmart de México,51.44,0.33,0.65,-1.34,-10.38,32.9,-0.293,0.14,lateral,-0.239,0.41,23.3,-13.6,-24,VENDER,Media
+2026-06-08,AMXB,América Móvil,21.71,0.03,0.14,-1.0,-8.13,36.4,-0.123,0.12,bajista,-0.228,0.58,22.4,-9.0,-33,VENDER,Media
+2026-06-08,KOFUBL,Coca-Cola FEMSA,183.08,-1.96,-1.06,-1.08,1.37,48.1,-0.497,0.32,alcista,0.193,0.58,22.1,-15.9,15,MANTENER,Media
+2026-06-08,KIMBERA,Kimberly-Clark de México,36.91,-0.01,-0.03,-4.33,-5.21,33.4,-0.034,-0.04,bajista,-0.245,0.69,23.7,-15.7,-31,VENDER,Media
+2026-06-08,OMAB,Grupo Aeroportuario Centro Norte,210.95,-0.88,-0.42,-3.02,-9.07,32.5,-0.369,-0.03,bajista,-0.307,0.8,30.1,-26.5,-34,VENDER,Media
+2026-06-09,WALMEX,Walmart de México,50.58,-0.86,-1.67,-2.41,-9.06,29.4,-0.296,0.07,bajista,-0.296,0.55,23.5,-14.5,-23,VENDER,Media
+2026-06-09,AMXB,América Móvil,22.05,0.34,1.57,-0.77,-5.57,43.3,-0.089,0.29,bajista,-0.259,0.72,22.5,-8.8,-48,VENTA FUERTE,Alta
+2026-06-09,KOFUBL,Coca-Cola FEMSA,181.35,-1.73,-0.94,-3.48,-0.02,44.7,-0.72,0.15,lateral,0.157,0.44,22.2,-15.9,18,MANTENER,Media
+2026-06-09,KIMBERA,Kimberly-Clark de México,36.16,-0.75,-2.03,-5.59,-6.85,29.1,-0.099,-0.16,bajista,-0.242,0.69,24.0,-17.4,-19,MANTENER,Media
+2026-06-09,OMAB,Grupo Aeroportuario Centro Norte,210.44,-0.51,-0.24,-5.53,-8.67,32.1,-0.454,0.01,bajista,-0.299,0.81,30.0,-26.7,-42,VENDER,Media
+2026-06-10,WALMEX,Walmart de México,50.12,-0.46,-0.91,-3.71,-9.74,27.7,-0.304,0.07,bajista,-0.359,0.7,23.0,-15.2,-25,VENDER,Media
+2026-06-10,AMXB,América Móvil,22.12,0.07,0.32,-0.09,-5.31,44.7,-0.057,0.34,bajista,-0.279,0.8,22.5,-8.6,-48,VENTA FUERTE,Alta
+2026-06-10,KOFUBL,Coca-Cola FEMSA,181.03,-0.32,-0.18,-2.94,-0.35,44.1,-0.857,0.13,lateral,0.12,0.29,22.2,-15.9,-3,MANTENER,Media
+2026-06-10,KIMBERA,Kimberly-Clark de México,35.62,-0.54,-1.49,-6.51,-8.1,26.4,-0.163,-0.16,bajista,-0.247,0.68,24.1,-18.7,-19,MANTENER,Media
+2026-06-10,OMAB,Grupo Aeroportuario Centro Norte,208.63,-1.81,-0.86,-5.19,-8.29,30.6,-0.547,0.01,bajista,-0.327,0.83,30.0,-27.3,-36,VENDER,Media
+2026-06-11,WALMEX,Walmart de México,51.71,1.59,3.17,0.27,-5.12,40.5,-0.181,0.3,bajista,-0.373,0.73,23.9,-15.2,-52,VENTA FUERTE,Alta
+2026-06-11,AMXB,América Móvil,23.9,1.78,8.05,9.13,2.09,66.4,0.081,1.11,bajista,-0.24,0.53,26.9,-8.6,-13,MANTENER,Media
+2026-06-11,KOFUBL,Coca-Cola FEMSA,184.42,3.39,1.87,-0.1,1.45,51.8,-0.694,0.44,lateral,0.085,0.21,21.8,-15.9,15,MANTENER,Media
+2026-06-11,KIMBERA,Kimberly-Clark de México,36.52,0.9,2.53,-3.16,-4.87,36.8,-0.131,0.15,bajista,-0.257,0.7,24.7,-18.7,-34,VENDER,Media
+2026-06-11,OMAB,Grupo Aeroportuario Centro Norte,213.83,5.2,2.49,-0.74,-4.49,39.4,-0.192,0.26,bajista,-0.328,0.83,29.9,-27.3,-41,VENDER,Alta
+2026-06-12,WALMEX,Walmart de México,52.15,0.44,0.85,2.03,-4.87,43.5,-0.057,0.37,bajista,-0.381,0.74,23.7,-15.2,-52,VENTA FUERTE,Alta
+2026-06-12,AMXB,América Móvil,23.92,0.02,0.08,10.33,3.42,66.6,0.166,1.04,lateral,-0.194,0.32,26.9,-8.6,-1,MANTENER,Baja
+2026-06-12,KOFUBL,Coca-Cola FEMSA,187.96,3.54,1.92,1.58,3.94,58.2,-0.34,0.77,lateral,0.073,0.18,22.0,-15.9,20,COMPRAR,Media
+2026-06-12,KIMBERA,Kimberly-Clark de México,37.42,0.9,2.46,1.35,-2.25,45.1,-0.04,0.42,bajista,-0.249,0.68,25.3,-18.7,-41,VENDER,Alta
+2026-06-12,OMAB,Grupo Aeroportuario Centro Norte,219.39,5.56,2.6,3.57,-1.6,47.1,0.448,0.51,bajista,-0.314,0.79,30.4,-27.3,-20,VENDER,Media
+2026-06-15,WALMEX,Walmart de México,52.69,0.54,1.04,2.43,-5.84,47.0,0.068,0.47,bajista,-0.395,0.79,23.7,-15.2,-30,VENDER,Media
+2026-06-15,AMXB,América Móvil,23.43,-0.49,-2.05,7.92,0.9,59.2,0.181,0.84,lateral,-0.163,0.23,27.2,-8.6,11,MANTENER,Media
+2026-06-15,KOFUBL,Coca-Cola FEMSA,185.07,-2.89,-1.54,1.09,1.26,52.1,-0.295,0.46,lateral,0.052,0.11,22.0,-15.9,15,MANTENER,Media
+2026-06-15,KIMBERA,Kimberly-Clark de México,37.45,0.03,0.08,1.46,-1.42,45.4,0.027,0.43,bajista,-0.243,0.66,24.8,-18.7,-17,MANTENER,Media
+2026-06-15,OMAB,Grupo Aeroportuario Centro Norte,235.98,16.59,7.56,11.87,4.23,62.4,1.937,1.12,lateral,-0.26,0.49,33.8,-27.3,0,MANTENER,Baja
+2026-06-16,WALMEX,Walmart de México,52.22,-0.47,-0.89,3.24,-5.91,44.4,0.123,0.42,bajista,-0.395,0.79,23.2,-15.2,-30,VENDER,Media
+2026-06-16,AMXB,América Móvil,23.12,-0.31,-1.32,4.85,-0.47,55.0,0.162,0.73,lateral,-0.128,0.15,27.3,-8.6,7,MANTENER,Baja
+2026-06-16,KOFUBL,Coca-Cola FEMSA,183.5,-1.57,-0.85,1.19,0.16,49.1,-0.36,0.28,lateral,0.051,0.11,22.0,-15.9,12,MANTENER,Baja
+2026-06-16,KIMBERA,Kimberly-Clark de México,37.86,0.41,1.09,4.7,-1.82,48.9,0.101,0.56,bajista,-0.215,0.58,24.7,-18.7,-17,MANTENER,Media
+2026-06-16,OMAB,Grupo Aeroportuario Centro Norte,240.87,4.89,2.07,14.46,7.15,65.6,3.128,1.14,lateral,-0.179,0.2,34.0,-27.3,2,MANTENER,Baja
+2026-06-17,WALMEX,Walmart de México,51.76,-0.46,-0.88,3.27,-6.89,42.0,0.132,0.37,bajista,-0.394,0.79,23.0,-15.2,-30,VENDER,Media
+2026-06-17,AMXB,América Móvil,23.0,-0.12,-0.52,3.98,-0.43,53.4,0.134,0.68,lateral,-0.104,0.1,27.3,-8.6,7,MANTENER,Baja
+2026-06-17,KOFUBL,Coca-Cola FEMSA,186.67,3.17,1.73,3.12,1.37,54.8,-0.189,0.62,lateral,0.058,0.13,22.1,-15.9,15,MANTENER,Media
+2026-06-17,KIMBERA,Kimberly-Clark de México,37.93,0.07,0.18,6.49,-2.29,49.5,0.153,0.6,lateral,-0.186,0.49,24.4,-18.7,-10,MANTENER,Media
+2026-06-17,OMAB,Grupo Aeroportuario Centro Norte,241.6,0.73,0.3,15.8,6.43,66.0,3.798,1.06,lateral,-0.107,0.06,33.6,-27.3,-5,MANTENER,Baja
+2026-06-18,WALMEX,Walmart de México,50.32,-1.44,-2.78,-2.69,-8.77,35.4,0.047,0.17,bajista,-0.395,0.79,23.5,-15.2,-23,VENDER,Baja
+2026-06-18,AMXB,América Móvil,23.01,0.01,0.04,-3.72,0.83,53.6,0.111,0.68,lateral,-0.086,0.07,27.2,-8.6,10,MANTENER,Alta
+2026-06-18,KOFUBL,Coca-Cola FEMSA,190.35,3.68,1.97,3.22,2.85,60.3,0.156,0.95,lateral,0.075,0.19,22.1,-15.9,27,COMPRAR,Media
+2026-06-18,KIMBERA,Kimberly-Clark de México,37.06,-0.87,-2.29,1.48,-2.68,42.8,0.128,0.35,lateral,-0.181,0.47,23.0,-18.7,-17,MANTENER,Media
+2026-06-18,OMAB,Grupo Aeroportuario Centro Norte,247.05,5.45,2.26,15.54,9.34,69.3,4.398,1.08,lateral,-0.021,0.0,33.8,-27.3,-5,MANTENER,Baja
+2026-06-19,WALMEX,Walmart de México,50.96,0.64,1.27,-2.28,-8.23,39.9,0.042,0.29,bajista,-0.382,0.78,23.7,-15.2,-28,VENDER,Media
+2026-06-19,AMXB,América Móvil,23.61,0.6,2.61,-1.3,4.19,60.1,0.128,0.87,lateral,-0.042,0.02,27.6,-8.6,2,MANTENER,Baja
+2026-06-19,KOFUBL,Coca-Cola FEMSA,181.26,-9.09,-4.78,-3.56,-2.4,45.5,-0.225,0.09,lateral,0.054,0.1,23.7,-15.9,-7,MANTENER,Media
+2026-06-19,KIMBERA,Kimberly-Clark de México,38.37,1.31,3.53,2.54,2.05,53.1,0.194,0.73,lateral,-0.148,0.34,23.5,-18.7,-8,MANTENER,Baja
+2026-06-19,OMAB,Grupo Aeroportuario Centro Norte,237.31,-9.74,-3.94,8.17,6.52,58.4,3.944,0.82,lateral,0.042,0.01,34.8,-27.3,12,MANTENER,Media
+2026-06-22,WALMEX,Walmart de México,50.46,-0.5,-0.98,-4.23,-8.69,37.7,0.014,0.2,bajista,-0.365,0.77,23.7,-15.2,-28,VENDER,Media
+2026-06-22,AMXB,América Móvil,22.65,-0.96,-4.07,-3.33,1.8,48.4,0.071,0.52,lateral,-0.02,0.0,27.5,-8.6,-8,MANTENER,Baja
+2026-06-22,KOFUBL,Coca-Cola FEMSA,184.91,3.65,2.01,-0.09,-1.63,50.7,-0.227,0.44,lateral,0.039,0.06,23.9,-15.9,9,MANTENER,Baja
+2026-06-22,KIMBERA,Kimberly-Clark de México,37.51,-0.86,-2.24,0.16,-0.37,47.1,0.176,0.48,lateral,-0.135,0.3,23.8,-18.7,-13,MANTENER,Media
+2026-06-22,OMAB,Grupo Aeroportuario Centro Norte,237.38,0.07,0.03,0.59,4.35,58.5,3.471,0.8,lateral,0.104,0.04,34.0,-27.3,17,MANTENER,Alta
+2026-06-23,WALMEX,Walmart de México,50.68,0.22,0.44,-2.95,-6.98,39.3,0.019,0.26,bajista,-0.36,0.76,23.0,-15.2,-28,VENDER,Media
+2026-06-23,AMXB,América Móvil,22.74,0.09,0.4,-1.64,1.16,49.4,0.037,0.55,lateral,-0.002,0.0,27.1,-8.6,-10,MANTENER,Baja
+2026-06-23,KOFUBL,Coca-Cola FEMSA,188.09,3.18,1.72,2.5,0.06,54.8,-0.02,0.74,lateral,0.038,0.05,23.5,-15.9,5,MANTENER,Baja
+2026-06-23,KIMBERA,Kimberly-Clark de México,37.17,-0.34,-0.91,-1.82,-1.48,44.9,0.139,0.38,lateral,-0.128,0.28,23.1,-18.7,-15,MANTENER,Media
+2026-06-23,OMAB,Grupo Aeroportuario Centro Norte,235.06,-2.32,-0.98,-2.41,6.58,56.0,2.848,0.73,lateral,0.154,0.1,33.2,-27.3,18,MANTENER,Alta
+2026-06-24,WALMEX,Walmart de México,51.48,0.8,1.58,-0.54,-5.97,44.8,0.081,0.49,bajista,-0.342,0.73,23.2,-15.2,-35,VENDER,Media
+2026-06-24,AMXB,América Móvil,23.0,0.26,1.14,0.0,1.41,52.2,0.029,0.63,lateral,0.025,0.01,27.1,-8.6,11,MANTENER,Alta
+2026-06-24,KOFUBL,Coca-Cola FEMSA,184.34,-3.75,-1.99,-1.25,-3.26,49.6,-0.137,0.41,lateral,0.023,0.02,23.7,-15.9,5,MANTENER,Baja
+2026-06-24,KIMBERA,Kimberly-Clark de México,37.23,0.06,0.16,-1.85,-4.66,45.4,0.117,0.42,lateral,-0.12,0.25,22.9,-18.7,-21,VENDER,Media
+2026-06-24,OMAB,Grupo Aeroportuario Centro Norte,236.88,1.82,0.77,-1.95,6.83,57.5,2.424,0.74,lateral,0.199,0.15,33.0,-27.3,18,MANTENER,Alta
+2026-06-25,WALMEX,Walmart de México,51.12,-0.36,-0.7,1.59,-2.81,42.9,0.101,0.39,bajista,-0.339,0.72,23.1,-15.2,-31,VENDER,Media
+2026-06-25,AMXB,América Móvil,23.05,0.05,0.22,0.17,3.13,52.8,0.025,0.64,lateral,0.055,0.03,27.1,-8.6,14,MANTENER,Alta
+2026-06-25,KOFUBL,Coca-Cola FEMSA,185.2,0.86,0.47,-2.71,-0.22,50.7,-0.154,0.5,lateral,0.011,0.0,23.5,-15.9,12,MANTENER,Baja
+2026-06-25,KIMBERA,Kimberly-Clark de México,38.24,1.01,2.71,3.18,-0.05,52.8,0.165,0.75,lateral,-0.098,0.17,23.6,-18.7,-12,MANTENER,Baja
+2026-06-25,OMAB,Grupo Aeroportuario Centro Norte,243.69,6.81,2.87,-1.36,11.45,62.6,2.458,0.84,lateral,0.25,0.22,33.4,-27.3,4,MANTENER,Baja
+2026-06-26,WALMEX,Walmart de México,50.86,-0.26,-0.51,-0.2,-3.09,41.6,0.101,0.32,bajista,-0.332,0.7,23.1,-15.2,-30,VENDER,Media
+2026-06-26,AMXB,América Móvil,23.2,0.15,0.65,-1.74,5.07,54.5,0.03,0.67,lateral,0.082,0.07,27.1,-8.6,18,MANTENER,Alta
+2026-06-26,KOFUBL,Coca-Cola FEMSA,186.96,1.76,0.95,3.14,-0.06,53.1,-0.052,0.69,lateral,0.0,0.0,23.6,-15.9,12,MANTENER,Baja
+2026-06-26,KIMBERA,Kimberly-Clark de México,38.85,0.61,1.6,1.25,1.17,56.6,0.23,0.92,lateral,-0.069,0.08,23.5,-18.7,4,MANTENER,Media
+2026-06-26,OMAB,Grupo Aeroportuario Centro Norte,245.6,1.91,0.78,3.49,12.78,64.0,2.46,0.84,lateral,0.299,0.28,33.3,-27.3,4,MANTENER,Baja
+2026-06-29,WALMEX,Walmart de México,51.1,0.24,0.47,1.27,-1.99,43.4,0.119,0.42,bajista,-0.304,0.66,23.1,-15.2,-27,VENDER,Media
+2026-06-29,AMXB,América Móvil,23.41,0.21,0.91,3.36,6.75,56.9,0.045,0.72,lateral,0.118,0.14,26.8,-8.6,18,MANTENER,Alta
+2026-06-29,KOFUBL,Coca-Cola FEMSA,186.16,-0.8,-0.43,0.68,0.59,51.9,-0.042,0.6,lateral,-0.007,0.0,23.6,-15.9,13,MANTENER,Media
+2026-06-29,KIMBERA,Kimberly-Clark de México,38.89,0.04,0.1,3.68,0.8,56.9,0.264,0.92,lateral,-0.044,0.03,23.5,-18.7,4,MANTENER,Media
+2026-06-29,OMAB,Grupo Aeroportuario Centro Norte,246.32,0.72,0.29,3.77,13.25,64.5,2.36,0.82,lateral,0.357,0.36,33.3,-27.3,4,MANTENER,Baja
+2026-06-30,WALMEX,Walmart de México,51.26,0.16,0.31,1.14,-1.1,44.6,0.143,0.49,bajista,-0.276,0.61,23.0,-15.2,-24,VENDER,Media
+2026-06-30,AMXB,América Móvil,22.73,-0.68,-2.9,-0.04,2.3,48.2,0.007,0.47,lateral,0.134,0.19,27.5,-8.6,-7,MANTENER,Baja
+2026-06-30,KOFUBL,Coca-Cola FEMSA,185.87,-0.29,-0.16,-1.18,-1.07,51.4,-0.059,0.58,lateral,-0.015,0.01,23.5,-15.9,10,MANTENER,Baja
+2026-06-30,KIMBERA,Kimberly-Clark de México,38.62,-0.27,-0.69,3.9,0.84,54.6,0.257,0.82,lateral,-0.015,0.0,23.2,-18.7,4,MANTENER,Media
+2026-06-30,OMAB,Grupo Aeroportuario Centro Norte,247.17,0.85,0.35,5.15,10.96,65.1,2.204,0.8,lateral,0.408,0.43,33.3,-27.3,30,COMPRAR,Media
+2026-07-01,WALMEX,Walmart de México,51.02,-0.24,-0.47,-0.89,-1.98,43.1,0.142,0.42,bajista,-0.246,0.56,22.9,-15.2,-25,VENDER,Media
+2026-07-01,AMXB,América Móvil,22.51,-0.22,-0.97,-2.13,1.67,45.7,-0.032,0.38,lateral,0.141,0.21,27.4,-8.6,-32,VENDER,Media
+2026-07-01,KOFUBL,Coca-Cola FEMSA,185.3,-0.57,-0.31,0.52,-0.65,50.5,-0.109,0.53,lateral,-0.022,0.02,23.5,-15.9,11,MANTENER,Baja
+2026-07-01,KIMBERA,Kimberly-Clark de México,38.56,-0.06,-0.16,3.57,1.21,54.1,0.238,0.79,lateral,0.017,0.0,23.2,-18.7,10,MANTENER,Alta
+2026-07-01,OMAB,Grupo Aeroportuario Centro Norte,245.87,-1.3,-0.53,3.8,11.73,63.3,1.879,0.75,alcista,0.458,0.51,33.3,-27.3,45,COMPRA FUERTE,Alta
+2026-07-02,WALMEX,Walmart de México,49.96,-1.06,-2.08,-2.27,-3.12,37.2,0.075,0.07,bajista,-0.231,0.55,23.2,-15.5,-13,MANTENER,Baja
+2026-07-02,AMXB,América Móvil,22.46,-0.05,-0.22,-2.56,2.56,45.2,-0.059,0.34,lateral,0.14,0.21,27.3,-8.6,-30,VENDER,Media
+2026-07-02,KOFUBL,Coca-Cola FEMSA,187.4,2.1,1.13,1.19,1.52,53.9,-0.006,0.73,lateral,-0.018,0.02,23.6,-15.9,15,MANTENER,Media
+2026-07-02,KIMBERA,Kimberly-Clark de México,38.51,-0.05,-0.13,0.71,2.12,53.7,0.212,0.76,lateral,0.036,0.02,22.9,-18.7,12,MANTENER,Alta
+2026-07-02,OMAB,Grupo Aeroportuario Centro Norte,243.28,-2.59,-1.05,-0.17,12.93,59.7,1.379,0.68,alcista,0.494,0.57,32.4,-27.3,53,COMPRA FUERTE,Alta
+2026-07-03,WALMEX,Walmart de México,50.18,0.22,0.44,-1.34,-1.82,39.0,0.05,0.18,bajista,-0.205,0.52,22.7,-15.5,-10,MANTENER,Baja
+2026-07-03,AMXB,América Móvil,22.48,0.02,0.09,-3.1,3.69,45.4,-0.072,0.32,lateral,0.135,0.19,27.2,-8.6,-8,MANTENER,Baja
+2026-07-03,KOFUBL,Coca-Cola FEMSA,186.86,-0.54,-0.29,-0.05,0.98,52.9,0.018,0.67,lateral,-0.014,0.01,22.3,-15.9,37,COMPRAR,Alta
+2026-07-03,KIMBERA,Kimberly-Clark de México,38.44,-0.07,-0.18,-1.06,4.12,53.0,0.181,0.72,lateral,0.045,0.03,22.9,-18.7,16,MANTENER,Alta
+2026-07-03,OMAB,Grupo Aeroportuario Centro Norte,243.75,0.47,0.19,-0.75,15.07,60.1,0.987,0.67,alcista,0.519,0.6,31.5,-27.3,45,COMPRA FUERTE,Alta
+2026-07-06,WALMEX,Walmart de México,49.06,-1.12,-2.23,-3.99,-4.63,33.5,-0.033,-0.07,bajista,-0.192,0.53,23.1,-17.0,-28,VENDER,Media
+2026-07-06,AMXB,América Móvil,23.04,0.56,2.49,-1.58,6.13,52.9,-0.041,0.53,lateral,0.134,0.19,27.0,-8.6,22,COMPRAR,Media
+2026-07-06,KOFUBL,Coca-Cola FEMSA,187.63,0.77,0.41,0.79,2.49,54.2,0.075,0.72,lateral,0.0,0.0,22.2,-15.9,40,COMPRAR,Alta
+2026-07-06,KIMBERA,Kimberly-Clark de México,39.27,0.83,2.16,0.98,6.39,59.5,0.206,0.89,lateral,0.067,0.06,23.3,-18.7,12,MANTENER,Media
+2026-07-06,OMAB,Grupo Aeroportuario Centro Norte,245.91,2.16,0.89,-0.17,16.57,62.2,0.789,0.69,alcista,0.559,0.67,31.5,-27.3,45,COMPRA FUERTE,Alta
+2026-07-07,WALMEX,Walmart de México,49.94,0.88,1.79,-2.58,-1.27,40.6,-0.019,0.21,bajista,-0.172,0.51,23.3,-17.0,-44,VENDER,Alta
+2026-07-07,AMXB,América Móvil,23.03,-0.01,-0.04,1.32,4.44,52.8,-0.021,0.51,lateral,0.137,0.2,27.0,-8.6,21,COMPRAR,Media
+2026-07-07,KOFUBL,Coca-Cola FEMSA,185.91,-1.72,-0.92,0.02,2.51,50.8,-0.009,0.52,lateral,0.009,0.0,22.2,-15.9,17,MANTENER,Media
+2026-07-07,KIMBERA,Kimberly-Clark de México,39.13,-0.14,-0.36,1.32,8.21,58.0,0.202,0.83,lateral,0.086,0.1,23.3,-18.7,12,MANTENER,Media
+2026-07-07,OMAB,Grupo Aeroportuario Centro Norte,234.83,-11.08,-4.51,-4.99,11.59,48.4,-0.124,0.44,alcista,0.546,0.65,32.8,-27.3,30,COMPRAR,Media
+2026-07-08,WALMEX,Walmart de México,49.78,-0.16,-0.32,-2.43,-0.68,39.8,-0.013,0.18,bajista,-0.147,0.51,23.2,-17.0,-27,VENDER,Media
+2026-07-08,AMXB,América Móvil,23.18,0.15,0.65,2.98,4.79,54.7,0.002,0.56,lateral,0.15,0.23,26.7,-8.6,45,COMPRA FUERTE,Alta
+2026-07-08,KOFUBL,Coca-Cola FEMSA,183.45,-2.46,-1.32,-1.0,1.34,46.3,-0.224,0.19,lateral,0.019,0.02,22.4,-15.9,-6,MANTENER,Baja
+2026-07-08,KIMBERA,Kimberly-Clark de México,38.72,-0.41,-1.05,0.41,8.7,53.9,0.163,0.71,lateral,0.121,0.2,23.3,-18.7,18,MANTENER,Alta
+2026-07-08,OMAB,Grupo Aeroportuario Centro Norte,236.19,1.36,0.58,-3.94,13.21,49.9,-0.642,0.42,alcista,0.536,0.63,32.4,-27.3,30,COMPRAR,Media
+2026-07-09,WALMEX,Walmart de México,49.06,-0.72,-1.45,-1.8,-5.12,36.2,-0.047,0.05,bajista,-0.154,0.52,23.1,-17.0,-30,VENDER,Media
+2026-07-09,AMXB,América Móvil,22.7,-0.48,-2.07,1.07,-5.02,48.0,-0.015,0.29,lateral,0.139,0.2,26.8,-8.6,-18,MANTENER,Alta
+2026-07-09,KOFUBL,Coca-Cola FEMSA,180.82,-2.63,-1.43,-3.51,-1.95,42.1,-0.521,-0.04,lateral,0.003,0.0,22.1,-15.9,-4,MANTENER,Media
+2026-07-09,KIMBERA,Kimberly-Clark de México,38.49,-0.23,-0.59,-0.05,5.39,51.6,0.114,0.61,lateral,0.138,0.26,23.3,-18.7,18,MANTENER,Alta
+2026-07-09,OMAB,Grupo Aeroportuario Centro Norte,238.51,2.32,0.98,-1.96,11.54,52.3,-0.824,0.44,alcista,0.521,0.61,32.4,-27.3,30,COMPRAR,Media
+2026-07-10,WALMEX,Walmart de México,49.31,0.25,0.51,-1.73,-5.45,38.3,-0.042,0.15,bajista,-0.157,0.53,23.1,-17.0,-30,VENDER,Media
+2026-07-10,AMXB,América Móvil,22.7,0.0,0.0,0.98,-5.1,48.0,-0.025,0.3,lateral,0.118,0.15,26.8,-8.6,-18,MANTENER,Alta
+2026-07-10,KOFUBL,Coca-Cola FEMSA,182.08,1.26,0.7,-2.56,-3.13,44.7,-0.604,0.14,lateral,-0.002,0.0,22.1,-15.9,-8,MANTENER,Media
+2026-07-10,KIMBERA,Kimberly-Clark de México,38.13,-0.36,-0.94,-0.81,1.9,48.3,0.054,0.46,lateral,0.152,0.31,22.6,-18.7,12,MANTENER,Alta
+2026-07-10,OMAB,Grupo Aeroportuario Centro Norte,235.73,-2.78,-1.17,-3.29,7.45,49.2,-1.109,0.21,alcista,0.491,0.56,32.4,-27.3,37,COMPRAR,Media
+2026-07-13,WALMEX,Walmart de México,49.66,0.35,0.71,1.22,-5.75,41.2,-0.007,0.25,bajista,-0.157,0.53,23.1,-17.0,-44,VENDER,Alta
+2026-07-13,AMXB,América Móvil,22.86,0.16,0.7,-0.78,-2.43,50.3,-0.02,0.45,lateral,0.096,0.11,26.8,-8.6,0,MANTENER,Media
+2026-07-13,KOFUBL,Coca-Cola FEMSA,181.26,-0.82,-0.45,-3.39,-2.06,43.3,-0.68,0.1,lateral,-0.016,0.01,22.1,-15.9,-6,MANTENER,Media
+2026-07-13,KIMBERA,Kimberly-Clark de México,38.2,0.07,0.18,-2.72,2.0,49.0,0.017,0.48,lateral,0.17,0.4,22.4,-18.7,32,COMPRAR,Alta
+2026-07-13,OMAB,Grupo Aeroportuario Centro Norte,232.47,-3.26,-1.38,-5.47,-1.49,45.7,-1.471,0.06,lateral,0.448,0.49,32.5,-27.3,15,MANTENER,Baja
+2026-07-14,WALMEX,Walmart de México,49.32,-0.34,-0.68,-1.24,-5.55,39.2,0.001,0.18,bajista,-0.163,0.54,23.1,-17.0,-7,MANTENER,Baja
+2026-07-14,AMXB,América Móvil,22.85,-0.01,-0.04,-0.78,-1.17,50.2,-0.017,0.45,lateral,0.081,0.08,26.6,-8.6,10,MANTENER,Baja
+2026-07-14,KOFUBL,Coca-Cola FEMSA,180.0,-1.26,-0.7,-3.18,-1.91,41.2,-0.773,0.03,lateral,-0.023,0.02,21.9,-15.9,-6,MANTENER,Media
+2026-07-14,KIMBERA,Kimberly-Clark de México,38.53,0.33,0.86,-1.53,1.77,52.2,0.013,0.6,lateral,0.189,0.49,22.5,-18.7,32,COMPRAR,Alta
+2026-07-14,OMAB,Grupo Aeroportuario Centro Norte,235.49,3.02,1.3,0.28,-2.23,49.3,-1.459,0.24,lateral,0.427,0.45,32.3,-27.3,8,MANTENER,Baja
+2026-07-15,WALMEX,Walmart de México,49.61,0.29,0.59,-0.34,-4.15,41.7,0.032,0.29,bajista,-0.16,0.54,23.1,-17.0,-19,MANTENER,Media
+2026-07-15,AMXB,América Móvil,22.8,-0.05,-0.22,-1.64,-0.87,49.4,-0.018,0.41,lateral,0.061,0.05,26.6,-8.6,-10,MANTENER,Alta
+2026-07-15,KOFUBL,Coca-Cola FEMSA,177.25,-2.75,-1.53,-3.38,-5.05,37.0,-0.967,-0.08,lateral,-0.043,0.06,21.9,-15.9,5,MANTENER,Baja
+2026-07-15,KIMBERA,Kimberly-Clark de México,38.73,0.2,0.52,0.03,2.11,54.2,0.021,0.66,alcista,0.207,0.57,22.4,-18.7,40,COMPRAR,Alta
+2026-07-15,OMAB,Grupo Aeroportuario Centro Norte,234.61,-0.88,-0.37,-0.67,-2.89,48.3,-1.458,0.22,lateral,0.393,0.4,32.3,-27.3,6,MANTENER,Baja
+2026-07-16,WALMEX,Walmart de México,49.59,-0.02,-0.04,1.08,-1.45,41.6,0.056,0.3,bajista,-0.162,0.54,23.1,-17.0,-14,MANTENER,Media
+2026-07-16,AMXB,América Móvil,22.78,-0.02,-0.09,0.35,-1.0,49.0,-0.018,0.41,lateral,0.032,0.01,26.3,-8.6,-10,MANTENER,Alta
+2026-07-16,KOFUBL,Coca-Cola FEMSA,179.47,2.22,1.25,-0.75,-5.72,42.1,-0.893,0.13,lateral,-0.06,0.1,21.8,-15.9,-32,VENDER,Media
+2026-07-16,KIMBERA,Kimberly-Clark de México,38.91,0.18,0.46,1.09,4.99,55.9,0.036,0.72,alcista,0.221,0.63,22.3,-18.7,46,COMPRA FUERTE,Alta
+2026-07-16,OMAB,Grupo Aeroportuario Centro Norte,231.98,-2.63,-1.12,-2.74,-6.1,45.3,-1.573,0.13,lateral,0.334,0.31,32.3,-27.3,8,MANTENER,Baja
+2026-07-17,WALMEX,Walmart de México,49.52,-0.07,-0.14,0.43,-2.83,41.1,0.072,0.29,bajista,-0.169,0.57,22.7,-17.0,-24,VENDER,Media
+2026-07-17,AMXB,América Móvil,23.0,0.22,0.97,1.32,-2.58,52.9,-0.004,0.64,lateral,-0.001,0.0,26.1,-8.6,7,MANTENER,Baja
+2026-07-17,KOFUBL,Coca-Cola FEMSA,181.1,1.63,0.91,-0.54,-0.09,45.6,-0.692,0.26,lateral,-0.069,0.13,21.7,-15.9,-28,VENDER,Alta
+2026-07-17,KIMBERA,Kimberly-Clark de México,38.67,-0.24,-0.62,1.42,0.78,53.0,0.027,0.6,alcista,0.215,0.61,22.3,-18.7,38,COMPRAR,Alta
+2026-07-17,OMAB,Grupo Aeroportuario Centro Norte,230.06,-1.92,-0.83,-2.41,-3.06,43.3,-1.706,0.08,lateral,0.254,0.2,32.2,-27.3,-8,MANTENER,Media
+2026-07-20,WALMEX,Walmart de México,49.38,-0.14,-0.28,-0.56,-2.14,40.2,0.075,0.27,bajista,-0.173,0.59,22.7,-17.0,-22,VENDER,Media
+2026-07-20,AMXB,América Móvil,22.74,-0.26,-1.13,-0.52,0.4,48.2,-0.012,0.37,lateral,-0.042,0.04,25.9,-8.6,-7,MANTENER,Baja
+2026-07-20,KOFUBL,Coca-Cola FEMSA,180.95,-0.15,-0.08,-0.17,-2.14,45.4,-0.533,0.27,lateral,-0.084,0.19,21.7,-15.9,-32,VENDER,Alta
+2026-07-20,KIMBERA,Kimberly-Clark de México,38.39,-0.28,-0.72,0.5,2.35,49.8,0.001,0.45,alcista,0.202,0.56,22.3,-18.7,41,COMPRAR,Alta
+2026-07-20,OMAB,Grupo Aeroportuario Centro Norte,226.42,-3.64,-1.58,-2.6,-4.62,39.5,-1.948,0.0,lateral,0.158,0.09,31.8,-27.3,-3,MANTENER,Baja
+2026-07-21,WALMEX,Walmart de México,49.15,-0.23,-0.47,-0.34,-3.02,38.5,0.066,0.23,bajista,-0.189,0.66,22.6,-17.0,-17,MANTENER,Media
+2026-07-21,AMXB,América Móvil,22.76,0.02,0.09,-0.39,0.09,48.6,-0.015,0.39,lateral,-0.074,0.14,25.1,-8.6,-8,MANTENER,Alta
+2026-07-21,KOFUBL,Coca-Cola FEMSA,181.05,0.1,0.06,0.58,-3.74,45.6,-0.392,0.3,lateral,-0.105,0.29,21.4,-15.9,-35,VENDER,Alta
+2026-07-21,KIMBERA,Kimberly-Clark de México,38.4,0.01,0.03,-0.34,3.31,49.9,-0.016,0.41,lateral,0.173,0.49,22.3,-18.7,12,MANTENER,Media
+2026-07-21,OMAB,Grupo Aeroportuario Centro Norte,225.89,-0.53,-0.23,-4.08,-3.9,39.0,-2.044,0.04,lateral,0.055,0.01,30.2,-27.3,-2,MANTENER,Baja
+2026-07-22,WALMEX,Walmart de México,48.65,-0.5,-1.02,-1.94,-5.5,35.2,0.032,0.1,bajista,-0.216,0.79,22.6,-17.7,-16,MANTENER,Baja
+2026-07-22,AMXB,América Móvil,22.7,-0.06,-0.26,-0.44,-1.3,47.5,-0.02,0.35,lateral,-0.106,0.34,24.9,-8.6,-11,MANTENER,Alta
+2026-07-22,KOFUBL,Coca-Cola FEMSA,182.55,1.5,0.83,2.99,-0.97,49.1,-0.179,0.43,lateral,-0.122,0.4,21.4,-15.9,-30,VENDER,Alta
+2026-07-22,KIMBERA,Kimberly-Clark de México,38.85,0.45,1.17,0.31,4.35,55.0,0.001,0.69,lateral,0.138,0.46,22.4,-18.7,37,COMPRAR,Alta
+2026-07-22,OMAB,Grupo Aeroportuario Centro Norte,229.62,3.73,1.65,-2.13,-3.06,44.6,-1.766,0.21,lateral,-0.046,0.01,28.4,-27.3,-14,MANTENER,Alta
+2026-07-23,WALMEX,Walmart de México,47.27,-1.38,-2.84,-4.68,-7.53,28.0,-0.072,-0.17,bajista,-0.24,0.78,21.7,-20.0,-19,MANTENER,Media
+2026-07-23,AMXB,América Móvil,22.84,0.14,0.62,0.26,-0.91,50.3,-0.013,0.5,lateral,-0.083,0.26,24.8,-8.6,10,MANTENER,Baja
+2026-07-23,KOFUBL,Coca-Cola FEMSA,179.34,-3.21,-1.76,-0.07,-3.16,42.8,-0.233,0.2,lateral,-0.137,0.48,21.6,-15.9,-28,VENDER,Media
+2026-07-23,KIMBERA,Kimberly-Clark de México,39.2,0.35,0.9,0.75,2.51,58.5,0.033,0.93,lateral,0.123,0.45,21.0,-18.7,27,COMPRAR,Media
+2026-07-23,OMAB,Grupo Aeroportuario Centro Norte,227.18,-2.44,-1.06,-2.07,-6.78,41.9,-1.659,0.16,lateral,-0.141,0.17,28.4,-27.3,-12,MANTENER,Media
+2026-07-24,WALMEX,Walmart de México,48.0,0.73,1.54,-3.07,-5.62,35.5,-0.08,0.09,bajista,-0.243,0.78,22.0,-20.0,-40,VENDER,Media
+2026-07-24,AMXB,América Móvil,22.8,-0.04,-0.18,-0.87,-1.72,49.5,-0.011,0.48,lateral,-0.058,0.18,24.7,-8.6,9,MANTENER,Baja
+2026-07-24,KOFUBL,Coca-Cola FEMSA,179.29,-0.05,-0.03,-1.0,-4.1,42.7,-0.248,0.22,lateral,-0.139,0.48,21.2,-15.9,-36,VENDER,Alta
+2026-07-24,KIMBERA,Kimberly-Clark de México,39.7,0.5,1.28,2.66,2.19,62.9,0.083,1.15,lateral,0.129,0.46,21.1,-18.7,16,MANTENER,Media
+2026-07-24,OMAB,Grupo Aeroportuario Centro Norte,226.14,-1.04,-0.46,-1.7,-7.92,40.8,-1.57,0.16,lateral,-0.224,0.49,28.4,-27.3,-12,MANTENER,Media
+2026-07-27,WALMEX,Walmart de México,48.52,0.52,1.08,-1.74,-5.05,40.3,-0.041,0.25,bajista,-0.229,0.78,21.8,-20.0,-54,VENTA FUERTE,Alta
+2026-07-27,AMXB,América Móvil,22.49,-0.31,-1.36,-1.1,-3.93,43.6,-0.028,0.13,lateral,-0.054,0.17,24.9,-8.6,-10,MANTENER,Media
+2026-07-27,KOFUBL,Coca-Cola FEMSA,189.0,9.71,5.42,4.45,1.53,60.5,0.385,0.97,lateral,-0.115,0.3,23.7,-15.9,4,MANTENER,Baja
+2026-07-27,KIMBERA,Kimberly-Clark de México,39.92,0.22,0.55,3.99,2.65,64.7,0.122,1.13,lateral,0.137,0.47,21.1,-18.7,10,MANTENER,Media
+2026-07-27,OMAB,Grupo Aeroportuario Centro Norte,228.74,2.6,1.15,1.02,-7.14,44.8,-1.263,0.27,bajista,-0.251,0.58,28.4,-27.3,-27,VENDER,Alta
+2026-07-28,WALMEX,Walmart de México,48.74,0.22,0.45,-0.83,-4.92,42.2,0.007,0.33,bajista,-0.214,0.76,20.9,-20.0,-23,VENDER,Media
+2026-07-28,AMXB,América Móvil,22.48,-0.01,-0.04,-1.23,-1.1,43.4,-0.039,0.15,lateral,-0.058,0.18,24.6,-8.6,-4,MANTENER,Media
+2026-07-28,KOFUBL,Coca-Cola FEMSA,189.82,0.82,0.43,4.84,2.13,61.6,0.822,0.98,lateral,-0.095,0.19,22.4,-15.9,5,MANTENER,Baja
+2026-07-28,KIMBERA,Kimberly-Clark de México,40.64,0.72,1.8,5.83,5.23,69.8,0.184,1.22,alcista,0.161,0.51,21.1,-18.7,21,COMPRAR,Media
+2026-07-28,OMAB,Grupo Aeroportuario Centro Norte,235.27,6.53,2.85,4.15,-4.81,53.3,-0.58,0.53,bajista,-0.245,0.55,28.6,-27.3,-7,MANTENER,Media
+2026-07-29,WALMEX,Walmart de México,49.54,0.8,1.64,1.83,-2.9,48.8,0.095,0.62,bajista,-0.192,0.68,21.2,-20.0,-18,MANTENER,Media
+2026-07-29,AMXB,América Móvil,21.77,-0.71,-3.16,-4.1,-3.29,32.9,-0.088,-0.32,lateral,-0.085,0.26,25.3,-9.0,8,MANTENER,Baja
+2026-07-29,KOFUBL,Coca-Cola FEMSA,186.22,-3.6,-1.9,2.01,0.5,54.5,0.83,0.72,lateral,-0.077,0.13,22.7,-15.9,16,MANTENER,Alta
+2026-07-29,KIMBERA,Kimberly-Clark de México,40.39,-0.25,-0.62,3.96,4.75,66.2,0.195,1.02,alcista,0.18,0.55,21.1,-18.7,21,COMPRAR,Media
+2026-07-29,OMAB,Grupo Aeroportuario Centro Norte,233.18,-2.09,-0.89,1.55,-5.16,50.6,-0.247,0.47,bajista,-0.241,0.54,28.5,-27.3,-7,MANTENER,Media
+2026-07-30,WALMEX,Walmart de México,50.34,0.8,1.61,6.49,0.76,54.4,0.204,0.89,bajista,-0.178,0.58,21.1,-20.0,-16,MANTENER,Media
+2026-07-30,AMXB,América Móvil,21.99,0.22,1.01,-3.72,-2.09,37.9,-0.1,-0.04,lateral,-0.102,0.31,25.3,-9.0,11,MANTENER,Baja
+2026-07-30,KOFUBL,Coca-Cola FEMSA,189.04,2.82,1.51,5.41,0.88,58.6,0.977,0.9,lateral,-0.036,0.03,22.9,-15.9,4,MANTENER,Media
+2026-07-30,KIMBERA,Kimberly-Clark de México,40.34,-0.05,-0.12,2.91,4.75,65.5,0.186,0.93,alcista,0.178,0.55,20.8,-18.7,31,COMPRAR,Media
+2026-07-30,OMAB,Grupo Aeroportuario Centro Norte,233.94,0.76,0.33,2.98,-3.84,51.6,0.032,0.53,lateral,-0.218,0.48,28.5,-27.3,27,COMPRAR,Media
+2026-07-31,WALMEX,Walmart de México,50.36,0.02,0.04,4.92,0.36,54.5,0.269,0.89,lateral,-0.154,0.45,21.1,-20.0,-17,MANTENER,Baja
+2026-07-31,AMXB,América Móvil,22.0,0.01,0.05,-3.51,-2.14,38.1,-0.101,0.03,lateral,-0.1,0.31,25.2,-9.0,2,MANTENER,Baja
+2026-07-31,KOFUBL,Coca-Cola FEMSA,187.94,-1.1,-0.58,4.82,0.58,56.5,0.95,0.81,lateral,-0.032,0.02,22.9,-15.9,3,MANTENER,Media
+2026-07-31,KIMBERA,Kimberly-Clark de México,40.19,-0.15,-0.37,1.23,4.55,63.3,0.158,0.84,alcista,0.195,0.6,20.9,-18.7,30,COMPRAR,Media
+2026-07-31,OMAB,Grupo Aeroportuario Centro Norte,231.05,-2.89,-1.24,2.17,-5.21,47.8,0.029,0.41,bajista,-0.228,0.51,28.6,-27.3,16,MANTENER,Baja
+2026-08-03,WALMEX,Walmart de México,49.94,-0.42,-0.83,2.93,1.79,51.1,0.275,0.72,lateral,-0.142,0.39,21.0,-20.0,-8,MANTENER,Baja
+2026-08-03,AMXB,América Móvil,21.68,-0.32,-1.45,-3.6,-5.9,33.9,-0.116,-0.07,lateral,-0.132,0.42,25.3,-9.4,-15,MANTENER,Media
+2026-08-03,KOFUBL,Coca-Cola FEMSA,185.35,-2.59,-1.38,-1.93,-1.22,51.7,0.719,0.65,lateral,-0.025,0.01,23.0,-15.9,6,MANTENER,Baja
+2026-08-03,KIMBERA,Kimberly-Clark de México,40.01,-0.18,-0.45,0.23,1.88,60.6,0.118,0.76,alcista,0.191,0.59,20.8,-18.7,31,COMPRAR,Alta
+2026-08-03,OMAB,Grupo Aeroportuario Centro Norte,230.9,-0.15,-0.06,0.94,-6.1,47.6,0.025,0.43,bajista,-0.237,0.55,28.6,-27.3,16,MANTENER,Baja
+2026-08-04,WALMEX,Walmart de México,50.13,0.19,0.38,2.85,0.38,52.6,0.281,0.78,lateral,-0.124,0.3,20.2,-20.0,-11,MANTENER,Baja
+2026-08-04,AMXB,América Móvil,21.54,-0.14,-0.65,-4.18,-6.47,32.2,-0.127,-0.04,bajista,-0.164,0.51,25.2,-9.9,-21,VENDER,Media
+2026-08-04,KOFUBL,Coca-Cola FEMSA,187.87,2.52,1.36,-1.03,1.05,55.6,0.696,0.81,lateral,0.002,0.0,23.1,-15.9,4,MANTENER,Media
+2026-08-04,KIMBERA,Kimberly-Clark de México,40.29,0.28,0.7,-0.86,2.96,63.2,0.1,0.82,alcista,0.182,0.58,20.8,-18.7,27,COMPRAR,Media
+2026-08-04,OMAB,Grupo Aeroportuario Centro Norte,239.84,8.94,3.87,1.94,2.13,58.5,0.6,0.98,lateral,-0.227,0.5,29.6,-27.3,26,COMPRAR,Media
+2026-08-05,WALMEX,Walmart de México,48.65,-1.48,-2.95,-1.8,-2.27,42.2,0.181,0.3,lateral,-0.114,0.28,21.0,-20.0,-17,MANTENER,Media
+2026-08-05,AMXB,América Móvil,20.74,-0.8,-3.71,-4.73,-10.53,24.7,-0.177,-0.22,bajista,-0.211,0.52,26.3,-13.3,-11,MANTENER,Media
+2026-08-05,KOFUBL,Coca-Cola FEMSA,187.07,-0.8,-0.43,0.46,1.97,54.1,0.591,0.74,lateral,0.013,0.0,23.1,-15.9,12,MANTENER,Alta
+2026-08-05,KIMBERA,Kimberly-Clark de México,40.27,-0.02,-0.05,-0.3,4.0,62.9,0.079,0.78,alcista,0.17,0.57,20.8,-18.7,34,COMPRAR,Alta
+2026-08-05,OMAB,Grupo Aeroportuario Centro Norte,235.58,-4.26,-1.78,1.03,-0.26,52.9,0.665,0.72,lateral,-0.225,0.49,29.7,-27.3,27,COMPRAR,Media
+2026-08-06,WALMEX,Walmart de México,49.01,0.36,0.74,-2.64,-0.1,45.0,0.136,0.43,lateral,-0.101,0.24,20.8,-20.0,-12,MANTENER,Baja
+2026-08-06,AMXB,América Móvil,20.62,-0.12,-0.58,-6.23,-9.16,23.8,-0.205,-0.11,bajista,-0.254,0.55,26.3,-13.8,-13,MANTENER,Media
+2026-08-06,KOFUBL,Coca-Cola FEMSA,188.0,0.93,0.5,-0.55,3.97,55.6,0.55,0.77,lateral,0.03,0.02,23.2,-15.0,16,MANTENER,Alta
+2026-08-06,KIMBERA,Kimberly-Clark de México,40.15,-0.12,-0.3,-0.47,4.31,60.9,0.05,0.72,alcista,0.172,0.58,20.7,-18.7,35,COMPRAR,Alta
+2026-08-06,OMAB,Grupo Aeroportuario Centro Norte,237.7,2.12,0.9,1.61,-0.34,55.2,0.811,0.86,lateral,-0.197,0.39,29.5,-27.3,21,COMPRAR,Baja
+2026-08-07,WALMEX,Walmart de México,49.6,0.59,1.2,-1.51,0.59,49.4,0.142,0.62,lateral,-0.083,0.17,20.9,-20.0,-11,MANTENER,Baja
+2026-08-07,AMXB,América Móvil,20.41,-0.21,-1.02,-7.23,-10.09,22.2,-0.223,-0.06,bajista,-0.295,0.57,26.2,-14.7,-14,MANTENER,Media
+2026-08-07,KOFUBL,Coca-Cola FEMSA,189.0,1.0,0.53,0.56,3.8,57.2,0.554,0.8,lateral,0.056,0.06,23.1,-15.0,10,MANTENER,Media
+2026-08-07,KIMBERA,Kimberly-Clark de México,40.73,0.58,1.44,1.34,6.82,66.4,0.062,0.86,alcista,0.191,0.64,20.9,-18.7,31,COMPRAR,Media
+2026-08-07,OMAB,Grupo Aeroportuario Centro Norte,236.74,-0.96,-0.4,2.46,0.43,53.9,0.803,0.79,lateral,-0.164,0.3,29.5,-27.3,9,MANTENER,Alta
+2026-08-10,WALMEX,Walmart de México,48.3,-1.3,-2.62,-3.28,-2.74,41.5,0.059,0.22,lateral,-0.077,0.16,21.0,-20.0,-17,MANTENER,Media
+2026-08-10,AMXB,América Móvil,20.52,0.11,0.54,-5.35,-10.24,24.9,-0.213,0.05,bajista,-0.321,0.59,26.2,-14.7,-24,VENDER,Media
+2026-08-10,KOFUBL,Coca-Cola FEMSA,186.29,-2.71,-1.43,0.51,2.78,51.8,0.348,0.62,lateral,0.069,0.09,23.3,-14.8,14,MANTENER,Alta
+2026-08-10,KIMBERA,Kimberly-Clark de México,40.38,-0.35,-0.86,0.92,5.71,60.8,0.039,0.73,alcista,0.204,0.69,20.9,-17.5,38,COMPRAR,Alta
+2026-08-10,OMAB,Grupo Aeroportuario Centro Norte,232.51,-4.23,-1.79,0.7,0.02,48.5,0.488,0.52,lateral,-0.14,0.24,29.6,-27.3,-12,MANTENER,Baja
+2026-08-11,WALMEX,Walmart de México,48.56,0.26,0.54,-3.13,-1.54,43.5,0.024,0.32,lateral,-0.063,0.12,21.0,-20.0,-15,MANTENER,Media
+2026-08-11,AMXB,América Móvil,20.03,-0.49,-2.39,-7.01,-12.34,21.4,-0.223,-0.0,bajista,-0.376,0.64,26.6,-16.3,-17,MANTENER,Media
+2026-08-11,KOFUBL,Coca-Cola FEMSA,187.39,1.1,0.59,-0.26,4.11,53.7,0.264,0.67,lateral,0.085,0.14,23.3,-14.8,16,MANTENER,Alta
+2026-08-11,KIMBERA,Kimberly-Clark de México,39.51,-0.87,-2.15,-1.94,2.54,49.6,-0.037,0.44,alcista,0.196,0.65,21.2,-17.5,17,MANTENER,Media
+2026-08-11,OMAB,Grupo Aeroportuario Centro Norte,232.53,0.02,0.01,-3.05,-1.26,48.5,0.267,0.53,lateral,-0.111,0.18,29.6,-27.3,-15,MANTENER,Media
+2026-08-12,WALMEX,Walmart de México,48.02,-0.54,-1.11,-1.29,-3.2,40.5,-0.03,0.18,lateral,-0.057,0.11,21.1,-20.0,-35,VENDER,Media
+2026-08-12,AMXB,América Móvil,19.84,-0.19,-0.95,-4.34,-12.98,20.1,-0.227,0.03,bajista,-0.439,0.7,26.7,-17.1,-27,VENDER,Media
+2026-08-12,KOFUBL,Coca-Cola FEMSA,187.1,-0.29,-0.15,0.02,5.56,53.1,0.171,0.63,lateral,0.097,0.18,23.3,-14.8,38,COMPRAR,Alta
+2026-08-12,KIMBERA,Kimberly-Clark de México,39.78,0.27,0.68,-1.22,2.71,52.5,-0.07,0.52,alcista,0.19,0.62,21.2,-17.5,17,MANTENER,Media
+2026-08-12,OMAB,Grupo Aeroportuario Centro Norte,233.25,0.72,0.31,-0.99,-0.58,49.5,0.16,0.59,lateral,-0.081,0.11,29.5,-27.3,7,MANTENER,Baja
+2026-08-13,WALMEX,Walmart de México,47.12,-0.9,-1.87,-3.86,-4.98,36.0,-0.116,-0.0,lateral,-0.076,0.15,21.3,-20.3,-22,VENDER,Media
+2026-08-13,AMXB,América Móvil,19.87,0.03,0.15,-3.64,-12.77,20.9,-0.211,0.09,bajista,-0.497,0.77,26.6,-17.1,-27,VENDER,Media
+2026-08-13,KOFUBL,Coca-Cola FEMSA,186.08,-1.02,-0.55,-1.02,3.68,50.9,0.03,0.54,lateral,0.113,0.25,23.3,-14.8,35,COMPRAR,Alta
+2026-08-13,KIMBERA,Kimberly-Clark de México,39.41,-0.37,-0.93,-1.84,1.29,48.4,-0.114,0.38,alcista,0.176,0.56,20.9,-17.5,15,MANTENER,Media
+2026-08-13,OMAB,Grupo Aeroportuario Centro Norte,229.09,-4.16,-1.78,-3.62,-1.25,44.2,-0.18,0.33,lateral,-0.068,0.08,29.8,-27.3,-37,VENDER,Alta
+2026-08-14,WALMEX,Walmart de México,47.41,0.29,0.62,-4.42,-4.26,38.4,-0.142,0.13,lateral,-0.084,0.17,21.3,-20.3,-30,VENDER,Media
+2026-08-14,AMXB,América Móvil,19.97,0.1,0.5,-2.16,-13.17,23.5,-0.178,0.15,bajista,-0.546,0.83,26.6,-17.1,-27,VENDER,Media
+2026-08-14,KOFUBL,Coca-Cola FEMSA,184.36,-1.72,-0.92,-2.46,1.8,47.4,-0.178,0.4,lateral,0.122,0.29,23.3,-13.5,-11,MANTENER,Baja
+2026-08-14,KIMBERA,Kimberly-Clark de México,39.13,-0.28,-0.71,-3.93,1.19,45.5,-0.158,0.26,lateral,0.155,0.45,20.8,-17.5,14,MANTENER,Media
+2026-08-14,OMAB,Grupo Aeroportuario Centro Norte,219.62,-9.47,-4.13,-7.23,-4.54,35.0,-0.988,-0.12,lateral,-0.077,0.1,30.9,-25.9,-21,VENDER,Media
+2026-08-17,WALMEX,Walmart de México,46.98,-0.43,-0.91,-2.73,-4.86,36.2,-0.174,0.08,lateral,-0.112,0.25,21.4,-20.5,-24,VENDER,Media
+2026-08-17,AMXB,América Móvil,20.2,0.23,1.15,-1.56,-11.17,29.3,-0.129,0.23,bajista,-0.565,0.85,26.5,-17.1,-33,VENDER,Alta
+2026-08-17,KOFUBL,Coca-Cola FEMSA,184.84,0.48,0.26,-0.78,2.15,48.5,-0.276,0.42,lateral,0.135,0.37,23.2,-13.5,9,MANTENER,Media
+2026-08-17,KIMBERA,Kimberly-Clark de México,38.69,-0.44,-1.12,-4.19,0.78,41.3,-0.209,0.07,lateral,0.141,0.36,21.0,-17.5,0,MANTENER,Baja
+2026-08-17,OMAB,Grupo Aeroportuario Centro Norte,219.49,-0.13,-0.06,-5.6,-3.06,34.8,-1.449,-0.04,lateral,-0.077,0.1,30.5,-23.8,-18,MANTENER,Media
+2026-08-18,WALMEX,Walmart de México,47.14,0.16,0.34,-2.92,-4.09,37.6,-0.17,0.16,lateral,-0.123,0.28,21.3,-20.5,-22,VENDER,Media
+2026-08-18,AMXB,América Móvil,20.2,0.0,0.0,0.85,-11.25,29.3,-0.086,0.26,bajista,-0.578,0.86,26.4,-17.1,-33,VENDER,Alta
+2026-08-18,KOFUBL,Coca-Cola FEMSA,187.0,2.16,1.17,-0.21,3.29,53.1,-0.193,0.57,lateral,0.151,0.45,23.3,-13.5,12,MANTENER,Media
+2026-08-18,KIMBERA,Kimberly-Clark de México,38.54,-0.15,-0.39,-2.46,0.36,39.9,-0.242,0.0,lateral,0.122,0.26,21.0,-17.5,7,MANTENER,Media
+2026-08-18,OMAB,Grupo Aeroportuario Centro Norte,214.31,-5.18,-2.36,-7.84,-5.13,30.8,-1.986,-0.13,lateral,-0.118,0.16,30.3,-23.0,-15,MANTENER,Media
+2026-08-19,WALMEX,Walmart de México,46.97,-0.17,-0.36,-2.19,-3.45,36.7,-0.165,0.16,lateral,-0.136,0.32,21.2,-20.5,-21,VENDER,Media
+2026-08-19,AMXB,América Móvil,19.99,-0.21,-1.04,0.76,-11.94,27.1,-0.062,0.23,bajista,-0.588,0.87,26.4,-17.1,-33,VENDER,Alta
+2026-08-19,KOFUBL,Coca-Cola FEMSA,191.68,4.68,2.5,2.45,5.0,61.2,0.161,0.92,alcista,0.173,0.52,23.7,-13.5,37,COMPRAR,Media
+2026-08-19,KIMBERA,Kimberly-Clark de México,38.64,0.1,0.26,-2.87,-0.54,41.3,-0.247,0.06,lateral,0.099,0.17,19.8,-17.5,-3,MANTENER,Media
+2026-08-19,OMAB,Grupo Aeroportuario Centro Norte,215.28,0.97,0.45,-7.7,-6.25,32.4,-2.147,-0.0,lateral,-0.149,0.21,30.3,-22.5,-15,MANTENER,Media
+2026-08-20,WALMEX,Walmart de México,47.59,0.62,1.32,1.0,0.68,42.2,-0.108,0.29,lateral,-0.148,0.36,20.0,-20.5,-27,VENDER,Media
+2026-08-20,AMXB,América Móvil,19.86,-0.13,-0.65,-0.05,-13.05,25.9,-0.046,0.23,bajista,-0.609,0.89,26.3,-17.1,-33,VENDER,Alta
+2026-08-20,KOFUBL,Coca-Cola FEMSA,191.72,0.04,0.02,3.03,6.9,61.3,0.37,0.92,alcista,0.183,0.55,23.1,-13.5,38,COMPRAR,Media
+2026-08-20,KIMBERA,Kimberly-Clark de México,38.62,-0.02,-0.05,-2.0,-1.48,41.1,-0.24,0.09,lateral,0.071,0.09,19.3,-17.5,-5,MANTENER,Media
+2026-08-20,OMAB,Grupo Aeroportuario Centro Norte,215.19,-0.09,-0.04,-6.07,-5.28,32.3,-2.125,0.06,lateral,-0.168,0.24,30.1,-20.7,-24,VENDER,Media
+2026-08-21,WALMEX,Walmart de México,46.53,-1.06,-2.23,-1.86,-3.06,36.4,-0.129,0.1,lateral,-0.17,0.42,20.4,-21.3,-20,VENDER,Media
+2026-08-21,AMXB,América Móvil,20.13,0.27,1.36,0.8,-11.71,33.0,-0.011,0.31,bajista,-0.617,0.9,26.4,-17.1,-45,VENTA FUERTE,Alta
+2026-08-21,KOFUBL,Coca-Cola FEMSA,189.51,-2.21,-1.15,2.79,5.7,56.0,0.333,0.72,alcista,0.188,0.57,23.1,-13.2,52,COMPRA FUERTE,Alta
+2026-08-21,KIMBERA,Kimberly-Clark de México,39.06,0.44,1.14,-0.18,-1.61,47.3,-0.196,0.26,lateral,0.044,0.04,19.4,-17.5,9,MANTENER,Baja
+2026-08-21,OMAB,Grupo Aeroportuario Centro Norte,217.58,2.39,1.11,-0.93,-3.79,36.5,-1.827,0.16,lateral,-0.185,0.27,30.2,-19.6,-22,VENDER,Media
+2026-08-24,WALMEX,Walmart de México,46.83,0.3,0.64,-0.32,-3.48,39.0,-0.11,0.19,lateral,-0.18,0.44,20.5,-21.3,-21,VENDER,Media
+2026-08-24,AMXB,América Móvil,20.22,0.09,0.45,0.1,-10.09,35.2,0.023,0.36,bajista,-0.611,0.89,26.4,-17.1,-22,VENDER,Media
+2026-08-24,KOFUBL,Coca-Cola FEMSA,194.66,5.15,2.72,5.31,2.99,63.8,0.611,1.17,alcista,0.205,0.6,23.7,-13.2,19,MANTENER,Media
+2026-08-24,KIMBERA,Kimberly-Clark de México,39.69,0.63,1.61,2.58,-0.58,54.6,-0.119,0.49,lateral,0.027,0.02,19.7,-17.5,11,MANTENER,Baja
+2026-08-24,OMAB,Grupo Aeroportuario Centro Norte,217.77,0.19,0.09,-0.78,-4.8,36.8,-1.509,0.2,lateral,-0.206,0.31,30.2,-19.6,-24,VENDER,Media
+2026-08-25,WALMEX,Walmart de México,47.68,0.85,1.82,1.15,-2.17,45.7,-0.033,0.37,lateral,-0.181,0.45,20.8,-21.3,-32,VENDER,Alta
+2026-08-25,AMXB,América Móvil,20.15,-0.07,-0.35,-0.25,-10.36,34.2,0.045,0.35,bajista,-0.602,0.88,26.2,-17.1,-22,VENDER,Media
+2026-08-25,KOFUBL,Coca-Cola FEMSA,197.88,3.22,1.65,5.82,4.25,67.7,0.949,1.22,alcista,0.225,0.61,23.7,-13.2,21,COMPRAR,Media
+2026-08-25,KIMBERA,Kimberly-Clark de México,39.96,0.27,0.68,3.68,-1.67,57.4,-0.048,0.6,lateral,0.019,0.01,19.7,-17.5,9,MANTENER,Baja
+2026-08-25,OMAB,Grupo Aeroportuario Centro Norte,220.0,2.23,1.02,2.66,-6.49,40.7,-1.06,0.29,lateral,-0.21,0.32,29.9,-19.6,-38,VENDER,Alta
+2026-08-26,WALMEX,Walmart de México,48.08,0.4,0.84,2.36,-2.95,48.5,0.049,0.46,lateral,-0.17,0.41,20.9,-21.3,-11,MANTENER,Media
+2026-08-26,AMXB,América Móvil,20.09,-0.06,-0.3,0.5,-7.72,33.4,0.058,0.35,bajista,-0.591,0.87,26.2,-17.1,-22,VENDER,Media
+2026-08-26,KOFUBL,Coca-Cola FEMSA,194.79,-3.09,-1.56,1.62,4.6,61.0,0.902,0.92,alcista,0.22,0.6,23.9,-11.6,31,COMPRAR,Media
+2026-08-26,KIMBERA,Kimberly-Clark de México,39.77,-0.19,-0.48,2.92,-1.54,54.8,-0.014,0.54,lateral,0.01,0.0,19.7,-17.5,9,MANTENER,Baja
+2026-08-26,OMAB,Grupo Aeroportuario Centro Norte,217.54,-2.46,-1.12,1.05,-6.71,37.9,-0.85,0.24,lateral,-0.22,0.34,29.9,-19.6,-30,VENDER,Media
+2026-08-27,WALMEX,Walmart de México,47.8,-0.28,-0.58,0.44,-5.05,46.7,0.086,0.43,lateral,-0.163,0.38,20.9,-21.3,-15,MANTENER,Media
+2026-08-27,AMXB,América Móvil,19.96,-0.13,-0.65,0.5,-9.23,31.6,0.061,0.32,bajista,-0.579,0.86,26.2,-17.1,-29,VENDER,Media
+2026-08-27,KOFUBL,Coca-Cola FEMSA,191.87,-2.92,-1.5,0.08,1.5,55.3,0.624,0.7,alcista,0.209,0.58,24.0,-11.3,39,COMPRAR,Alta
+2026-08-27,KIMBERA,Kimberly-Clark de México,39.77,0.0,0.0,2.98,-1.41,54.8,0.008,0.55,lateral,0.003,0.0,19.5,-17.5,32,COMPRAR,Media
+2026-08-27,OMAB,Grupo Aeroportuario Centro Norte,218.1,0.56,0.26,1.35,-6.77,39.0,-0.606,0.28,lateral,-0.233,0.37,29.6,-19.6,-30,VENDER,Media
+2026-08-28,WALMEX,Walmart de México,48.0,0.2,0.42,3.16,-4.69,48.2,0.124,0.5,lateral,-0.152,0.34,20.8,-21.3,-14,MANTENER,Media
+2026-08-28,AMXB,América Móvil,19.8,-0.16,-0.8,-1.64,-10.0,29.5,0.054,0.26,bajista,-0.56,0.84,26.1,-17.2,-17,MANTENER,Media
+2026-08-28,KOFUBL,Coca-Cola FEMSA,191.48,-0.39,-0.2,1.04,1.88,54.6,0.376,0.66,alcista,0.2,0.56,24.0,-9.1,40,COMPRAR,Alta
+2026-08-28,KIMBERA,Kimberly-Clark de México,40.13,0.36,0.91,2.74,-0.15,58.8,0.043,0.7,lateral,-0.004,0.0,19.1,-17.5,35,COMPRAR,Alta
+2026-08-28,OMAB,Grupo Aeroportuario Centro Norte,213.65,-4.45,-2.04,-1.81,-7.53,34.1,-0.672,0.19,lateral,-0.262,0.42,29.7,-19.6,-24,VENDER,Media
+2026-08-31,WALMEX,Walmart de México,47.27,-0.73,-1.52,0.94,-5.35,43.3,0.1,0.33,lateral,-0.151,0.34,21.0,-21.3,-22,VENDER,Media
+2026-08-31,AMXB,América Móvil,19.61,-0.19,-0.96,-3.02,-9.55,27.2,0.041,0.15,bajista,-0.548,0.83,26.2,-18.0,-11,MANTENER,Baja
+2026-08-31,KOFUBL,Coca-Cola FEMSA,188.97,-2.51,-1.31,-2.92,1.95,50.1,0.024,0.47,lateral,0.18,0.49,24.0,-8.5,32,COMPRAR,Alta
+2026-08-31,KIMBERA,Kimberly-Clark de México,39.88,-0.25,-0.62,0.48,-0.32,55.2,0.047,0.6,lateral,-0.021,0.01,19.1,-17.5,34,COMPRAR,Media
+2026-08-31,OMAB,Grupo Aeroportuario Centro Norte,210.7,-2.95,-1.38,-3.25,-8.75,31.3,-0.831,0.15,bajista,-0.308,0.51,29.8,-19.6,-36,VENDER,Media
+2026-09-01,WALMEX,Walmart de México,46.86,-0.41,-0.87,-1.72,-6.52,40.8,0.058,0.23,lateral,-0.158,0.36,20.8,-21.3,-22,VENDER,Media
+2026-09-01,AMXB,América Móvil,19.59,-0.02,-0.1,-2.78,-9.05,26.9,0.034,0.08,bajista,-0.53,0.82,25.9,-18.1,-11,MANTENER,Baja
+2026-09-01,KOFUBL,Coca-Cola FEMSA,188.85,-0.12,-0.06,-4.56,0.52,49.9,-0.222,0.46,lateral,0.158,0.42,24.0,-8.5,6,MANTENER,Media
+2026-09-01,KIMBERA,Kimberly-Clark de México,39.38,-0.5,-1.25,-1.45,-2.26,48.7,0.014,0.42,lateral,-0.048,0.07,18.8,-17.5,23,COMPRAR,Media
+2026-09-01,OMAB,Grupo Aeroportuario Centro Norte,206.96,-3.74,-1.78,-5.93,-13.71,28.2,-1.089,0.09,bajista,-0.364,0.61,30.0,-20.2,-26,VENDER,Media
+2026-09-02,WALMEX,Walmart de México,46.81,-0.05,-0.11,-2.64,-3.78,40.5,0.031,0.24,lateral,-0.17,0.4,20.7,-21.3,-20,VENDER,Media
+2026-09-02,AMXB,América Móvil,19.46,-0.13,-0.66,-3.14,-6.17,25.4,0.025,0.02,bajista,-0.511,0.81,25.9,-18.6,-11,MANTENER,Baja
+2026-09-02,KOFUBL,Coca-Cola FEMSA,190.57,1.72,0.91,-2.17,1.87,53.0,-0.271,0.57,lateral,0.146,0.38,24.0,-7.0,9,MANTENER,Media
+2026-09-02,KIMBERA,Kimberly-Clark de México,39.28,-0.1,-0.25,-1.23,-2.46,47.5,-0.015,0.4,lateral,-0.07,0.16,18.5,-17.5,0,MANTENER,Media
+2026-09-02,OMAB,Grupo Aeroportuario Centro Norte,212.75,5.79,2.8,-2.2,-9.69,38.5,-0.785,0.27,bajista,-0.387,0.65,30.5,-20.2,-45,VENTA FUERTE,Alta
+2026-09-03,WALMEX,Walmart de México,47.57,0.76,1.62,-0.48,-2.94,47.0,0.066,0.5,bajista,-0.19,0.5,19.9,-21.3,-25,VENDER,Media
+2026-09-03,AMXB,América Móvil,19.6,0.14,0.72,-1.8,-4.95,30.1,0.032,0.16,bajista,-0.476,0.79,20.2,-18.6,-23,VENDER,Baja
+2026-09-03,KOFUBL,Coca-Cola FEMSA,190.0,-0.57,-0.3,-0.97,1.06,51.8,-0.34,0.52,lateral,0.117,0.3,23.7,-7.0,7,MANTENER,Media
+2026-09-03,KIMBERA,Kimberly-Clark de México,39.1,-0.18,-0.46,-1.68,-2.62,45.4,-0.044,0.34,lateral,-0.089,0.25,17.9,-17.5,-20,VENDER,Alta
+2026-09-03,OMAB,Grupo Aeroportuario Centro Norte,210.25,-2.5,-1.18,-3.6,-11.55,36.1,-0.671,0.22,bajista,-0.421,0.72,30.2,-20.2,-45,VENTA FUERTE,Alta
+2026-09-04,WALMEX,Walmart de México,47.18,-0.39,-0.82,-1.71,-4.88,44.4,0.065,0.38,bajista,-0.204,0.57,19.9,-21.3,-30,VENDER,Media
+2026-09-04,AMXB,América Móvil,19.46,-0.14,-0.71,-1.72,-4.65,28.2,0.031,0.07,bajista,-0.441,0.78,20.2,-18.6,-10,MANTENER,Baja
+2026-09-04,KOFUBL,Coca-Cola FEMSA,189.07,-0.93,-0.49,-1.26,0.04,49.9,-0.439,0.45,lateral,0.083,0.21,23.5,-7.0,12,MANTENER,Baja
+2026-09-04,KIMBERA,Kimberly-Clark de México,39.12,0.02,0.05,-2.52,-3.95,45.7,-0.06,0.37,lateral,-0.098,0.3,17.3,-17.5,-23,VENDER,Alta
+2026-09-04,OMAB,Grupo Aeroportuario Centro Norte,210.23,-0.02,-0.01,-1.6,-11.2,36.0,-0.524,0.23,bajista,-0.456,0.79,29.7,-20.2,-45,VENTA FUERTE,Alta
+2026-09-07,WALMEX,Walmart de México,46.75,-0.43,-0.91,-1.1,-3.21,41.5,0.038,0.21,bajista,-0.217,0.62,19.8,-21.3,-26,VENDER,Media
+2026-09-07,AMXB,América Móvil,19.35,-0.11,-0.57,-1.33,-5.7,26.7,0.027,0.01,bajista,-0.411,0.77,19.9,-19.1,-11,MANTENER,Baja
+2026-09-07,KOFUBL,Coca-Cola FEMSA,186.52,-2.55,-1.35,-1.3,0.12,45.1,-0.655,0.26,lateral,0.074,0.16,23.4,-7.0,-8,MANTENER,Alta
+2026-09-07,KIMBERA,Kimberly-Clark de México,39.4,0.28,0.72,-1.2,-2.43,49.8,-0.049,0.53,lateral,-0.099,0.3,17.3,-17.5,7,MANTENER,Baja
+2026-09-07,OMAB,Grupo Aeroportuario Centro Norte,218.45,8.22,3.91,3.68,-6.05,48.3,0.165,0.53,bajista,-0.454,0.78,26.8,-20.2,-30,VENDER,Media
+2026-09-08,WALMEX,Walmart de México,46.37,-0.38,-0.81,-1.05,-4.51,39.2,-0.0,0.05,bajista,-0.23,0.66,19.8,-21.5,-39,VENDER,Media
+2026-09-08,AMXB,América Móvil,19.47,0.12,0.62,-0.61,-2.8,30.9,0.035,0.17,bajista,-0.371,0.76,19.8,-19.1,-18,MANTENER,Baja
+2026-09-08,KOFUBL,Coca-Cola FEMSA,185.38,-1.14,-0.61,-1.84,-1.07,43.1,-0.841,0.2,lateral,0.064,0.12,23.4,-7.0,-4,MANTENER,Media
+2026-09-08,KIMBERA,Kimberly-Clark de México,38.96,-0.44,-1.12,-1.07,-1.39,44.1,-0.068,0.31,lateral,-0.094,0.29,17.3,-17.5,-31,VENDER,Alta
+2026-09-08,OMAB,Grupo Aeroportuario Centro Norte,209.98,-8.47,-3.88,1.46,-9.7,39.8,0.091,0.23,bajista,-0.456,0.79,27.5,-20.2,-22,VENDER,Media
+2026-09-09,WALMEX,Walmart de México,45.98,-0.39,-0.84,-1.77,-4.25,36.9,-0.045,-0.05,bajista,-0.235,0.67,19.8,-22.2,-29,VENDER,Media
+2026-09-09,AMXB,América Móvil,19.55,0.08,0.41,0.46,-1.46,33.6,0.048,0.26,bajista,-0.345,0.73,19.9,-19.1,-20,VENDER,Media
+2026-09-09,KOFUBL,Coca-Cola FEMSA,184.32,-1.06,-0.57,-3.28,-1.49,41.2,-0.992,0.15,lateral,0.039,0.04,23.1,-7.0,-5,MANTENER,Media
+2026-09-09,KIMBERA,Kimberly-Clark de México,38.6,-0.36,-0.92,-1.73,-2.97,40.1,-0.1,0.16,lateral,-0.097,0.3,17.5,-17.5,-28,VENDER,Media
+2026-09-09,OMAB,Grupo Aeroportuario Centro Norte,209.81,-0.17,-0.08,-1.38,-10.05,39.7,0.072,0.22,bajista,-0.461,0.79,27.5,-20.2,-22,VENDER,Media
+2026-09-10,WALMEX,Walmart de México,46.04,0.06,0.13,-3.22,-2.29,37.5,-0.061,0.05,bajista,-0.225,0.66,19.0,-22.2,-34,VENDER,Media
+2026-09-10,AMXB,América Móvil,19.38,-0.17,-0.87,-1.12,-2.47,30.8,0.048,0.15,bajista,-0.312,0.72,19.9,-19.1,-15,MANTENER,Baja
+2026-09-10,KOFUBL,Coca-Cola FEMSA,187.16,2.84,1.54,-1.49,0.58,47.7,-0.861,0.34,lateral,0.034,0.03,23.0,-7.0,13,MANTENER,Media
+2026-09-10,KIMBERA,Kimberly-Clark de México,38.44,-0.16,-0.41,-1.69,-2.46,38.4,-0.124,0.13,lateral,-0.102,0.31,16.8,-17.5,-19,MANTENER,Media
+2026-09-10,OMAB,Grupo Aeroportuario Centro Norte,208.03,-1.78,-0.85,-1.06,-9.19,38.1,-0.014,0.12,bajista,-0.463,0.8,27.0,-20.2,-46,VENTA FUERTE,Media
+2026-09-11,WALMEX,Walmart de México,45.49,-0.55,-1.19,-3.58,-4.05,34.2,-0.099,-0.06,bajista,-0.218,0.66,18.9,-23.0,-21,VENDER,Media
+2026-09-11,AMXB,América Móvil,19.37,-0.01,-0.05,-0.46,-3.0,30.7,0.05,0.18,bajista,-0.273,0.73,19.0,-19.1,-14,MANTENER,Baja
+2026-09-11,KOFUBL,Coca-Cola FEMSA,188.03,0.87,0.46,-0.55,1.99,49.5,-0.685,0.38,lateral,0.029,0.02,20.7,-7.0,16,MANTENER,Media
+2026-09-11,KIMBERA,Kimberly-Clark de México,38.5,0.06,0.16,-1.58,-1.61,39.5,-0.129,0.18,lateral,-0.107,0.33,15.2,-17.5,-17,MANTENER,Media
+2026-09-11,OMAB,Grupo Aeroportuario Centro Norte,208.5,0.47,0.23,-0.82,-5.06,38.8,0.006,0.18,bajista,-0.468,0.8,25.9,-20.2,-23,VENDER,Baja
+2026-09-14,WALMEX,Walmart de México,45.96,0.47,1.03,-1.69,-2.17,39.1,-0.082,0.15,bajista,-0.206,0.65,19.0,-23.0,-26,VENDER,Media
+2026-09-14,AMXB,América Móvil,19.82,0.45,2.32,2.43,-1.88,44.6,0.081,0.56,bajista,-0.224,0.68,18.1,-19.1,-24,VENDER,Media
+2026-09-14,KOFUBL,Coca-Cola FEMSA,191.98,3.95,2.1,2.93,3.86,56.9,-0.291,0.65,lateral,0.027,0.02,20.7,-7.0,20,COMPRAR,Media
+2026-09-14,KIMBERA,Kimberly-Clark de México,38.77,0.27,0.7,-1.6,0.21,44.0,-0.108,0.31,lateral,-0.108,0.33,14.6,-17.5,-28,VENDER,Alta
+2026-09-14,OMAB,Grupo Aeroportuario Centro Norte,209.7,1.2,0.58,-4.01,-4.46,40.7,0.138,0.28,bajista,-0.464,0.8,26.0,-20.2,-36,VENDER,Media
+2026-09-15,WALMEX,Walmart de México,45.49,-0.47,-1.02,-1.9,-3.5,36.2,-0.092,0.06,bajista,-0.194,0.65,19.0,-23.0,-28,VENDER,Media
+2026-09-15,AMXB,América Móvil,19.9,0.08,0.4,2.21,-1.49,46.6,0.106,0.64,bajista,-0.173,0.64,18.1,-19.1,-22,VENDER,Media
+2026-09-15,KOFUBL,Coca-Cola FEMSA,191.02,-0.96,-0.5,3.04,2.15,54.8,-0.095,0.56,lateral,0.03,0.02,20.5,-7.0,16,MANTENER,Media
+2026-09-15,KIMBERA,Kimberly-Clark de México,38.43,-0.34,-0.88,-1.36,-0.29,39.9,-0.11,0.15,lateral,-0.108,0.33,14.6,-17.5,-15,MANTENER,Media
+2026-09-15,OMAB,Grupo Aeroportuario Centro Norte,206.91,-2.79,-1.33,-1.46,-3.45,37.8,0.078,0.14,bajista,-0.439,0.78,26.0,-19.9,-13,MANTENER,Baja
+2026-09-17,WALMEX,Walmart de México,46.27,0.78,1.71,0.63,-1.49,43.7,-0.038,0.32,bajista,-0.188,0.63,19.1,-23.0,-38,VENDER,Alta
+2026-09-17,AMXB,América Móvil,19.8,-0.1,-0.5,1.28,-0.95,44.4,0.114,0.56,bajista,-0.148,0.57,17.9,-19.1,-20,VENDER,Media
+2026-09-17,KOFUBL,Coca-Cola FEMSA,193.25,2.23,1.17,4.84,0.82,58.6,0.172,0.72,lateral,0.037,0.04,20.2,-7.0,37,COMPRAR,Alta
+2026-09-17,KIMBERA,Kimberly-Clark de México,39.12,0.69,1.8,1.35,1.24,49.9,-0.06,0.46,lateral,-0.095,0.28,15.0,-17.5,-26,VENDER,Media
+2026-09-17,OMAB,Grupo Aeroportuario Centro Norte,208.42,1.51,0.73,-0.66,-3.19,40.2,0.176,0.26,bajista,-0.415,0.76,26.0,-19.9,-33,VENDER,Media
+2026-09-18,WALMEX,Walmart de México,46.32,0.05,0.11,0.61,-2.67,44.1,0.007,0.36,bajista,-0.173,0.6,19.1,-23.0,-16,MANTENER,Media
+2026-09-18,AMXB,América Móvil,19.37,-0.43,-2.17,-0.05,-2.47,36.4,0.089,0.21,bajista,-0.139,0.55,18.3,-19.1,-14,MANTENER,Media
+2026-09-18,KOFUBL,Coca-Cola FEMSA,190.06,-3.19,-1.65,1.55,-0.87,51.9,0.123,0.48,lateral,0.035,0.03,20.5,-7.0,33,COMPRAR,Media
+2026-09-18,KIMBERA,Kimberly-Clark de México,39.26,0.14,0.36,2.13,1.66,51.7,-0.016,0.51,lateral,-0.081,0.22,14.0,-17.5,-25,VENDER,Media
+2026-09-18,OMAB,Grupo Aeroportuario Centro Norte,208.96,0.54,0.26,0.45,-2.9,41.1,0.304,0.31,bajista,-0.378,0.74,25.3,-19.5,-32,VENDER,Media
+2026-09-21,WALMEX,Walmart de México,45.15,-1.17,-2.53,-0.75,-2.97,36.7,-0.034,0.04,bajista,-0.165,0.6,19.7,-23.6,-26,VENDER,Media
+2026-09-21,AMXB,América Móvil,19.36,-0.01,-0.05,-0.05,-3.83,36.2,0.072,0.22,bajista,-0.135,0.54,18.2,-19.1,-17,MANTENER,Media
+2026-09-21,KOFUBL,Coca-Cola FEMSA,191.15,1.09,0.57,1.66,0.87,53.8,0.15,0.56,lateral,0.04,0.04,20.4,-7.0,37,COMPRAR,Alta
+2026-09-21,KIMBERA,Kimberly-Clark de México,38.14,-1.12,-2.85,-0.94,-2.36,39.7,-0.057,0.03,lateral,-0.074,0.2,14.9,-17.5,-19,MANTENER,Media
+2026-09-21,OMAB,Grupo Aeroportuario Centro Norte,214.35,5.39,2.58,2.81,-1.48,49.4,0.754,0.64,bajista,-0.321,0.66,25.8,-19.5,-27,VENDER,Media
+2026-09-22,WALMEX,Walmart de México,45.87,0.72,1.59,-0.2,-2.05,43.1,-0.007,0.28,bajista,-0.16,0.59,20.0,-23.6,-38,VENDER,Alta
+2026-09-22,AMXB,América Móvil,19.27,-0.09,-0.46,-2.77,-4.7,34.7,0.055,0.16,bajista,-0.127,0.53,18.0,-19.4,-12,MANTENER,Baja
+2026-09-22,KOFUBL,Coca-Cola FEMSA,193.36,2.21,1.16,0.72,-0.67,57.6,0.296,0.74,lateral,0.042,0.04,20.5,-7.0,27,COMPRAR,Media
+2026-09-22,KIMBERA,Kimberly-Clark de México,38.77,0.63,1.65,0.0,-2.32,47.1,-0.039,0.33,lateral,-0.06,0.15,15.2,-17.5,-33,VENDER,Alta
+2026-09-22,OMAB,Grupo Aeroportuario Centro Norte,221.23,6.88,3.21,5.5,1.59,57.5,1.476,1.01,lateral,-0.252,0.48,26.7,-19.5,-24,VENDER,Baja
+2026-09-23,WALMEX,Walmart de México,45.81,-0.06,-0.13,0.7,-3.92,42.7,0.013,0.28,bajista,-0.15,0.57,19.9,-23.6,-26,VENDER,Media
+2026-09-23,AMXB,América Móvil,19.34,0.07,0.36,-2.81,-4.02,36.9,0.049,0.25,bajista,-0.131,0.55,17.2,-19.4,-17,MANTENER,Media
+2026-09-23,KOFUBL,Coca-Cola FEMSA,193.62,0.26,0.13,1.36,-2.15,58.0,0.383,0.82,lateral,0.047,0.06,20.5,-7.0,18,MANTENER,Baja
+2026-09-23,KIMBERA,Kimberly-Clark de México,38.67,-0.1,-0.26,0.62,-3.23,46.2,-0.03,0.31,lateral,-0.061,0.16,15.2,-16.9,-34,VENDER,Alta
+2026-09-23,OMAB,Grupo Aeroportuario Centro Norte,221.5,0.27,0.12,7.05,0.68,57.8,1.905,1.0,lateral,-0.18,0.29,26.7,-19.0,-26,VENDER,Baja
+2026-09-24,WALMEX,Walmart de México,46.02,0.21,0.46,-0.54,-4.28,44.5,0.044,0.36,bajista,-0.142,0.54,20.0,-23.6,-19,MANTENER,Media
+2026-09-24,AMXB,América Móvil,19.57,0.23,1.19,-1.16,-2.59,43.7,0.061,0.52,bajista,-0.133,0.56,17.4,-19.4,-22,VENDER,Media
+2026-09-24,KOFUBL,Coca-Cola FEMSA,192.53,-1.09,-0.56,-0.37,-1.16,55.5,0.341,0.75,lateral,0.046,0.05,20.5,-7.0,26,COMPRAR,Media
+2026-09-24,KIMBERA,Kimberly-Clark de México,38.82,0.15,0.39,-0.77,-2.39,47.9,-0.012,0.4,lateral,-0.054,0.13,15.2,-15.4,-33,VENDER,Alta
+2026-09-24,OMAB,Grupo Aeroportuario Centro Norte,223.21,1.71,0.77,7.1,2.61,59.7,2.215,1.03,lateral,-0.098,0.11,26.7,-18.9,-2,MANTENER,Baja
+2026-09-25,WALMEX,Walmart de México,46.6,0.58,1.26,0.6,-2.51,49.4,0.103,0.57,bajista,-0.138,0.51,19.8,-23.6,-15,MANTENER,Media
+2026-09-25,AMXB,América Móvil,19.5,-0.07,-0.36,0.67,-2.3,42.2,0.064,0.46,bajista,-0.135,0.57,17.4,-19.4,-22,VENDER,Media
+2026-09-25,KOFUBL,Coca-Cola FEMSA,195.32,2.79,1.45,2.77,1.8,60.3,0.468,0.96,lateral,0.05,0.06,20.6,-7.0,18,MANTENER,Media
+2026-09-25,KIMBERA,Kimberly-Clark de México,38.96,0.14,0.36,-0.76,-2.04,49.5,0.01,0.49,lateral,-0.049,0.11,15.2,-15.2,-9,MANTENER,Media
+2026-09-25,OMAB,Grupo Aeroportuario Centro Norte,228.37,5.16,2.31,9.29,4.71,64.7,2.649,1.14,lateral,-0.013,0.0,27.1,-18.9,-6,MANTENER,Baja
+2026-09-28,WALMEX,Walmart de México,46.9,0.3,0.64,3.88,-2.29,51.8,0.16,0.72,lateral,-0.124,0.43,19.8,-22.9,-17,MANTENER,Media
+2026-09-28,AMXB,América Móvil,19.47,-0.03,-0.15,0.57,-1.67,41.5,0.063,0.44,bajista,-0.134,0.57,17.4,-19.4,-20,VENDER,Media
+2026-09-28,KOFUBL,Coca-Cola FEMSA,195.22,-0.1,-0.05,2.13,1.95,60.0,0.509,0.91,lateral,0.044,0.05,20.6,-7.0,18,MANTENER,Media
+2026-09-28,KIMBERA,Kimberly-Clark de México,39.2,0.24,0.62,2.78,-2.32,52.3,0.041,0.66,lateral,-0.045,0.09,15.3,-15.2,-10,MANTENER,Media
+2026-09-28,OMAB,Grupo Aeroportuario Centro Norte,227.66,-0.71,-0.31,6.21,6.56,63.6,2.759,1.01,lateral,0.042,0.02,27.1,-18.8,-5,MANTENER,Baja
+2026-09-29,WALMEX,Walmart de México,46.71,-0.19,-0.41,1.83,-1.18,50.2,0.179,0.67,lateral,-0.119,0.4,19.3,-22.7,-14,MANTENER,Media
+2026-09-29,AMXB,América Móvil,19.68,0.21,1.08,2.13,0.36,47.6,0.076,0.74,lateral,-0.117,0.48,16.7,-19.4,-11,MANTENER,Baja
+2026-09-29,KOFUBL,Coca-Cola FEMSA,196.14,0.92,0.47,1.44,3.79,61.6,0.557,0.92,lateral,0.041,0.04,20.6,-7.0,22,COMPRAR,Media
+2026-09-29,KIMBERA,Kimberly-Clark de México,39.46,0.26,0.66,1.78,-1.05,55.2,0.076,0.87,lateral,-0.045,0.09,14.7,-15.2,7,MANTENER,Baja
+2026-09-29,OMAB,Grupo Aeroportuario Centro Norte,222.45,-5.21,-2.29,0.55,5.58,55.5,2.365,0.79,lateral,0.08,0.06,27.4,-18.8,18,MANTENER,Alta
+2026-09-30,WALMEX,Walmart de México,46.11,-0.6,-1.28,0.65,-1.6,45.4,0.149,0.43,lateral,-0.12,0.4,19.1,-22.7,-15,MANTENER,Media
+2026-09-30,AMXB,América Móvil,19.17,-0.51,-2.59,-0.88,-2.14,37.4,0.05,0.06,lateral,-0.115,0.47,17.4,-19.9,-2,MANTENER,Baja
+2026-09-30,KOFUBL,Coca-Cola FEMSA,195.0,-1.14,-0.58,0.71,3.26,58.5,0.474,0.8,lateral,0.039,0.04,20.5,-7.0,35,COMPRAR,Alta
+2026-09-30,KIMBERA,Kimberly-Clark de México,37.73,-1.73,-4.38,-2.43,-4.19,38.6,-0.016,-0.14,lateral,-0.077,0.22,17.3,-15.2,-20,VENDER,Media
+2026-09-30,OMAB,Grupo Aeroportuario Centro Norte,217.98,-4.47,-2.01,-1.59,5.32,49.8,1.718,0.61,lateral,0.087,0.08,26.1,-18.8,-2,MANTENER,Baja
+2026-10-01,WALMEX,Walmart de México,46.57,0.46,1.0,1.2,-0.51,49.4,0.155,0.63,lateral,-0.115,0.37,19.2,-21.3,-13,MANTENER,Media
+2026-10-01,AMXB,América Móvil,18.98,-0.19,-0.99,-3.01,-2.47,34.5,0.021,-0.07,lateral,-0.125,0.5,17.3,-20.7,6,MANTENER,Media
+2026-10-01,KOFUBL,Coca-Cola FEMSA,193.14,-1.86,-0.95,0.32,1.35,53.8,0.267,0.65,lateral,0.046,0.06,20.4,-7.0,31,COMPRAR,Alta
+2026-10-01,KIMBERA,Kimberly-Clark de México,37.39,-0.34,-0.9,-3.68,-4.81,36.2,-0.092,-0.15,lateral,-0.113,0.37,17.2,-15.2,-22,VENDER,Media
+2026-10-01,OMAB,Grupo Aeroportuario Centro Norte,214.88,-3.1,-1.42,-3.73,1.0,46.2,1.03,0.49,lateral,0.088,0.08,26.2,-18.8,-10,MANTENER,Baja
+2026-10-02,WALMEX,Walmart de México,46.17,-0.4,-0.86,-0.92,-2.94,46.2,0.13,0.49,lateral,-0.107,0.34,19.1,-21.3,-18,MANTENER,Media
+2026-10-02,AMXB,América Móvil,19.36,0.38,2.0,-0.72,-1.22,44.0,0.029,0.39,lateral,-0.124,0.49,17.6,-20.7,-14,MANTENER,Media
+2026-10-02,KOFUBL,Coca-Cola FEMSA,193.8,0.66,0.34,-0.78,2.0,55.2,0.153,0.68,lateral,0.055,0.08,20.2,-7.0,32,COMPRAR,Alta
+2026-10-02,KIMBERA,Kimberly-Clark de México,37.78,0.39,1.04,-3.03,-3.38,40.6,-0.109,0.1,bajista,-0.14,0.51,17.4,-15.2,-41,VENDER,Alta
+2026-10-02,OMAB,Grupo Aeroportuario Centro Norte,214.14,-0.74,-0.34,-6.23,1.85,45.3,0.501,0.46,lateral,0.087,0.07,26.1,-18.8,-8,MANTENER,Baja

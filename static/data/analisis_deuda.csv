@@ -1,0 +1,746 @@
+﻿fecha,nombre,emisor,fecha_subasta,valor,var_pb,z,pendiente,tendencia,senal
+2026-03-02,CETES 28 días,Gobierno Federal,2026-02-26,6.83,-1.0,-1.32,-3.38,a la baja,ESPERAR
+2026-03-02,BONDES F 2 años,Gobierno Federal,2026-02-19,99.68282,,0.39,0.0,estable,MANTENER
+2026-03-02,UDIBONOS 10 años,Gobierno Federal,2026-02-12,4.07,-29.0,-0.98,0.0,estable,MANTENER
+2026-03-02,BPAG28 3 años,IPAB,2026-02-26,0.19,-1.0,-1.96,-0.36,estable,ESPERAR
+2026-03-02,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-03,CETES 28 días,Gobierno Federal,2026-02-26,6.83,-1.0,-1.32,-3.38,a la baja,ESPERAR
+2026-03-03,BONDES F 2 años,Gobierno Federal,2026-02-19,99.68282,,0.39,0.0,estable,MANTENER
+2026-03-03,UDIBONOS 10 años,Gobierno Federal,2026-02-12,4.07,-29.0,-0.98,0.0,estable,MANTENER
+2026-03-03,BPAG28 3 años,IPAB,2026-02-26,0.19,-1.0,-1.96,-0.36,estable,ESPERAR
+2026-03-03,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-04,CETES 28 días,Gobierno Federal,2026-02-26,6.83,-1.0,-1.32,-3.38,a la baja,ESPERAR
+2026-03-04,BONDES F 2 años,Gobierno Federal,2026-02-19,99.68282,,0.39,0.0,estable,MANTENER
+2026-03-04,UDIBONOS 10 años,Gobierno Federal,2026-02-12,4.07,-29.0,-0.98,0.0,estable,MANTENER
+2026-03-04,BPAG28 3 años,IPAB,2026-02-26,0.19,-1.0,-1.96,-0.36,estable,ESPERAR
+2026-03-04,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-05,CETES 28 días,Gobierno Federal,2026-03-05,6.81,-2.0,-1.37,-2.93,a la baja,ESPERAR
+2026-03-05,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-05,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-05,BPAG28 3 años,IPAB,2026-03-05,0.19,0.0,-1.55,-0.32,estable,ESPERAR
+2026-03-05,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-06,CETES 28 días,Gobierno Federal,2026-03-05,6.81,-2.0,-1.37,-2.93,a la baja,ESPERAR
+2026-03-06,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-06,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-06,BPAG28 3 años,IPAB,2026-03-05,0.19,0.0,-1.55,-0.32,estable,ESPERAR
+2026-03-06,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-09,CETES 28 días,Gobierno Federal,2026-03-05,6.81,-2.0,-1.37,-2.93,a la baja,ESPERAR
+2026-03-09,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-09,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-09,BPAG28 3 años,IPAB,2026-03-05,0.19,0.0,-1.55,-0.32,estable,ESPERAR
+2026-03-09,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-10,CETES 28 días,Gobierno Federal,2026-03-05,6.81,-2.0,-1.37,-2.93,a la baja,ESPERAR
+2026-03-10,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-10,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-10,BPAG28 3 años,IPAB,2026-03-05,0.19,0.0,-1.55,-0.32,estable,ESPERAR
+2026-03-10,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-11,CETES 28 días,Gobierno Federal,2026-03-05,6.81,-2.0,-1.37,-2.93,a la baja,ESPERAR
+2026-03-11,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-11,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-11,BPAG28 3 años,IPAB,2026-03-05,0.19,0.0,-1.55,-0.32,estable,ESPERAR
+2026-03-11,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-12,CETES 28 días,Gobierno Federal,2026-03-12,6.81,0.0,-1.22,-2.71,a la baja,ESPERAR
+2026-03-12,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-12,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-12,BPAG28 3 años,IPAB,2026-03-12,0.19,0.0,-1.28,-0.32,estable,ESPERAR
+2026-03-12,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-13,CETES 28 días,Gobierno Federal,2026-03-12,6.81,0.0,-1.22,-2.71,a la baja,ESPERAR
+2026-03-13,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-13,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-13,BPAG28 3 años,IPAB,2026-03-12,0.19,0.0,-1.28,-0.32,estable,ESPERAR
+2026-03-13,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-17,CETES 28 días,Gobierno Federal,2026-03-12,6.81,0.0,-1.22,-2.71,a la baja,ESPERAR
+2026-03-17,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-17,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-17,BPAG28 3 años,IPAB,2026-03-12,0.19,0.0,-1.28,-0.32,estable,ESPERAR
+2026-03-17,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-18,CETES 28 días,Gobierno Federal,2026-03-12,6.81,0.0,-1.22,-2.71,a la baja,ESPERAR
+2026-03-18,BONDES F 2 años,Gobierno Federal,2026-03-05,99.70431,,1.39,0.0,al alza,MANTENER
+2026-03-18,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-18,BPAG28 3 años,IPAB,2026-03-12,0.19,0.0,-1.28,-0.32,estable,ESPERAR
+2026-03-18,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-19,CETES 28 días,Gobierno Federal,2026-03-19,6.81,0.0,-1.04,-1.96,a la baja,ESPERAR
+2026-03-19,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-19,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-19,BPAG28 3 años,IPAB,2026-03-19,0.2,1.0,-0.31,-0.19,estable,MANTENER
+2026-03-19,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-20,CETES 28 días,Gobierno Federal,2026-03-19,6.81,0.0,-1.04,-1.96,a la baja,ESPERAR
+2026-03-20,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-20,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-20,BPAG28 3 años,IPAB,2026-03-19,0.2,1.0,-0.31,-0.19,estable,MANTENER
+2026-03-20,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-23,CETES 28 días,Gobierno Federal,2026-03-19,6.81,0.0,-1.04,-1.96,a la baja,ESPERAR
+2026-03-23,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-23,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-23,BPAG28 3 años,IPAB,2026-03-19,0.2,1.0,-0.31,-0.19,estable,MANTENER
+2026-03-23,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-24,CETES 28 días,Gobierno Federal,2026-03-19,6.81,0.0,-1.04,-1.96,a la baja,ESPERAR
+2026-03-24,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-24,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-24,BPAG28 3 años,IPAB,2026-03-19,0.2,1.0,-0.31,-0.19,estable,MANTENER
+2026-03-24,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-25,CETES 28 días,Gobierno Federal,2026-03-19,6.81,0.0,-1.04,-1.96,a la baja,ESPERAR
+2026-03-25,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-25,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-25,BPAG28 3 años,IPAB,2026-03-19,0.2,1.0,-0.31,-0.19,estable,MANTENER
+2026-03-25,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-26,CETES 28 días,Gobierno Federal,2026-03-26,6.81,0.0,-0.9,-1.3,estable,ESPERAR
+2026-03-26,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-26,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-26,BPAG28 3 años,IPAB,2026-03-26,0.2,0.0,-0.18,-0.04,estable,MANTENER
+2026-03-26,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-27,CETES 28 días,Gobierno Federal,2026-03-26,6.81,0.0,-0.9,-1.3,estable,ESPERAR
+2026-03-27,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-27,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-27,BPAG28 3 años,IPAB,2026-03-26,0.2,0.0,-0.18,-0.04,estable,MANTENER
+2026-03-27,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-30,CETES 28 días,Gobierno Federal,2026-03-26,6.81,0.0,-0.9,-1.3,estable,ESPERAR
+2026-03-30,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-30,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-30,BPAG28 3 años,IPAB,2026-03-26,0.2,0.0,-0.18,-0.04,estable,MANTENER
+2026-03-30,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-03-31,CETES 28 días,Gobierno Federal,2026-03-26,6.81,0.0,-0.9,-1.3,estable,ESPERAR
+2026-03-31,BONDES F 2 años,Gobierno Federal,2026-03-19,99.70639,,1.24,0.01,al alza,MANTENER
+2026-03-31,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-03-31,BPAG28 3 años,IPAB,2026-03-26,0.2,0.0,-0.18,-0.04,estable,MANTENER
+2026-03-31,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-01,CETES 28 días,Gobierno Federal,2026-04-01,6.64,-17.0,-2.2,-2.25,a la baja,ESPERAR
+2026-04-01,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-01,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-04-01,BPAG28 3 años,IPAB,2026-04-01,0.21,1.0,1.16,0.12,estable,COMPRAR
+2026-04-01,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-06,CETES 28 días,Gobierno Federal,2026-04-01,6.64,-17.0,-2.2,-2.25,a la baja,ESPERAR
+2026-04-06,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-06,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-04-06,BPAG28 3 años,IPAB,2026-04-01,0.21,1.0,1.16,0.12,estable,COMPRAR
+2026-04-06,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-07,CETES 28 días,Gobierno Federal,2026-04-01,6.64,-17.0,-2.2,-2.25,a la baja,ESPERAR
+2026-04-07,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-07,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-04-07,BPAG28 3 años,IPAB,2026-04-01,0.21,1.0,1.16,0.12,estable,COMPRAR
+2026-04-07,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-08,CETES 28 días,Gobierno Federal,2026-04-01,6.64,-17.0,-2.2,-2.25,a la baja,ESPERAR
+2026-04-08,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-08,UDIBONOS 10 años,Gobierno Federal,2026-03-05,4.41,34.0,0.11,-11.3,a la baja,MANTENER
+2026-04-08,BPAG28 3 años,IPAB,2026-04-01,0.21,1.0,1.16,0.12,estable,COMPRAR
+2026-04-08,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-09,CETES 28 días,Gobierno Federal,2026-04-09,6.6,-4.0,-1.97,-3.13,a la baja,ESPERAR
+2026-04-09,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-09,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-09,BPAG28 3 años,IPAB,2026-04-09,0.21,0.0,1.16,0.25,estable,COMPRAR
+2026-04-09,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-10,CETES 28 días,Gobierno Federal,2026-04-09,6.6,-4.0,-1.97,-3.13,a la baja,ESPERAR
+2026-04-10,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-10,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-10,BPAG28 3 años,IPAB,2026-04-09,0.21,0.0,1.16,0.25,estable,COMPRAR
+2026-04-10,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-13,CETES 28 días,Gobierno Federal,2026-04-09,6.6,-4.0,-1.97,-3.13,a la baja,ESPERAR
+2026-04-13,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-13,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-13,BPAG28 3 años,IPAB,2026-04-09,0.21,0.0,1.16,0.25,estable,COMPRAR
+2026-04-13,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-14,CETES 28 días,Gobierno Federal,2026-04-09,6.6,-4.0,-1.97,-3.13,a la baja,ESPERAR
+2026-04-14,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-14,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-14,BPAG28 3 años,IPAB,2026-04-09,0.21,0.0,1.16,0.25,estable,COMPRAR
+2026-04-14,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-15,CETES 28 días,Gobierno Federal,2026-04-09,6.6,-4.0,-1.97,-3.13,a la baja,ESPERAR
+2026-04-15,BONDES F 2 años,Gobierno Federal,2026-04-01,99.67829,,-0.31,0.01,al alza,MANTENER
+2026-04-15,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-15,BPAG28 3 años,IPAB,2026-04-09,0.21,0.0,1.16,0.25,estable,COMPRAR
+2026-04-15,BONOS M 10 años,Gobierno Federal,2026-02-19,8.74,-47.0,-1.15,0.0,estable,MANTENER
+2026-04-16,CETES 28 días,Gobierno Federal,2026-04-16,6.6,0.0,-1.65,-3.77,a la baja,ESPERAR
+2026-04-16,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-16,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-16,BPAG28 3 años,IPAB,2026-04-16,0.22,1.0,1.96,0.44,estable,COMPRAR
+2026-04-16,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-17,CETES 28 días,Gobierno Federal,2026-04-16,6.6,0.0,-1.65,-3.77,a la baja,ESPERAR
+2026-04-17,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-17,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-17,BPAG28 3 años,IPAB,2026-04-16,0.22,1.0,1.96,0.44,estable,COMPRAR
+2026-04-17,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-20,CETES 28 días,Gobierno Federal,2026-04-16,6.6,0.0,-1.65,-3.77,a la baja,ESPERAR
+2026-04-20,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-20,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-20,BPAG28 3 años,IPAB,2026-04-16,0.22,1.0,1.96,0.44,estable,COMPRAR
+2026-04-20,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-21,CETES 28 días,Gobierno Federal,2026-04-16,6.6,0.0,-1.65,-3.77,a la baja,ESPERAR
+2026-04-21,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-21,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-21,BPAG28 3 años,IPAB,2026-04-16,0.22,1.0,1.96,0.44,estable,COMPRAR
+2026-04-21,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-23,CETES 28 días,Gobierno Federal,2026-04-23,6.55,-5.0,-1.69,-4.37,a la baja,ESPERAR
+2026-04-23,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-23,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-23,BPAG28 3 años,IPAB,2026-04-23,0.21,-1.0,0.89,0.39,estable,COMPRAR
+2026-04-23,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-24,CETES 28 días,Gobierno Federal,2026-04-23,6.55,-5.0,-1.69,-4.37,a la baja,ESPERAR
+2026-04-24,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-24,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-24,BPAG28 3 años,IPAB,2026-04-23,0.21,-1.0,0.89,0.39,estable,COMPRAR
+2026-04-24,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-27,CETES 28 días,Gobierno Federal,2026-04-23,6.55,-5.0,-1.69,-4.37,a la baja,ESPERAR
+2026-04-27,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-27,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-27,BPAG28 3 años,IPAB,2026-04-23,0.21,-1.0,0.89,0.39,estable,COMPRAR
+2026-04-27,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-28,CETES 28 días,Gobierno Federal,2026-04-23,6.55,-5.0,-1.69,-4.37,a la baja,ESPERAR
+2026-04-28,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-28,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-28,BPAG28 3 años,IPAB,2026-04-23,0.21,-1.0,0.89,0.39,estable,COMPRAR
+2026-04-28,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-29,CETES 28 días,Gobierno Federal,2026-04-23,6.55,-5.0,-1.69,-4.37,a la baja,ESPERAR
+2026-04-29,BONDES F 2 años,Gobierno Federal,2026-04-16,99.68578,,0.13,0.0,estable,MANTENER
+2026-04-29,UDIBONOS 10 años,Gobierno Federal,2026-04-09,4.9,49.0,1.3,4.7,al alza,COMPRAR
+2026-04-29,BPAG28 3 años,IPAB,2026-04-23,0.21,-1.0,0.89,0.39,estable,COMPRAR
+2026-04-29,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-04-30,CETES 28 días,Gobierno Federal,2026-04-30,6.5,-5.0,-1.67,-4.93,a la baja,ESPERAR
+2026-04-30,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-04-30,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-04-30,BPAG28 3 años,IPAB,2026-04-30,0.21,0.0,0.78,0.3,estable,COMPRAR
+2026-04-30,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-04,CETES 28 días,Gobierno Federal,2026-04-30,6.5,-5.0,-1.67,-4.93,a la baja,ESPERAR
+2026-05-04,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-04,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-04,BPAG28 3 años,IPAB,2026-04-30,0.21,0.0,0.78,0.3,estable,COMPRAR
+2026-05-04,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-05,CETES 28 días,Gobierno Federal,2026-04-30,6.5,-5.0,-1.67,-4.93,a la baja,ESPERAR
+2026-05-05,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-05,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-05,BPAG28 3 años,IPAB,2026-04-30,0.21,0.0,0.78,0.3,estable,COMPRAR
+2026-05-05,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-06,CETES 28 días,Gobierno Federal,2026-04-30,6.5,-5.0,-1.67,-4.93,a la baja,ESPERAR
+2026-05-06,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-06,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-06,BPAG28 3 años,IPAB,2026-04-30,0.21,0.0,0.78,0.3,estable,COMPRAR
+2026-05-06,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-07,CETES 28 días,Gobierno Federal,2026-05-07,6.49,-1.0,-1.44,-4.83,a la baja,ESPERAR
+2026-05-07,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-07,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-07,BPAG28 3 años,IPAB,2026-05-07,0.21,0.0,0.68,0.15,estable,MANTENER
+2026-05-07,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-08,CETES 28 días,Gobierno Federal,2026-05-07,6.49,-1.0,-1.44,-4.83,a la baja,ESPERAR
+2026-05-08,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-08,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-08,BPAG28 3 años,IPAB,2026-05-07,0.21,0.0,0.68,0.15,estable,MANTENER
+2026-05-08,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-11,CETES 28 días,Gobierno Federal,2026-05-07,6.49,-1.0,-1.44,-4.83,a la baja,ESPERAR
+2026-05-11,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-11,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-11,BPAG28 3 años,IPAB,2026-05-07,0.21,0.0,0.68,0.15,estable,MANTENER
+2026-05-11,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-12,CETES 28 días,Gobierno Federal,2026-05-07,6.49,-1.0,-1.44,-4.83,a la baja,ESPERAR
+2026-05-12,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-12,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-12,BPAG28 3 años,IPAB,2026-05-07,0.21,0.0,0.68,0.15,estable,MANTENER
+2026-05-12,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-13,CETES 28 días,Gobierno Federal,2026-05-07,6.49,-1.0,-1.44,-4.83,a la baja,ESPERAR
+2026-05-13,BONDES F 2 años,Gobierno Federal,2026-04-30,99.70318,,1.09,0.0,estable,MANTENER
+2026-05-13,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-13,BPAG28 3 años,IPAB,2026-05-07,0.21,0.0,0.68,0.15,estable,MANTENER
+2026-05-13,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-14,CETES 28 días,Gobierno Federal,2026-05-14,6.54,5.0,-0.92,-3.56,a la baja,ESPERAR
+2026-05-14,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-14,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-14,BPAG28 3 años,IPAB,2026-05-14,0.2,-1.0,-0.34,-0.01,estable,MANTENER
+2026-05-14,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-15,CETES 28 días,Gobierno Federal,2026-05-14,6.54,5.0,-0.92,-3.56,a la baja,ESPERAR
+2026-05-15,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-15,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-15,BPAG28 3 años,IPAB,2026-05-14,0.2,-1.0,-0.34,-0.01,estable,MANTENER
+2026-05-15,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-18,CETES 28 días,Gobierno Federal,2026-05-14,6.54,5.0,-0.92,-3.56,a la baja,ESPERAR
+2026-05-18,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-18,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-18,BPAG28 3 años,IPAB,2026-05-14,0.2,-1.0,-0.34,-0.01,estable,MANTENER
+2026-05-18,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-19,CETES 28 días,Gobierno Federal,2026-05-14,6.54,5.0,-0.92,-3.56,a la baja,ESPERAR
+2026-05-19,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-19,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-19,BPAG28 3 años,IPAB,2026-05-14,0.2,-1.0,-0.34,-0.01,estable,MANTENER
+2026-05-19,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-20,CETES 28 días,Gobierno Federal,2026-05-14,6.54,5.0,-0.92,-3.56,a la baja,ESPERAR
+2026-05-20,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-20,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-20,BPAG28 3 años,IPAB,2026-05-14,0.2,-1.0,-0.34,-0.01,estable,MANTENER
+2026-05-20,BONOS M 10 años,Gobierno Federal,2026-04-16,8.88,14.0,-0.54,-14.3,a la baja,MANTENER
+2026-05-21,CETES 28 días,Gobierno Federal,2026-05-21,6.45,-9.0,-1.32,-2.39,a la baja,ESPERAR
+2026-05-21,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-21,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-21,BPAG28 3 años,IPAB,2026-05-21,0.21,1.0,0.55,-0.1,estable,MANTENER
+2026-05-21,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-05-22,CETES 28 días,Gobierno Federal,2026-05-21,6.45,-9.0,-1.32,-2.39,a la baja,ESPERAR
+2026-05-22,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-22,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-22,BPAG28 3 años,IPAB,2026-05-21,0.21,1.0,0.55,-0.1,estable,MANTENER
+2026-05-22,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-05-25,CETES 28 días,Gobierno Federal,2026-05-21,6.45,-9.0,-1.32,-2.39,a la baja,ESPERAR
+2026-05-25,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-25,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-25,BPAG28 3 años,IPAB,2026-05-21,0.21,1.0,0.55,-0.1,estable,MANTENER
+2026-05-25,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-05-26,CETES 28 días,Gobierno Federal,2026-05-21,6.45,-9.0,-1.32,-2.39,a la baja,ESPERAR
+2026-05-26,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-26,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-26,BPAG28 3 años,IPAB,2026-05-21,0.21,1.0,0.55,-0.1,estable,MANTENER
+2026-05-26,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-05-27,CETES 28 días,Gobierno Federal,2026-05-21,6.45,-9.0,-1.32,-2.39,a la baja,ESPERAR
+2026-05-27,BONDES F 2 años,Gobierno Federal,2026-05-14,99.70665,,1.16,0.0,estable,MANTENER
+2026-05-27,UDIBONOS 10 años,Gobierno Federal,2026-04-30,4.61,-29.0,0.36,4.46,al alza,MANTENER
+2026-05-27,BPAG28 3 años,IPAB,2026-05-21,0.21,1.0,0.55,-0.1,estable,MANTENER
+2026-05-27,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-05-28,CETES 28 días,Gobierno Federal,2026-05-28,6.38,-7.0,-1.5,-2.77,a la baja,ESPERAR
+2026-05-28,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-05-28,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-05-28,BPAG28 3 años,IPAB,2026-05-28,0.21,0.0,0.43,-0.1,estable,MANTENER
+2026-05-28,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-05-29,CETES 28 días,Gobierno Federal,2026-05-28,6.38,-7.0,-1.5,-2.77,a la baja,ESPERAR
+2026-05-29,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-05-29,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-05-29,BPAG28 3 años,IPAB,2026-05-28,0.21,0.0,0.43,-0.1,estable,MANTENER
+2026-05-29,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-01,CETES 28 días,Gobierno Federal,2026-05-28,6.38,-7.0,-1.5,-2.77,a la baja,ESPERAR
+2026-06-01,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-01,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-01,BPAG28 3 años,IPAB,2026-05-28,0.21,0.0,0.43,-0.1,estable,MANTENER
+2026-06-01,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-02,CETES 28 días,Gobierno Federal,2026-05-28,6.38,-7.0,-1.5,-2.77,a la baja,ESPERAR
+2026-06-02,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-02,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-02,BPAG28 3 años,IPAB,2026-05-28,0.21,0.0,0.43,-0.1,estable,MANTENER
+2026-06-02,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-03,CETES 28 días,Gobierno Federal,2026-05-28,6.38,-7.0,-1.5,-2.77,a la baja,ESPERAR
+2026-06-03,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-03,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-03,BPAG28 3 años,IPAB,2026-05-28,0.21,0.0,0.43,-0.1,estable,MANTENER
+2026-06-03,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-04,CETES 28 días,Gobierno Federal,2026-06-04,6.36,-2.0,-1.39,-3.13,a la baja,ESPERAR
+2026-06-04,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-04,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-04,BPAG28 3 años,IPAB,2026-06-04,0.21,0.0,0.29,-0.1,estable,MANTENER
+2026-06-04,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-05,CETES 28 días,Gobierno Federal,2026-06-04,6.36,-2.0,-1.39,-3.13,a la baja,ESPERAR
+2026-06-05,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-05,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-05,BPAG28 3 años,IPAB,2026-06-04,0.21,0.0,0.29,-0.1,estable,MANTENER
+2026-06-05,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-08,CETES 28 días,Gobierno Federal,2026-06-04,6.36,-2.0,-1.39,-3.13,a la baja,ESPERAR
+2026-06-08,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-08,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-08,BPAG28 3 años,IPAB,2026-06-04,0.21,0.0,0.29,-0.1,estable,MANTENER
+2026-06-08,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-09,CETES 28 días,Gobierno Federal,2026-06-04,6.36,-2.0,-1.39,-3.13,a la baja,ESPERAR
+2026-06-09,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-09,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-09,BPAG28 3 años,IPAB,2026-06-04,0.21,0.0,0.29,-0.1,estable,MANTENER
+2026-06-09,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-10,CETES 28 días,Gobierno Federal,2026-06-04,6.36,-2.0,-1.39,-3.13,a la baja,ESPERAR
+2026-06-10,BONDES F 2 años,Gobierno Federal,2026-05-28,99.69888,,0.64,0.0,estable,MANTENER
+2026-06-10,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-10,BPAG28 3 años,IPAB,2026-06-04,0.21,0.0,0.29,-0.1,estable,MANTENER
+2026-06-10,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-11,CETES 28 días,Gobierno Federal,2026-06-11,6.25,-11.0,-1.8,-3.83,a la baja,ESPERAR
+2026-06-11,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-11,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-11,BPAG28 3 años,IPAB,2026-06-11,0.2,-1.0,-1.44,-0.07,estable,ESPERAR
+2026-06-11,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-12,CETES 28 días,Gobierno Federal,2026-06-11,6.25,-11.0,-1.8,-3.83,a la baja,ESPERAR
+2026-06-12,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-12,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-12,BPAG28 3 años,IPAB,2026-06-11,0.2,-1.0,-1.44,-0.07,estable,ESPERAR
+2026-06-12,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-15,CETES 28 días,Gobierno Federal,2026-06-11,6.25,-11.0,-1.8,-3.83,a la baja,ESPERAR
+2026-06-15,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-15,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-15,BPAG28 3 años,IPAB,2026-06-11,0.2,-1.0,-1.44,-0.07,estable,ESPERAR
+2026-06-15,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-16,CETES 28 días,Gobierno Federal,2026-06-11,6.25,-11.0,-1.8,-3.83,a la baja,ESPERAR
+2026-06-16,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-16,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-16,BPAG28 3 años,IPAB,2026-06-11,0.2,-1.0,-1.44,-0.07,estable,ESPERAR
+2026-06-16,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-17,CETES 28 días,Gobierno Federal,2026-06-11,6.25,-11.0,-1.8,-3.83,a la baja,ESPERAR
+2026-06-17,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-17,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-17,BPAG28 3 años,IPAB,2026-06-11,0.2,-1.0,-1.44,-0.07,estable,ESPERAR
+2026-06-17,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-18,CETES 28 días,Gobierno Federal,2026-06-18,6.28,3.0,-1.48,-3.99,a la baja,ESPERAR
+2026-06-18,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-18,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-18,BPAG28 3 años,IPAB,2026-06-18,0.2,0.0,-1.44,-0.11,estable,ESPERAR
+2026-06-18,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-19,CETES 28 días,Gobierno Federal,2026-06-18,6.28,3.0,-1.48,-3.99,a la baja,ESPERAR
+2026-06-19,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-19,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-19,BPAG28 3 años,IPAB,2026-06-18,0.2,0.0,-1.44,-0.11,estable,ESPERAR
+2026-06-19,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-22,CETES 28 días,Gobierno Federal,2026-06-18,6.28,3.0,-1.48,-3.99,a la baja,ESPERAR
+2026-06-22,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-22,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-22,BPAG28 3 años,IPAB,2026-06-18,0.2,0.0,-1.44,-0.11,estable,ESPERAR
+2026-06-22,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-23,CETES 28 días,Gobierno Federal,2026-06-18,6.28,3.0,-1.48,-3.99,a la baja,ESPERAR
+2026-06-23,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-23,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-23,BPAG28 3 años,IPAB,2026-06-18,0.2,0.0,-1.44,-0.11,estable,ESPERAR
+2026-06-23,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-24,CETES 28 días,Gobierno Federal,2026-06-18,6.28,3.0,-1.48,-3.99,a la baja,ESPERAR
+2026-06-24,BONDES F 2 años,Gobierno Federal,2026-06-11,99.7091,,1.12,0.0,estable,MANTENER
+2026-06-24,UDIBONOS 10 años,Gobierno Federal,2026-05-28,4.52,-9.0,0.04,2.93,al alza,MANTENER
+2026-06-24,BPAG28 3 años,IPAB,2026-06-18,0.2,0.0,-1.44,-0.11,estable,ESPERAR
+2026-06-24,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-25,CETES 28 días,Gobierno Federal,2026-06-25,6.28,0.0,-1.26,-4.04,a la baja,ESPERAR
+2026-06-25,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-06-25,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-06-25,BPAG28 3 años,IPAB,2026-06-25,0.2,0.0,-1.21,-0.12,estable,ESPERAR
+2026-06-25,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-26,CETES 28 días,Gobierno Federal,2026-06-25,6.28,0.0,-1.26,-4.04,a la baja,ESPERAR
+2026-06-26,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-06-26,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-06-26,BPAG28 3 años,IPAB,2026-06-25,0.2,0.0,-1.21,-0.12,estable,ESPERAR
+2026-06-26,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-29,CETES 28 días,Gobierno Federal,2026-06-25,6.28,0.0,-1.26,-4.04,a la baja,ESPERAR
+2026-06-29,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-06-29,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-06-29,BPAG28 3 años,IPAB,2026-06-25,0.2,0.0,-1.21,-0.12,estable,ESPERAR
+2026-06-29,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-06-30,CETES 28 días,Gobierno Federal,2026-06-25,6.28,0.0,-1.26,-4.04,a la baja,ESPERAR
+2026-06-30,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-06-30,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-06-30,BPAG28 3 años,IPAB,2026-06-25,0.2,0.0,-1.21,-0.12,estable,ESPERAR
+2026-06-30,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-07-01,CETES 28 días,Gobierno Federal,2026-06-25,6.28,0.0,-1.26,-4.04,a la baja,ESPERAR
+2026-07-01,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-07-01,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-01,BPAG28 3 años,IPAB,2026-06-25,0.2,0.0,-1.21,-0.12,estable,ESPERAR
+2026-07-01,BONOS M 10 años,Gobierno Federal,2026-05-21,9.45,57.0,1.25,1.7,al alza,COMPRAR
+2026-07-02,CETES 28 días,Gobierno Federal,2026-07-02,6.3,2.0,-0.94,-3.5,a la baja,ESPERAR
+2026-07-02,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-07-02,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-02,BPAG28 3 años,IPAB,2026-07-02,0.19,-1.0,-2.0,-0.19,estable,ESPERAR
+2026-07-02,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-03,CETES 28 días,Gobierno Federal,2026-07-02,6.3,2.0,-0.94,-3.5,a la baja,ESPERAR
+2026-07-03,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-07-03,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-03,BPAG28 3 años,IPAB,2026-07-02,0.19,-1.0,-2.0,-0.19,estable,ESPERAR
+2026-07-03,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-06,CETES 28 días,Gobierno Federal,2026-07-02,6.3,2.0,-0.94,-3.5,a la baja,ESPERAR
+2026-07-06,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-07-06,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-06,BPAG28 3 años,IPAB,2026-07-02,0.19,-1.0,-2.0,-0.19,estable,ESPERAR
+2026-07-06,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-07,CETES 28 días,Gobierno Federal,2026-07-02,6.3,2.0,-0.94,-3.5,a la baja,ESPERAR
+2026-07-07,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-07-07,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-07,BPAG28 3 años,IPAB,2026-07-02,0.19,-1.0,-2.0,-0.19,estable,ESPERAR
+2026-07-07,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-08,CETES 28 días,Gobierno Federal,2026-07-02,6.3,2.0,-0.94,-3.5,a la baja,ESPERAR
+2026-07-08,BONDES F 2 años,Gobierno Federal,2026-06-25,99.72395,,1.85,0.0,estable,MANTENER
+2026-07-08,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-08,BPAG28 3 años,IPAB,2026-07-02,0.19,-1.0,-2.0,-0.19,estable,ESPERAR
+2026-07-08,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-09,CETES 28 días,Gobierno Federal,2026-07-09,6.29,-1.0,-0.89,-2.06,a la baja,ESPERAR
+2026-07-09,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-09,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-09,BPAG28 3 años,IPAB,2026-07-09,0.19,0.0,-1.71,-0.32,estable,ESPERAR
+2026-07-09,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-10,CETES 28 días,Gobierno Federal,2026-07-09,6.29,-1.0,-0.89,-2.06,a la baja,ESPERAR
+2026-07-10,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-10,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-10,BPAG28 3 años,IPAB,2026-07-09,0.19,0.0,-1.71,-0.32,estable,ESPERAR
+2026-07-10,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-13,CETES 28 días,Gobierno Federal,2026-07-09,6.29,-1.0,-0.89,-2.06,a la baja,ESPERAR
+2026-07-13,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-13,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-13,BPAG28 3 años,IPAB,2026-07-09,0.19,0.0,-1.71,-0.32,estable,ESPERAR
+2026-07-13,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-14,CETES 28 días,Gobierno Federal,2026-07-09,6.29,-1.0,-0.89,-2.06,a la baja,ESPERAR
+2026-07-14,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-14,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-14,BPAG28 3 años,IPAB,2026-07-09,0.19,0.0,-1.71,-0.32,estable,ESPERAR
+2026-07-14,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-15,CETES 28 días,Gobierno Federal,2026-07-09,6.29,-1.0,-0.89,-2.06,a la baja,ESPERAR
+2026-07-15,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-15,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-15,BPAG28 3 años,IPAB,2026-07-09,0.19,0.0,-1.71,-0.32,estable,ESPERAR
+2026-07-15,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-16,CETES 28 días,Gobierno Federal,2026-07-16,6.2,-9.0,-1.44,-1.74,a la baja,ESPERAR
+2026-07-16,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-16,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-16,BPAG28 3 años,IPAB,2026-07-16,0.19,0.0,-1.4,-0.32,estable,ESPERAR
+2026-07-16,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-17,CETES 28 días,Gobierno Federal,2026-07-16,6.2,-9.0,-1.44,-1.74,a la baja,ESPERAR
+2026-07-17,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-17,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-17,BPAG28 3 años,IPAB,2026-07-16,0.19,0.0,-1.4,-0.32,estable,ESPERAR
+2026-07-17,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-20,CETES 28 días,Gobierno Federal,2026-07-16,6.2,-9.0,-1.44,-1.74,a la baja,ESPERAR
+2026-07-20,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-20,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-20,BPAG28 3 años,IPAB,2026-07-16,0.19,0.0,-1.4,-0.32,estable,ESPERAR
+2026-07-20,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-21,CETES 28 días,Gobierno Federal,2026-07-16,6.2,-9.0,-1.44,-1.74,a la baja,ESPERAR
+2026-07-21,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-21,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-21,BPAG28 3 años,IPAB,2026-07-16,0.19,0.0,-1.4,-0.32,estable,ESPERAR
+2026-07-21,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-22,CETES 28 días,Gobierno Federal,2026-07-16,6.2,-9.0,-1.44,-1.74,a la baja,ESPERAR
+2026-07-22,BONDES F 2 años,Gobierno Federal,2026-07-09,99.73409,,1.97,0.01,al alza,MANTENER
+2026-07-22,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-22,BPAG28 3 años,IPAB,2026-07-16,0.19,0.0,-1.4,-0.32,estable,ESPERAR
+2026-07-22,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-23,CETES 28 días,Gobierno Federal,2026-07-23,6.18,-2.0,-1.36,-1.74,a la baja,ESPERAR
+2026-07-23,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-23,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-23,BPAG28 3 años,IPAB,2026-07-23,0.19,0.0,-1.17,-0.27,estable,ESPERAR
+2026-07-23,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-24,CETES 28 días,Gobierno Federal,2026-07-23,6.18,-2.0,-1.36,-1.74,a la baja,ESPERAR
+2026-07-24,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-24,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-24,BPAG28 3 años,IPAB,2026-07-23,0.19,0.0,-1.17,-0.27,estable,ESPERAR
+2026-07-24,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-27,CETES 28 días,Gobierno Federal,2026-07-23,6.18,-2.0,-1.36,-1.74,a la baja,ESPERAR
+2026-07-27,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-27,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-27,BPAG28 3 años,IPAB,2026-07-23,0.19,0.0,-1.17,-0.27,estable,ESPERAR
+2026-07-27,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-28,CETES 28 días,Gobierno Federal,2026-07-23,6.18,-2.0,-1.36,-1.74,a la baja,ESPERAR
+2026-07-28,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-28,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-28,BPAG28 3 años,IPAB,2026-07-23,0.19,0.0,-1.17,-0.27,estable,ESPERAR
+2026-07-28,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-29,CETES 28 días,Gobierno Federal,2026-07-23,6.18,-2.0,-1.36,-1.74,a la baja,ESPERAR
+2026-07-29,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-29,UDIBONOS 10 años,Gobierno Federal,2026-06-25,4.6,8.0,0.32,2.71,al alza,MANTENER
+2026-07-29,BPAG28 3 años,IPAB,2026-07-23,0.19,0.0,-1.17,-0.27,estable,ESPERAR
+2026-07-29,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-30,CETES 28 días,Gobierno Federal,2026-07-30,6.2,2.0,-1.02,-1.31,estable,ESPERAR
+2026-07-30,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-30,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-07-30,BPAG28 3 años,IPAB,2026-07-30,0.19,0.0,-1.0,-0.18,estable,ESPERAR
+2026-07-30,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-07-31,CETES 28 días,Gobierno Federal,2026-07-30,6.2,2.0,-1.02,-1.31,estable,ESPERAR
+2026-07-31,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-07-31,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-07-31,BPAG28 3 años,IPAB,2026-07-30,0.19,0.0,-1.0,-0.18,estable,ESPERAR
+2026-07-31,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-03,CETES 28 días,Gobierno Federal,2026-07-30,6.2,2.0,-1.02,-1.31,estable,ESPERAR
+2026-08-03,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-08-03,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-03,BPAG28 3 años,IPAB,2026-07-30,0.19,0.0,-1.0,-0.18,estable,ESPERAR
+2026-08-03,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-04,CETES 28 días,Gobierno Federal,2026-07-30,6.2,2.0,-1.02,-1.31,estable,ESPERAR
+2026-08-04,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-08-04,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-04,BPAG28 3 años,IPAB,2026-07-30,0.19,0.0,-1.0,-0.18,estable,ESPERAR
+2026-08-04,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-05,CETES 28 días,Gobierno Federal,2026-07-30,6.2,2.0,-1.02,-1.31,estable,ESPERAR
+2026-08-05,BONDES F 2 años,Gobierno Federal,2026-07-23,99.7051,,0.12,0.0,al alza,MANTENER
+2026-08-05,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-05,BPAG28 3 años,IPAB,2026-07-30,0.19,0.0,-1.0,-0.18,estable,ESPERAR
+2026-08-05,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-06,CETES 28 días,Gobierno Federal,2026-08-06,6.17,-3.0,-1.26,-1.93,a la baja,ESPERAR
+2026-08-06,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-06,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-06,BPAG28 3 años,IPAB,2026-08-06,0.19,0.0,-0.87,-0.14,estable,ESPERAR
+2026-08-06,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-07,CETES 28 días,Gobierno Federal,2026-08-06,6.17,-3.0,-1.26,-1.93,a la baja,ESPERAR
+2026-08-07,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-07,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-07,BPAG28 3 años,IPAB,2026-08-06,0.19,0.0,-0.87,-0.14,estable,ESPERAR
+2026-08-07,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-10,CETES 28 días,Gobierno Federal,2026-08-06,6.17,-3.0,-1.26,-1.93,a la baja,ESPERAR
+2026-08-10,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-10,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-10,BPAG28 3 años,IPAB,2026-08-06,0.19,0.0,-0.87,-0.14,estable,ESPERAR
+2026-08-10,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-11,CETES 28 días,Gobierno Federal,2026-08-06,6.17,-3.0,-1.26,-1.93,a la baja,ESPERAR
+2026-08-11,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-11,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-11,BPAG28 3 años,IPAB,2026-08-06,0.19,0.0,-0.87,-0.14,estable,ESPERAR
+2026-08-11,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-12,CETES 28 días,Gobierno Federal,2026-08-06,6.17,-3.0,-1.26,-1.93,a la baja,ESPERAR
+2026-08-12,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-12,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-12,BPAG28 3 años,IPAB,2026-08-06,0.19,0.0,-0.87,-0.14,estable,ESPERAR
+2026-08-12,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-13,CETES 28 días,Gobierno Federal,2026-08-13,6.4,23.0,1.62,-0.12,estable,COMPRAR
+2026-08-13,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-13,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-13,BPAG28 3 años,IPAB,2026-08-13,0.18,-1.0,-1.66,-0.17,estable,ESPERAR
+2026-08-13,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-14,CETES 28 días,Gobierno Federal,2026-08-13,6.4,23.0,1.62,-0.12,estable,COMPRAR
+2026-08-14,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-14,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-14,BPAG28 3 años,IPAB,2026-08-13,0.18,-1.0,-1.66,-0.17,estable,ESPERAR
+2026-08-14,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-17,CETES 28 días,Gobierno Federal,2026-08-13,6.4,23.0,1.62,-0.12,estable,COMPRAR
+2026-08-17,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-17,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-17,BPAG28 3 años,IPAB,2026-08-13,0.18,-1.0,-1.66,-0.17,estable,ESPERAR
+2026-08-17,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-18,CETES 28 días,Gobierno Federal,2026-08-13,6.4,23.0,1.62,-0.12,estable,COMPRAR
+2026-08-18,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-18,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-18,BPAG28 3 años,IPAB,2026-08-13,0.18,-1.0,-1.66,-0.17,estable,ESPERAR
+2026-08-18,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-19,CETES 28 días,Gobierno Federal,2026-08-13,6.4,23.0,1.62,-0.12,estable,COMPRAR
+2026-08-19,BONDES F 2 años,Gobierno Federal,2026-08-06,99.71565,,0.65,0.0,estable,MANTENER
+2026-08-19,UDIBONOS 10 años,Gobierno Federal,2026-07-30,4.71,11.0,0.7,6.12,al alza,MANTENER
+2026-08-19,BPAG28 3 años,IPAB,2026-08-13,0.18,-1.0,-1.66,-0.17,estable,ESPERAR
+2026-08-19,BONOS M 10 años,Gobierno Federal,2026-07-02,9.02,-43.0,-0.25,-0.11,estable,MANTENER
+2026-08-20,CETES 28 días,Gobierno Federal,2026-08-20,6.15,-25.0,-1.35,-0.68,estable,ESPERAR
+2026-08-20,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-20,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-20,BPAG28 3 años,IPAB,2026-08-20,0.18,0.0,-1.44,-0.14,estable,ESPERAR
+2026-08-20,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-21,CETES 28 días,Gobierno Federal,2026-08-20,6.15,-25.0,-1.35,-0.68,estable,ESPERAR
+2026-08-21,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-21,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-21,BPAG28 3 años,IPAB,2026-08-20,0.18,0.0,-1.44,-0.14,estable,ESPERAR
+2026-08-21,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-24,CETES 28 días,Gobierno Federal,2026-08-20,6.15,-25.0,-1.35,-0.68,estable,ESPERAR
+2026-08-24,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-24,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-24,BPAG28 3 años,IPAB,2026-08-20,0.18,0.0,-1.44,-0.14,estable,ESPERAR
+2026-08-24,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-25,CETES 28 días,Gobierno Federal,2026-08-20,6.15,-25.0,-1.35,-0.68,estable,ESPERAR
+2026-08-25,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-25,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-25,BPAG28 3 años,IPAB,2026-08-20,0.18,0.0,-1.44,-0.14,estable,ESPERAR
+2026-08-25,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-26,CETES 28 días,Gobierno Federal,2026-08-20,6.15,-25.0,-1.35,-0.68,estable,ESPERAR
+2026-08-26,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-26,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-26,BPAG28 3 años,IPAB,2026-08-20,0.18,0.0,-1.44,-0.14,estable,ESPERAR
+2026-08-26,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-27,CETES 28 días,Gobierno Federal,2026-08-27,6.13,-2.0,-1.36,-0.88,estable,ESPERAR
+2026-08-27,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-27,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-27,BPAG28 3 años,IPAB,2026-08-27,0.18,0.0,-1.35,-0.18,estable,ESPERAR
+2026-08-27,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-28,CETES 28 días,Gobierno Federal,2026-08-27,6.13,-2.0,-1.36,-0.88,estable,ESPERAR
+2026-08-28,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-28,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-28,BPAG28 3 años,IPAB,2026-08-27,0.18,0.0,-1.35,-0.18,estable,ESPERAR
+2026-08-28,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-08-31,CETES 28 días,Gobierno Federal,2026-08-27,6.13,-2.0,-1.36,-0.88,estable,ESPERAR
+2026-08-31,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-08-31,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-08-31,BPAG28 3 años,IPAB,2026-08-27,0.18,0.0,-1.35,-0.18,estable,ESPERAR
+2026-08-31,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-01,CETES 28 días,Gobierno Federal,2026-08-27,6.13,-2.0,-1.36,-0.88,estable,ESPERAR
+2026-09-01,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-09-01,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-01,BPAG28 3 años,IPAB,2026-08-27,0.18,0.0,-1.35,-0.18,estable,ESPERAR
+2026-09-01,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-02,CETES 28 días,Gobierno Federal,2026-08-27,6.13,-2.0,-1.36,-0.88,estable,ESPERAR
+2026-09-02,BONDES F 2 años,Gobierno Federal,2026-08-20,99.7351,,1.55,0.0,estable,MANTENER
+2026-09-02,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-02,BPAG28 3 años,IPAB,2026-08-27,0.18,0.0,-1.35,-0.18,estable,ESPERAR
+2026-09-02,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-03,CETES 28 días,Gobierno Federal,2026-09-03,6.49,36.0,2.19,2.21,al alza,COMPRAR
+2026-09-03,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-03,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-03,BPAG28 3 años,IPAB,2026-09-03,0.18,0.0,-1.16,-0.19,estable,ESPERAR
+2026-09-03,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-04,CETES 28 días,Gobierno Federal,2026-09-03,6.49,36.0,2.19,2.21,al alza,COMPRAR
+2026-09-04,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-04,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-04,BPAG28 3 años,IPAB,2026-09-03,0.18,0.0,-1.16,-0.19,estable,ESPERAR
+2026-09-04,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-07,CETES 28 días,Gobierno Federal,2026-09-03,6.49,36.0,2.19,2.21,al alza,COMPRAR
+2026-09-07,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-07,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-07,BPAG28 3 años,IPAB,2026-09-03,0.18,0.0,-1.16,-0.19,estable,ESPERAR
+2026-09-07,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-08,CETES 28 días,Gobierno Federal,2026-09-03,6.49,36.0,2.19,2.21,al alza,COMPRAR
+2026-09-08,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-08,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-08,BPAG28 3 años,IPAB,2026-09-03,0.18,0.0,-1.16,-0.19,estable,ESPERAR
+2026-09-08,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-09,CETES 28 días,Gobierno Federal,2026-09-03,6.49,36.0,2.19,2.21,al alza,COMPRAR
+2026-09-09,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-09,UDIBONOS 10 años,Gobierno Federal,2026-08-20,4.64,-7.0,0.39,5.36,al alza,MANTENER
+2026-09-09,BPAG28 3 años,IPAB,2026-09-03,0.18,0.0,-1.16,-0.19,estable,ESPERAR
+2026-09-09,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-10,CETES 28 días,Gobierno Federal,2026-09-10,6.25,-24.0,-0.03,1.87,al alza,MANTENER
+2026-09-10,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-10,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-10,BPAG28 3 años,IPAB,2026-09-10,0.19,1.0,0.4,-0.1,estable,MANTENER
+2026-09-10,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-11,CETES 28 días,Gobierno Federal,2026-09-10,6.25,-24.0,-0.03,1.87,al alza,MANTENER
+2026-09-11,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-11,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-11,BPAG28 3 años,IPAB,2026-09-10,0.19,1.0,0.4,-0.1,estable,MANTENER
+2026-09-11,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-14,CETES 28 días,Gobierno Federal,2026-09-10,6.25,-24.0,-0.03,1.87,al alza,MANTENER
+2026-09-14,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-14,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-14,BPAG28 3 años,IPAB,2026-09-10,0.19,1.0,0.4,-0.1,estable,MANTENER
+2026-09-14,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-15,CETES 28 días,Gobierno Federal,2026-09-10,6.25,-24.0,-0.03,1.87,al alza,MANTENER
+2026-09-15,BONDES F 2 años,Gobierno Federal,2026-09-03,99.72149,,0.67,0.0,estable,MANTENER
+2026-09-15,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-15,BPAG28 3 años,IPAB,2026-09-10,0.19,1.0,0.4,-0.1,estable,MANTENER
+2026-09-15,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-17,CETES 28 días,Gobierno Federal,2026-09-17,6.25,0.0,-0.01,1.19,estable,MANTENER
+2026-09-17,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-17,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-17,BPAG28 3 años,IPAB,2026-09-17,0.19,0.0,0.68,0.0,estable,MANTENER
+2026-09-17,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-18,CETES 28 días,Gobierno Federal,2026-09-17,6.25,0.0,-0.01,1.19,estable,MANTENER
+2026-09-18,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-18,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-18,BPAG28 3 años,IPAB,2026-09-17,0.19,0.0,0.68,0.0,estable,MANTENER
+2026-09-18,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-21,CETES 28 días,Gobierno Federal,2026-09-17,6.25,0.0,-0.01,1.19,estable,MANTENER
+2026-09-21,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-21,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-21,BPAG28 3 años,IPAB,2026-09-17,0.19,0.0,0.68,0.0,estable,MANTENER
+2026-09-21,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-22,CETES 28 días,Gobierno Federal,2026-09-17,6.25,0.0,-0.01,1.19,estable,MANTENER
+2026-09-22,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-22,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-22,BPAG28 3 años,IPAB,2026-09-17,0.19,0.0,0.68,0.0,estable,MANTENER
+2026-09-22,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-23,CETES 28 días,Gobierno Federal,2026-09-17,6.25,0.0,-0.01,1.19,estable,MANTENER
+2026-09-23,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-23,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-23,BPAG28 3 años,IPAB,2026-09-17,0.19,0.0,0.68,0.0,estable,MANTENER
+2026-09-23,BONOS M 10 años,Gobierno Federal,2026-08-20,9.16,14.0,0.28,0.75,estable,MANTENER
+2026-09-24,CETES 28 días,Gobierno Federal,2026-09-24,6.15,-10.0,-0.81,-0.27,estable,ESPERAR
+2026-09-24,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-24,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-24,BPAG28 3 años,IPAB,2026-09-24,0.2,1.0,2.01,0.18,estable,COMPRAR
+2026-09-24,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR
+2026-09-25,CETES 28 días,Gobierno Federal,2026-09-24,6.15,-10.0,-0.81,-0.27,estable,ESPERAR
+2026-09-25,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-25,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-25,BPAG28 3 años,IPAB,2026-09-24,0.2,1.0,2.01,0.18,estable,COMPRAR
+2026-09-25,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR
+2026-09-28,CETES 28 días,Gobierno Federal,2026-09-24,6.15,-10.0,-0.81,-0.27,estable,ESPERAR
+2026-09-28,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-28,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-28,BPAG28 3 años,IPAB,2026-09-24,0.2,1.0,2.01,0.18,estable,COMPRAR
+2026-09-28,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR
+2026-09-29,CETES 28 días,Gobierno Federal,2026-09-24,6.15,-10.0,-0.81,-0.27,estable,ESPERAR
+2026-09-29,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-29,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-29,BPAG28 3 años,IPAB,2026-09-24,0.2,1.0,2.01,0.18,estable,COMPRAR
+2026-09-29,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR
+2026-09-30,CETES 28 días,Gobierno Federal,2026-09-24,6.15,-10.0,-0.81,-0.27,estable,ESPERAR
+2026-09-30,BONDES F 2 años,Gobierno Federal,2026-09-17,99.72463,,0.74,0.0,estable,MANTENER
+2026-09-30,UDIBONOS 10 años,Gobierno Federal,2026-09-10,4.75,11.0,0.81,1.74,al alza,COMPRAR
+2026-09-30,BPAG28 3 años,IPAB,2026-09-24,0.2,1.0,2.01,0.18,estable,COMPRAR
+2026-09-30,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR
+2026-10-01,CETES 28 días,Gobierno Federal,2026-10-01,6.01,-14.0,-1.63,-3.11,a la baja,ESPERAR
+2026-10-01,BONDES F 2 años,Gobierno Federal,2026-10-01,99.72473,,0.64,0.0,estable,MANTENER
+2026-10-01,UDIBONOS 10 años,Gobierno Federal,2026-10-01,5.0,25.0,1.59,2.23,al alza,COMPRAR
+2026-10-01,BPAG28 3 años,IPAB,2026-10-01,0.2,0.0,1.63,0.33,estable,COMPRAR
+2026-10-01,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR
+2026-10-02,CETES 28 días,Gobierno Federal,2026-10-01,6.01,-14.0,-1.63,-3.11,a la baja,ESPERAR
+2026-10-02,BONDES F 2 años,Gobierno Federal,2026-10-01,99.72473,,0.64,0.0,estable,MANTENER
+2026-10-02,UDIBONOS 10 años,Gobierno Federal,2026-10-01,5.0,25.0,1.59,2.23,al alza,COMPRAR
+2026-10-02,BPAG28 3 años,IPAB,2026-10-01,0.2,0.0,1.63,0.33,estable,COMPRAR
+2026-10-02,BONOS M 10 años,Gobierno Federal,2026-09-24,9.35,19.0,0.95,2.63,al alza,COMPRAR

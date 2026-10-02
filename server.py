@@ -1,9 +1,8 @@
-"""Monitor de Mercado — servidor local.
+"""Monitor de Mercado — consulta de datos y análisis.
 
-Consulta Yahoo Finance (acciones BMV) y Banco de México (subastas de deuda)
-y sirve un tablero web en http://localhost:8765 que se actualiza solo.
-
-Uso:  python server.py   (o doble clic en iniciar.command)
+Consulta Yahoo Finance (acciones BMV) y Banco de México (subastas de deuda).
+En producción lo usan las funciones de Vercel (api/*.py); en la Mac puede correr
+como servidor local (solo 127.0.0.1) con:  python server.py
 """
 import io
 import json
@@ -11,11 +10,13 @@ import threading
 import time
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import analisis
 import truststore
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -176,13 +177,75 @@ def deuda(desde):
 
 def acciones(tickers, desde):
     ttl = 60 if mercado_abierto() else 15 * 60
-    out = []
-    for t in tickers:
+
+    def uno(t):
         try:
-            out.append(cached(("acc", t, desde), ttl, lambda t=t: historico(t, desde)))
+            return cached(("acc", t, desde), ttl, lambda: historico(t, desde))
         except Exception as e:
-            out.append({"ticker": t, "nombre": ACCIONES.get(t, t), "error": str(e), "historico": []})
-    return out
+            return {"ticker": t, "nombre": ACCIONES.get(t, t), "error": str(e), "historico": []}
+
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        return list(ex.map(uno, tickers))
+
+
+def ventana_historial():
+    """Historial largo (≈14 meses) para que las medias y el backtest tengan datos."""
+    return date.today() - timedelta(days=420)
+
+
+def cotizacion(t):
+    """Último precio y puntos del día (5 min) de una emisora."""
+    r = yahoo_chart(t, range="1d", interval="5m")
+    m, q = r["meta"], r["indicators"]["quote"][0]
+    precio, previo = m.get("regularMarketPrice"), m.get("chartPreviousClose")
+    hora = m.get("regularMarketTime")
+    return {
+        "ticker": t, "precio": precio, "previo": previo,
+        "var": precio - previo if precio is not None and previo else None,
+        "var_pct": (precio / previo - 1) * 100 if precio is not None and previo else None,
+        "maximo": m.get("regularMarketDayHigh"), "minimo": m.get("regularMarketDayLow"),
+        "volumen": m.get("regularMarketVolume"),
+        "hora": datetime.fromtimestamp(hora, TZ).isoformat() if hora else None,
+        "puntos": [round(x, 2) for x in (q.get("close") or []) if x is not None],
+    }
+
+
+def cotizaciones(tickers):
+    def uno(t):
+        try:
+            return cached(("cot", t), 20, lambda: cotizacion(t))
+        except Exception as e:
+            return {"ticker": t, "error": str(e)}
+
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        return list(ex.map(uno, tickers))
+
+
+def analisis_completo(tickers, desde):
+    """Señales, estadística y series para el tablero (todo calculado en el servidor)."""
+    accs = acciones(tickers, ventana_historial())
+    items = []
+    for a in accs:
+        if a.get("error") or len(a["historico"]) < 30:
+            items.append({"ticker": a["ticker"], "nombre": a["nombre"], "error": a.get("error") or "Historial insuficiente"})
+            continue
+        d = analisis.analizar_serie(a["nombre"], a["historico"], desde.isoformat())
+        d.update(ticker=a["ticker"], nombre=a["nombre"], precio=a.get("precio"), hora=a.get("hora"))
+        items.append(d)
+    ok = [x for x in items if "error" not in x]
+    deu = []
+    for s in deuda(date.today() - timedelta(days=300)):
+        d = analisis.analizar_deuda(s)
+        d["datos"] = [x for x in s["datos"] if x["fecha"] >= desde.isoformat()]
+        deu.append(d)
+    return {"ahora": datetime.now(TZ).isoformat(), "mercado_abierto": mercado_abierto(),
+            "mercado": analisis.resumen_mercado(ok), "acciones": items, "deuda": deu}
+
+
+def comparacion(tickers, desde):
+    hist = {a["ticker"]: a["historico"] for a in acciones(tickers, ventana_historial())
+            if not a.get("error") and a["historico"]}
+    return analisis.comparar(hist, desde.isoformat())
 
 
 # ---------------- Exportar a Excel ----------------
@@ -245,6 +308,11 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=str(STATIC), **kw)
 
+    def translate_path(self, path):  # mismas rutas que en Vercel: /static/app.js
+        if path.startswith("/static/"):
+            path = path[len("/static"):]
+        return super().translate_path(path)
+
     def end_headers(self):
         if not self.path.startswith("/api/"):
             self.send_header("Cache-Control", "no-cache")  # el celular siempre recibe la versión más reciente
@@ -284,6 +352,12 @@ class Handler(SimpleHTTPRequestHandler):
                 data = cached(("intra", t), 60, lambda: intradia(t))
             elif u.path == "/api/deuda":
                 data = deuda(desde)
+            elif u.path == "/api/analisis":
+                data = analisis_completo(tickers, desde)
+            elif u.path == "/api/comparar":
+                data = comparacion(tickers, desde)
+            elif u.path == "/api/cotizaciones":
+                data = cotizaciones(tickers)
             elif u.path == "/api/excel":
                 name = f"Mercado_{desde:%Y%m%d}_{datetime.now(TZ):%Y%m%d}.xlsx"
                 return self.send(excel(tickers, desde),
@@ -296,23 +370,6 @@ class Handler(SimpleHTTPRequestHandler):
             self.send(json.dumps({"error": str(e)}, ensure_ascii=False).encode(), status=502)
 
 
-def ip_local():
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(("10.255.255.255", 1))
-        return s.getsockname()[0]
-    except OSError:
-        return None
-    finally:
-        s.close()
-
-
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", PORT))
-    print(f"Monitor de mercado en http://localhost:{port}  (Ctrl+C para detener)")
-    if ip := ip_local():
-        print(f"Desde tu celular (misma red Wi-Fi): http://{ip}:{port}")
-    # 0.0.0.0 = acepta conexiones de otros dispositivos de la red (celular)
-    ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
+    print(f"Monitor de mercado en http://localhost:{PORT}  (Ctrl+C para detener)")
+    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
