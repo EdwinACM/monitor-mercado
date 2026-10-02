@@ -3,168 +3,156 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Monitor de Mercado</title>
-<meta name="description" content="Acciones de la BMV e instrumentos de deuda con tendencias, señales técnicas y análisis diario.">
-<meta name="theme-color" content="#6c1d45">
+<title>Pizarra · Bolsa y deuda de México</title>
+<meta name="description" content="Acciones de la BMV e instrumentos de deuda con tendencias, señales técnicas, comparación de cierres y análisis diario archivado.">
+<meta name="theme-color" content="#15191D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mercado">
+<meta name="apple-mobile-web-app-title" content="Pizarra">
 <link rel="manifest" href="/static/manifest.webmanifest">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/static/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/pizarra.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
-<header class="top">
-  <div class="brand">
-    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M15 6h5v5"/></svg></div>
-    <div>
-      <h1>Monitor de Mercado</h1>
-      <p class="kicker" id="fechaHoy">Bolsa Mexicana de Valores · deuda gubernamental</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-mark" viewBox="0 0 48 48">
+    <path d="M2 22V12A10 10 0 0 1 12 2h24a10 10 0 0 1 10 10v10z" fill="var(--mark-bg)"/>
+    <path d="M2 26v10a10 10 0 0 0 10 10h24a10 10 0 0 0 10-10V26z" fill="var(--mark-bg)"/>
+    <path d="M9 36l9.5-8 7 3.5L38 14" fill="none" stroke="#F2A900" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="5.5" cy="24" r="1.7" fill="#8E99A3"/><circle cx="42.5" cy="24" r="1.7" fill="#8E99A3"/>
+  </symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-flat" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-wait" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
+  <symbol id="i-compare" viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 8-9"/><path d="M3 21l6-4 4 2 8-7"/></symbol>
+  <symbol id="i-debt" viewBox="0 0 24 24"><path d="M4 20h16M6 20v-9M12 20V7M18 20v-5"/><path d="M4 8l8-4 8 4"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 4h16v4H4zM5 8v12h14V8M10 12h4"/></symbol>
+</svg>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#mercado" aria-label="Pizarra, ir al mercado">
+      <svg class="mark" aria-hidden="true"><use href="#i-mark"/></svg>
+      <span class="word">Pizarra</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Secciones"></nav>
+    <div class="status">
+      <button class="live" id="live" data-on="true" data-open="false" aria-pressed="true" title="Actualización automática">
+        <span class="pulse" aria-hidden="true"></span><span class="t" id="liveTxt">Conectando</span>
+      </button>
+      <button class="icon-btn" id="refresh" aria-label="Actualizar ahora" title="Actualizar ahora"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></button>
     </div>
-  </div>
-  <div class="tools">
-    <span id="estado" class="pill"><i class="dot"></i><span id="estadoTxt">Conectando…</span></span>
-    <button id="btnVivo" class="toggle" aria-pressed="false" title="Consulta los precios cada 30 segundos mientras la bolsa está abierta"><i class="dot"></i>En vivo</button>
-    <button id="btnAct" class="btn primary">Actualizar</button>
-    <button id="btnTema" class="btn icon" aria-label="Cambiar tema claro/oscuro" title="Tema">◐</button>
   </div>
 </header>
-<div class="subbar">
-  <label>Periodo desde <input type="date" id="desde" value="2026-03-01" min="2025-11-01"></label>
-  <span>hasta <b id="hasta">hoy</b></span>
-  <span class="grow"></span>
-  <span id="ult" class="note"></span>
-</div>
 
-<nav class="tabs" role="tablist" id="tabs"></nav>
+<main id="main">
+  <p id="err" class="err" role="alert" hidden></p>
 
-<main>
-  <div id="err" class="err" hidden role="alert"></div>
+  <!-- ================= MERCADO ================= -->
+  <section id="v-mercado" class="view" hidden>
+    <div class="head">
+      <div><h1 id="titulo">Mercado</h1><p id="lectura"></p></div>
+      <label class="period" for="desde">Periodo desde <input type="date" id="desde" value="2026-03-01" min="2025-11-01"></label>
+    </div>
+    <div class="board"><table id="board" aria-label="Cotizaciones de acciones"></table><div class="board-foot" id="boardFoot"></div></div>
 
-  <!-- ============ PANEL ============ -->
-  <section id="v-panel" class="view" hidden>
-    <div class="card hero">
-      <div>
-        <p class="kicker">Lectura del día</p>
-        <p class="lead" id="heroTexto">Cargando análisis…</p>
-        <div class="stats" id="heroStats"></div>
+    <div class="detail" id="detalle" hidden>
+      <div class="detail-head">
+        <h2 id="dNombre"></h2>
+        <div class="tools">
+          <div class="seg" id="rango" role="group" aria-label="Rango de la gráfica"></div>
+          <label class="tgl"><input type="checkbox" id="chkMedias" checked> Medias móviles</label>
+          <label class="tgl"><input type="checkbox" id="chkBandas"> Bandas de Bollinger</label>
+        </div>
       </div>
-      <div>
-        <p class="kicker">Termómetro técnico del mercado</p>
-        <div class="meter" id="meter"><span class="pin" style="left:50%"></span></div>
-        <div class="meter-l"><span>Venta −100</span><span>Neutral</span><span>+100 Compra</span></div>
-        <p class="note" id="meterTxt" style="margin-top:10px"></p>
+      <div class="cols">
+        <div>
+          <div class="legend" id="legPrecio"></div>
+          <div class="chartbox"><canvas id="chPrecio" role="img" aria-label="Gráfica de precio de cierre"></canvas></div>
+        </div>
+        <aside class="verdict" id="senal"></aside>
+      </div>
+
+      <div class="split">
+        <section class="sec"><h3>Estadística</h3><dl class="dl" id="stats"></dl></section>
+        <section class="sec"><h3>RSI y MACD</h3>
+          <div class="chartbox sm"><canvas id="chRsi" role="img" aria-label="RSI de 14 sesiones"></canvas></div>
+          <div class="chartbox sm" style="margin-top:12px"><canvas id="chMacd" role="img" aria-label="MACD"></canvas></div></section>
+      </div>
+      <div class="split">
+        <section class="sec"><h3>Análisis del día</h3><div class="prose" id="texto"></div>
+          <div class="row-btns"><button class="btn" id="btnMd"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descargar análisis (.md)</button></div></section>
+        <section class="sec"><h3>Prueba histórica de la señal</h3><div id="bt"></div></section>
       </div>
     </div>
-
-    <div class="sec-h"><div><p class="kicker">01 · Acciones</p><h2>Emisoras en seguimiento</h2></div>
-      <span class="note" id="vivoNota"></span></div>
-    <div class="cards" id="cards"></div>
-
-    <div class="sec-h"><div><p class="kicker">02 · Renta fija</p><h2>Deuda gubernamental</h2></div></div>
-    <div class="cards" id="cardsDeuda"></div>
-    <p class="aviso">Herramienta educativa. Las señales se calculan con indicadores técnicos del historial de precios y <b>no constituyen asesoría financiera</b>; el rendimiento pasado no garantiza resultados futuros.</p>
+    <p class="aviso">Herramienta educativa. Las señales se calculan con indicadores técnicos del historial de precios y no constituyen asesoría financiera; el rendimiento pasado no garantiza resultados futuros. Fuentes: Yahoo Finance (posible retraso de 15 a 20 minutos) y Banco de México.</p>
   </section>
 
-  <!-- ============ ANÁLISIS ============ -->
-  <section id="v-analisis" class="view" hidden>
-    <div class="toolbar"><div class="chips" id="selAnalisis"></div></div>
-    <div class="grid cols-2">
-      <div class="card verdict" id="veredicto"></div>
-      <div class="card"><p class="kicker">Cómo se compone la señal</p><div class="comp" id="comp" style="margin-top:12px"></div></div>
-    </div>
-
-    <div class="sec-h"><div><p class="kicker">Estadística</p><h2>Indicadores clave</h2></div></div>
-    <div class="kpis" id="kpis"></div>
-
-    <div class="sec-h"><div><p class="kicker">Precio y tendencia</p><h2 id="tituloGrafica">Cierre</h2></div>
-      <div class="seg" id="rango" role="group" aria-label="Rango"><button data-r="21">1M</button><button data-r="63">3M</button><button data-r="126">6M</button><button data-r="0" aria-pressed="true">Periodo</button></div></div>
-    <div class="card">
-      <div class="toolbar" style="margin-bottom:6px">
-        <div class="legend" id="legAnalisis"></div>
-        <div style="display:flex;gap:14px"><label class="check"><input type="checkbox" id="chkMedias" checked> Medias móviles</label><label class="check"><input type="checkbox" id="chkBandas" checked> Bandas de Bollinger</label></div>
-      </div>
-      <div class="chartbox"><canvas id="chPrecio" role="img" aria-label="Gráfica de precio de cierre con medias móviles"></canvas></div>
-    </div>
-    <div class="grid cols-eq">
-      <div class="card"><p class="kicker">RSI (14) · sobreventa &lt; 30 · sobrecompra &gt; 70</p><div class="chartbox sm" style="margin-top:8px"><canvas id="chRsi"></canvas></div></div>
-      <div class="card"><p class="kicker">MACD (12, 26, 9)</p><div class="chartbox sm" style="margin-top:8px"><canvas id="chMacd"></canvas></div></div>
-    </div>
-
-    <div class="grid cols-2" style="margin-top:14px">
-      <div class="card"><p class="kicker">Análisis del día</p><div class="prose" id="textoDia" style="margin-top:8px"></div>
-        <div class="dl" style="margin-top:14px"><button class="btn" id="btnMd">Descargar análisis (.md)</button></div></div>
-      <div class="card"><p class="kicker">¿Ha funcionado esta señal? (prueba histórica)</p><div id="backtest" style="margin-top:10px"></div></div>
-    </div>
-  </section>
-
-  <!-- ============ COMPARAR ============ -->
+  <!-- ================= COMPARAR ================= -->
   <section id="v-comparar" class="view" hidden>
-    <div class="toolbar"><div class="chips" id="selComparar"></div><span class="note">Elige 2 o más emisoras</span></div>
-    <div class="card">
-      <p class="kicker">Evolución comparada · base 100 al inicio del periodo</p>
-      <div class="legend" id="legComparar" style="margin-top:8px"></div>
-      <div class="chartbox"><canvas id="chComparar" role="img" aria-label="Comparación de rendimiento acumulado"></canvas></div>
-    </div>
+    <div class="head"><div><h1>Comparar</h1><p>Rendimiento acumulado desde el inicio del periodo (base 100) y precios de cierre por fecha.</p></div></div>
+    <div class="chips" id="chips" role="group" aria-label="Emisoras a comparar"></div>
+    <div class="legend" id="legComparar"></div>
+    <div class="chartbox"><canvas id="chComparar" role="img" aria-label="Comparación de rendimiento acumulado"></canvas></div>
 
-    <div class="sec-h"><div><p class="kicker">Consulta</p><h2>Precios de cierre por fecha</h2></div></div>
-    <div class="card">
-      <div class="toolbar">
-        <label class="check">Fecha A <input type="date" id="fechaA" class="mono" style="border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px;font:500 13px var(--f-mono)"></label>
-        <label class="check">Fecha B <input type="date" id="fechaB" class="mono" style="border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px;font:500 13px var(--f-mono)"></label>
-        <div class="seg" id="atajos"><button data-a="ini">Inicio → hoy</button><button data-a="sem">Hace 1 semana</button><button data-a="mes">Hace 1 mes</button></div>
-      </div>
-      <div class="tablewrap" style="max-height:none"><table id="tblConsulta"></table></div>
-      <p class="note" style="margin-top:8px">Si la fecha no fue día hábil, se usa el cierre de la sesión hábil anterior.</p>
+    <div class="split">
+      <section class="sec"><h2>Cierres en dos fechas</h2>
+        <div class="consulta">
+          <label>De <input type="date" id="fechaA"></label>
+          <label>A <input type="date" id="fechaB"></label>
+          <div class="seg" id="atajos"><button data-a="ini">Periodo</button><button data-a="sem">1 semana</button><button data-a="mes">1 mes</button></div>
+        </div>
+        <table class="tbl" id="tblConsulta"></table>
+        <p class="note" style="margin-top:8px">Si la fecha no fue día hábil se usa el cierre anterior.</p></section>
+      <section class="sec"><h2>Ranking del periodo</h2><div style="overflow-x:auto"><table class="tbl" id="tblRanking"></table></div></section>
     </div>
-
-    <div class="grid cols-eq">
-      <div class="card"><p class="kicker">Ranking del periodo</p><div class="tablewrap" style="margin-top:8px;max-height:none"><table id="tblRanking"></table></div></div>
-      <div class="card"><p class="kicker">Correlación de rendimientos diarios</p><div class="heat" id="heat" style="margin-top:10px"></div>
-        <p class="note" style="margin-top:10px">+1: se mueven igual · 0: sin relación · −1: se mueven al revés. Valores bajos ayudan a diversificar.</p></div>
+    <div class="split">
+      <section class="sec"><h2>Correlación de rendimientos diarios</h2><div class="heat" id="heat"></div>
+        <p class="note" style="margin-top:10px">+1 se mueven igual, 0 sin relación, −1 en sentido contrario. Valores bajos diversifican.</p></section>
+      <section class="sec"><h2>Cierres diarios</h2>
+        <details class="more" style="margin-top:0"><summary>Ver tabla completa<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary><div class="body scroll"><table class="tbl" id="tblCierres"></table></div></details></section>
     </div>
-
-    <div class="sec-h"><div><p class="kicker">Datos</p><h2>Cierres diarios lado a lado</h2></div></div>
-    <div class="tablewrap"><table id="tblCierres"></table></div>
   </section>
 
-  <!-- ============ DEUDA ============ -->
+  <!-- ================= DEUDA ================= -->
   <section id="v-deuda" class="view" hidden>
-    <div class="cards hscroll" id="cardsDeuda2"></div>
-    <div class="grid cols-2" style="margin-top:14px">
-      <div class="card"><p class="kicker" id="deuKicker">Subastas</p><h2 id="deuTitulo" style="font:600 22px var(--f-display);margin:4px 0 8px"></h2>
-        <div class="legend" id="legDeuda"></div>
-        <div class="chartbox md"><canvas id="chDeuda" role="img" aria-label="Rendimiento en las subastas"></canvas></div></div>
-      <div class="card verdict"><p class="kicker">Lectura</p><div id="deuLectura" style="margin-top:8px"></div></div>
+    <div class="head"><div><h1>Deuda gubernamental</h1><p>Resultados de las subastas primarias semanales del Banco de México. El rendimiento se compara con el promedio de las últimas 12 subastas.</p></div></div>
+    <div class="board"><table id="boardDeuda" aria-label="Instrumentos de deuda"></table><div class="board-foot" id="footDeuda"></div></div>
+    <div class="detail" id="detalleDeuda" hidden>
+      <div class="detail-head"><h2 id="deuNombre"></h2></div>
+      <div class="cols">
+        <div><div class="legend" id="legDeuda"></div><div class="chartbox"><canvas id="chDeuda" role="img" aria-label="Rendimiento por subasta"></canvas></div></div>
+        <aside class="verdict" id="deuLectura"></aside>
+      </div>
+      <details class="more"><summary>Resultados de cada subasta<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary><div class="body scroll"><table class="tbl" id="tblDeuda"></table></div></details>
     </div>
-    <div class="sec-h"><div><p class="kicker">Datos</p><h2>Resultados de subasta</h2></div></div>
-    <div class="tablewrap"><table id="tblDeuda"></table></div>
-    <p class="aviso">Los datos provienen de las subastas primarias semanales del Banco de México (cuadros CF107 y CF115). La señal compara el rendimiento más reciente con el promedio de las últimas 12 subastas (puntaje z) y su pendiente.</p>
+    <p class="aviso">Si las tasas suben, el precio de los bonos ya emitidos baja. La señal es un apoyo educativo y no constituye asesoría financiera.</p>
   </section>
 
-  <!-- ============ HISTORIAL ============ -->
-  <section id="v-historial" class="view" hidden>
-    <div class="card">
-      <p class="kicker">Archivo de análisis diarios</p>
-      <p class="lead" id="histResumen" style="font:400 20px/1.35 var(--f-display);margin-top:6px">Cargando…</p>
-      <div class="dl" style="margin-top:14px" id="descargas"></div>
-      <p class="note" style="margin-top:10px">Un proceso automático (GitHub Actions) agrega el análisis de cada día hábil después del cierre y vuelve a publicar la app.</p>
+  <!-- ================= ARCHIVO ================= -->
+  <section id="v-archivo" class="view" hidden>
+    <div class="head"><div><h1>Archivo</h1><p id="archResumen">Cargando análisis guardados…</p></div></div>
+    <div class="downloads" id="descargas"></div>
+    <div class="split one" style="margin-top:28px">
+      <section class="sec"><h2>Mapa de señales por día</h2><div class="legend" id="legTl" style="margin-bottom:12px"></div><div class="tl" id="timeline"></div></section>
     </div>
-
-    <div class="sec-h"><div><p class="kicker">Mapa de señales</p><h2>Evolución día por día</h2></div>
-      <div class="legend" id="legTl" style="margin:0"></div></div>
-    <div class="card tl" id="timeline"></div>
-
-    <div class="sec-h"><div><p class="kicker">Consulta de un día</p><h2 id="diaTitulo">—</h2></div>
-      <div class="dl"><button class="btn" id="diaPrev" aria-label="Día anterior">←</button><input type="date" id="diaSel" class="mono" style="border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font:500 13px var(--f-mono)"><button class="btn" id="diaNext" aria-label="Día siguiente">→</button></div></div>
-    <div class="card" id="diaDetalle"></div>
+    <div class="split one" style="margin-top:32px">
+      <section class="sec"><h2 id="diaTitulo">Un día</h2>
+        <div class="daybar" style="margin-bottom:12px"><button class="icon-btn" id="diaPrev" aria-label="Día anterior"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chevron"/></svg></button><input type="date" id="diaSel"><button class="icon-btn" id="diaNext" aria-label="Día siguiente"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
+        <div id="diaDetalle"></div></section>
+    </div>
   </section>
 </main>
-<script src="/static/app.js"></script>
+<script src="/static/pizarra.js"></script>
 </body>
 </html>
