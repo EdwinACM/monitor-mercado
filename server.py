@@ -231,7 +231,7 @@ def cotizaciones(tickers):
 
 
 def analisis_completo(tickers, desde):
-    """Señales, estadística y series para el tablero (todo calculado en el servidor)."""
+    """Señales, estadística y series para la pantalla (todo calculado en el servidor)."""
     accs = acciones(tickers, ventana_historial())
     validar_desde(accs, desde)
     items = []
@@ -396,12 +396,12 @@ class Handler(SimpleHTTPRequestHandler):
                 reg = cached(("dia", f, date.today()), 120, lambda: dia(f))
                 fmt = qs.get("formato", ["json"])[0]
                 if fmt == "pdf":
-                    return self.send(reportes.pdf_dia(reg), "application/pdf", extra={"Content-Disposition": f'attachment; filename="Pizarra_analisis_{f}.pdf"'})
+                    return self.send(reportes.pdf_dia(reg), "application/pdf", extra={"Content-Disposition": f'attachment; filename="Atalaya_analisis_{f}.pdf"'})
                 if fmt == "xlsx":
                     return self.send(reportes.xlsx_dia(reg), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                     extra={"Content-Disposition": f'attachment; filename="Pizarra_analisis_{f}.xlsx"'})
+                                     extra={"Content-Disposition": f'attachment; filename="Atalaya_analisis_{f}.xlsx"'})
                 if fmt == "md":
-                    return self.send(reportes.md_dia(reg).encode(), "text/markdown; charset=utf-8", extra={"Content-Disposition": f'attachment; filename="Pizarra_analisis_{f}.md"'})
+                    return self.send(reportes.md_dia(reg).encode(), "text/markdown; charset=utf-8", extra={"Content-Disposition": f'attachment; filename="Atalaya_analisis_{f}.md"'})
                 data = reg
             elif u.path == "/api/excel":
                 name = f"Mercado_{desde:%Y%m%d}_{datetime.now(TZ):%Y%m%d}.xlsx"
