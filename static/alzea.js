@@ -1,5 +1,5 @@
 "use strict";
-/* Atalaya — interfaz. Los cálculos viven en el servidor (analisis.py); aquí solo se muestran. */
+/* Alzea — interfaz. Los cálculos viven en el servidor (analisis.py); aquí solo se muestran. */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -512,16 +512,16 @@ async function renderSimulacion() {
   const s = S.sim, m = s.metricas;
   if (!s.fechas.length) { $("#simTexto").textContent = s.error || "No hay datos suficientes."; return; }
   const peso = n => "$" + fmt(n), ink = css("--ink"), acc = css("--s2");
-  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las 5 emisoras, desde ${fhumana(s.fechas[0])}: seguir las decisiones de Atalaya terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
-  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones de Atalaya</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
+  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las 5 emisoras, desde ${fhumana(s.fechas[0])}: seguir las decisiones de Alzea terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
+  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones de Alzea</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
   const o = opts({ fy: v => fmt(v, 2), ftip: v => peso(v), right: 8, title: it => flarga(s.fechas[it[0].dataIndex]) });
-  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Atalaya", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] }, options: o });
-  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Atalaya</th><th>Comprar y mantener</th></tr></thead><tbody>
+  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Alzea", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] }, options: o });
+  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Alzea</th><th>Comprar y mantener</th></tr></thead><tbody>
     <tr><td>Rendimiento del periodo</td><td class="${cls(m.ret_estrategia)}"><b>${pct(m.ret_estrategia)}</b></td><td class="${cls(m.ret_comprar_mantener)}"><b>${pct(m.ret_comprar_mantener)}</b></td></tr>
     <tr><td>Valor final</td><td>${peso(s.estrategia.at(-1))}</td><td>${peso(s.comprar_mantener.at(-1))}</td></tr>
     <tr><td>Caída máxima</td><td class="down">${pct(m.caida_estrategia)}</td><td class="down">${pct(m.caida_comprar_mantener)}</td></tr>
     <tr><td>Operaciones</td><td>${m.operaciones}</td><td>1 por emisora</td></tr></tbody>`;
-  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Atalaya</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
+  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Alzea</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
     s.por_emisora.map(p => `<tr><td><b>${tk(p.ticker)}</b></td><td class="${cls(p.ret_estrategia)}">${pct(p.ret_estrategia)}</td><td class="${cls(p.ret_comprar_mantener)}">${pct(p.ret_comprar_mantener)}</td><td>${p.operaciones}</td><td>${fmt(p.tiempo_en_mercado)}%</td></tr>`).join("") + "</tbody>";
   $("#simAviso").textContent = `Reglas: se compra cuando el puntaje llega a +20 o más y se sale a efectivo cuando baja a -20 o menos; la decisión de un día se ejecuta al cierre del día siguiente y cada operación paga ${fmt(s.costo_pct)}% de comisión. Es una prueba dentro de la misma muestra, sin impuestos ni deslizamiento, con fines educativos; no constituye asesoría financiera y el resultado pasado no garantiza resultados futuros.`;
 }

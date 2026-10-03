@@ -1,9 +1,9 @@
-# Design — Atalaya
+# Design — Alzea
 
 Modo: Operate. Escena: un estudiante o su asesor revisan el mercado en el celular o en un escritorio con luz de día; la lectura rápida de cifras manda.
 
 ## Mundo
-Una atalaya: la torre desde donde se vigila el horizonte. La app vigila el mercado: un panel con las cotizaciones en filas fijas y columnas de cifras, y una página donde viven las gráficas y el análisis. Cuando cambia un precio, el dígito gira como una ficha mecánica. Sin mosaicos de tarjetas: el panel y las secciones separadas por filetes hacen la estructura.
+Alzea (del verbo «alzar», la subida): un panel con las cotizaciones en filas fijas y columnas de cifras, y una página donde viven las gráficas y el análisis. Cuando cambia un precio, el dígito gira como una ficha mecánica. Sin mosaicos de tarjetas: el panel y las secciones separadas por filetes hacen la estructura.
 
 ## Temas (selector en la barra superior; abre en Claro)
 | Rol | Claro | Mixto (panel oscuro sobre página clara) | Oscuro |
@@ -30,4 +30,5 @@ Radios 12 px (panel) y 8 px (controles). Un solo recurso de elevación: borde o 
 El indicador «Bolsa abierta / cerrada» es de solo lectura: se calcula con el reloj y el horario real de la BMV (lunes a viernes, 9:30 a 16:00 hora de Nueva York) y ningún control lo modifica. La pausa de actualización es un control aparte («Auto»).
 
 ## Marca
-Nombre: **Atalaya** (torre de vigilancia). Marca sin letras y en 3D: tres columnas isométricas que ascienden (gráfica de barras y torre a la vez) y un farol ámbar en la más alta. Las caras usan degradados (claro arriba, medio a la izquierda, oscuro a la derecha) y un borde de luz; sobre fondo claro las columnas son pizarra oscura y sobre fondo oscuro son acero claro. Kit en `static/marca/`: marca, marca para fondo oscuro, logo horizontal (claro y fondo oscuro) y logo vertical, con el nombre convertido a trazos desde Barlow Semi Condensed Bold (licencia OFL incluida).
+Nombre: **Alzea**, palabra inventada corta a partir de «alza». No se escribe en la barra superior: ahí va solo el logo (el nombre queda en el título, el ícono de la pantalla de inicio, los reportes y la documentación).
+Logo sin letras y en 3D pulido: una esfera de pizarra con brillo y borde de luz, un anillo ámbar inclinado hacia arriba que la rodea y un astro ámbar que sube (la órbita como gráfica; el astro, la cima). Funciona sobre fondo claro y oscuro. Kit en `static/marca/`: marca, marca para fondo oscuro, logo horizontal (claro y fondo oscuro) y logo vertical, con el nombre convertido a trazos desde Barlow Semi Condensed Bold (licencia OFL incluida).
