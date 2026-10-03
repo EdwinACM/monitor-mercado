@@ -1,4 +1,4 @@
-# Atalaya · Bolsa y deuda de México
+# Alzea · Bolsa y deuda de México
 
 App web con 5 acciones de la BMV y 5 instrumentos de deuda gubernamental: precio, variación, tendencia, estadística, **decisión de comprar, mantener o vender con su porqué**, comparación de cierres, simulación y un análisis archivado por día.
 
@@ -39,7 +39,7 @@ Deuda: compara el rendimiento de la última subasta con el promedio de las últi
 Mientras tanto, para agregar días: `python analisis_diario.py`, luego `git add static/data && git commit && git push`. Los reportes PDF y Excel de cualquier día se generan al momento, sin depender de ese proceso.
 
 ## Logo
-Kit en `static/marca/` (torre isométrica de tres columnas que ascienden con un farol ámbar, sin letras): `marca.svg`, `marca-fondo-oscuro.svg`, `logo-horizontal.svg`, `logo-horizontal-fondo-oscuro.svg` y `logo-vertical.svg` (nombre convertido a trazos desde Barlow Semi Condensed Bold, licencia OFL). Íconos de la app: `static/icon.svg`, `icon-180.png`, `icon-512.png`.
+Kit en `static/marca/` (esfera de pizarra con anillo ámbar y un astro que sube, sin letras): `marca.svg`, `marca-fondo-oscuro.svg`, `logo-horizontal.svg`, `logo-horizontal-fondo-oscuro.svg` y `logo-vertical.svg` (nombre convertido a trazos desde Barlow Semi Condensed Bold, licencia OFL). Íconos de la app: `static/icon.svg`, `icon-180.png`, `icon-512.png`. En la barra superior solo se muestra el logo, sin el nombre.
 
 ## Archivos
 - `server.py`: consulta las fuentes y atiende las rutas `/api/*`.
@@ -48,6 +48,6 @@ Kit en `static/marca/` (torre isométrica de tres columnas que ascienden con un 
 - `reportes.py`: PDF, Excel y Markdown del día.
 - `analisis_diario.py`: genera los archivos de análisis diario.
 - `api/*.py`: funciones de Vercel (`analisis`, `comparar`, `cotizaciones`, `dia`, `simulacion`, …).
-- `static/`: interfaz (`index.html`, `atalaya.css`, `atalaya.js`), logo y `data/`.
+- `static/`: interfaz (`index.html`, `alzea.css`, `alzea.js`), logo y `data/`.
 - `PRODUCT.md` y `DESIGN.md`: contexto del producto y decisiones de diseño.
 - Opcional en la Mac: `iniciar.command` abre una copia local en `http://localhost:8765` (solo tu equipo); se cierra con Ctrl+C.
