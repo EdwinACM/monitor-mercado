@@ -146,7 +146,7 @@ def pdf_dia(reg):
     pdf.set_y(19)
     pdf.set_font("Helvetica", "B", 20)
     pdf.set_text_color(11, 17, 23)
-    pdf.cell(0, 9, "Pizarra", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 9, "Atalaya", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 12)
     pdf.cell(0, 6, lat(f"Análisis del {fecha_larga(reg['fecha'])}"), new_x="LMARGIN", new_y="NEXT")
     pdf.ln(2)

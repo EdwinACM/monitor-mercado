@@ -13,7 +13,7 @@ Edwin Cruz, estudiante del Seminario de Titulación (tesina «Comportamiento Fin
 Seguir 5 acciones de la Bolsa Mexicana de Valores y 5 instrumentos de deuda gubernamental mexicana (CETES, Bondes F, Udibonos, BPAG28, Bonos M). Mostrar precio, variación, tendencia y estadística; comparar precios de cierre entre fechas y emisoras; proponer una señal técnica (comprar, mantener, vender) con su razonamiento; actualizarse sola durante la sesión y guardar un análisis por día. Éxito: que el asesor entienda la lectura del mercado en segundos y que cada cifra sea trazable a su fuente.
 
 ## Positioning
-Un tablero académico con rigor: cada señal se descompone en criterios con puntos, se contrasta con una prueba histórica de qué pasó después de señales anteriores, y el análisis diario queda archivado en un archivo descargable (JSON, CSV, Excel).
+Un panel académico con rigor: cada señal se descompone en criterios con puntos, se contrasta con una prueba histórica de qué pasó después de señales anteriores, y el análisis diario queda archivado en un archivo descargable (JSON, CSV, Excel).
 
 ## Operating Context
 Datos de Yahoo Finance (acciones BMV, posible retraso de 15–20 min) y Banco de México SIE (subastas semanales de deuda). Alojado gratis en Vercel con código en GitHub; sin servidor propio ni costo. Idioma: español de México. Herramienta educativa: las señales no son asesoría financiera y así debe decirse.
