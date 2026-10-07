@@ -54,10 +54,24 @@ const vivo = () => !!S.data?.periodo?.vivo;
 /* ---------------------------------------------------------------- utilidades */
 async function api(path) {
   const r = await fetch(path, { cache: "no-store" });
+  if (r.headers.get("X-Desde-Cache")) marcarSinConexion(+r.headers.get("X-Guardado") || 0);
+  else if (S.sinConexion && r.ok) { S.sinConexion = false; avisoConexion(); }
   let j;
   try { j = await r.json(); } catch { throw new Error("El servidor no respondió con datos válidos"); }
   if (!r.ok || j.error) throw new Error(j.error || r.statusText);
   return j;
+}
+function marcarSinConexion(t) {
+  S.sinConexion = true; S.guardado = Math.max(S.guardado || 0, t || 0);
+  avisoConexion();
+}
+function avisoConexion() {
+  const el = $("#offline"); if (!el) return;
+  el.hidden = !S.sinConexion && navigator.onLine;
+  if (!el.hidden) {
+    const g = S.guardado ? ` Última actualización guardada: ${new Date(S.guardado).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}.` : "";
+    el.textContent = `Sin conexión a internet. Se muestran los últimos datos guardados en este dispositivo.${g}`;
+  }
 }
 const showErr = m => { const e = $("#err"); e.textContent = m || ""; e.hidden = !m; };
 function relojNY() {
@@ -84,7 +98,7 @@ async function descargar(url, btn) {
     Object.assign(document.createElement("a"), { href: u, download: nombre }).click();
     setTimeout(() => URL.revokeObjectURL(u), 3000);
     showErr("");
-  } catch (e) { showErr(`No se pudo generar el archivo. ${e.message}. Intenta de nuevo en unos segundos.`); }
+  } catch (e) { showErr(navigator.onLine ? `No se pudo generar el archivo. ${e.message}. Intenta de nuevo en unos segundos.` : "Sin conexión: este archivo no está guardado en el dispositivo. Descárgalo cuando tengas internet o usa «Guardar para ver sin internet»."); }
   btn.removeAttribute("aria-busy"); btn.innerHTML = txt;
 }
 function ligarDescargas(raiz) {
@@ -364,7 +378,9 @@ async function renderDetalle() {
     row("Tendencia 30 ses.", a.tendencia.pendiente == null ? "—" : pct(a.tendencia.pendiente, 2) + "/día", cls(a.tendencia.pendiente)), row("Volumen vs. promedio", s.vol_relativo == null ? "—" : s.vol_relativo.toFixed(2) + "×")].join("");
   $("#texto").innerHTML = `<div class="decision ${sigK(a.veredicto)}" style="font:700 22px/1.2 var(--f-num);margin-bottom:8px">${esc(a.decision)}</div>
     <p>${esc(a.texto)}</p><p><b>Por qué:</b></p><ul>${a.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
-    <p><b>Qué hacer:</b> ${esc(a.accion)}</p>` + (a.cambio ? `<p><b>Cambio de decisión:</b> antes era ${esc(sigT(a.veredicto_ant).toLowerCase())}, ahora es ${esc(a.decision.toLowerCase())}.</p>` : "");
+    <p><b>Respaldo estadístico:</b> ${esc(a.respaldo)}</p>
+    <p><b>Qué hacer:</b> ${esc(a.accion)}</p>
+    <p><b>Qué podría hacer fallar la decisión:</b></p><ul>${a.riesgos.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` + (a.cambio ? `<p><b>Cambio de decisión:</b> antes era ${esc(sigT(a.veredicto_ant).toLowerCase())}, ahora es ${esc(a.decision.toLowerCase())}.</p>` : "");
   $("#descDia").innerHTML = dlBtn(`/api/dia?fecha=${a.fecha}&formato=pdf`, `PDF del ${flarga(a.fecha)}`) + dlBtn(`/api/dia?fecha=${a.fecha}&formato=xlsx`, "Excel del día") +
     `<p class="note" style="flex-basis:100%">Incluye todas las emisoras y la deuda: decisión, por qué, qué hacer, lo que pasó después y el entorno del día.</p>`;
   ligarDescargas($("#descDia"));
@@ -372,7 +388,7 @@ async function renderDetalle() {
   const okC = b.aciertos_compra >= 55 && b.rend_medio_compra > b.base_rend_medio, okV = b.aciertos_venta >= 55 && b.rend_medio_venta < b.base_rend_medio;
   $("#bt").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Señal</th><th>Casos</th><th>Aciertos</th><th>Rend. a ${b.horizonte} ses.</th><th>Lectura</th></tr></thead><tbody>` +
     fila("Compra", b.n_compra, b.aciertos_compra, b.rend_medio_compra, okC, okC ? "respaldada" : "sin respaldo") + fila("Venta", b.n_venta, b.aciertos_venta, b.rend_medio_venta, okV, okV ? "respaldada" : "sin respaldo") +
-    `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Prueba dentro de la misma muestra (${b.muestra} sesiones): sirve para calibrar la confianza, no la garantiza.</p>`;
+    `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Es una prueba dentro de la muestra de calibración (${b.muestra} sesiones de esta emisora): sirve para dimensionar la confianza, no la garantiza.</p>`;
   mxVista(a);
   queEs(a);
   cargarCambios();
@@ -699,6 +715,8 @@ const INFORME_HTML = `
   <section class="sec"><h2>¿Acertaron las decisiones?</h2><div id="aciertos"><p class="cargando">Calculando…</p></div></section>
   <section class="sec"><h2>Mapa de decisiones por día</h2><div class="legend" id="legTl"></div><div class="tl" id="timeline"></div></section>
   <section class="sec"><h2 id="diaTitulo">Detalle del día</h2><div id="diaDetalle"><p class="note">Elige un día en el mapa o en el calendario.</p></div></section>
+  <section class="sec"><h2>Ver sin internet</h2><p class="intro">Todo lo que consultas se guarda en este dispositivo y puedes verlo sin conexión. Este botón guarda de una vez todas las secciones del periodo elegido y los informes en PDF y Excel.</p>
+    <div class="dl-grupo"><button class="btn solid" id="guardarOffline">${ICON("download")}Guardar para ver sin internet</button><span class="note" id="guardarEstado"></span></div></section>
   <section class="sec"><h2>Archivo guardado</h2><p class="intro">El Excel trae una hoja por emisora e instrumento con todas las sesiones desde el 1 de marzo de 2026 y se genera al momento. Los CSV son tablas planas para otros programas.</p><div class="dl-grupo" id="descargas"></div></section>`;
 async function renderInforme() {
   armar("informe", INFORME_HTML);
@@ -707,6 +725,7 @@ async function renderInforme() {
   const ctx = S.ctx, an = S.data;
   $("#iResumen").innerHTML = `<p>${esc(an.mercado.texto_periodo || an.mercado.texto)}</p>` + (ctx ? `<p>${esc(ctx.lectura[0] || "")}</p>` : "");
   pintarVivo();
+  $("#guardarOffline").onclick = guardarTodo;
   $("#iDl").innerHTML = dlBtn(`/api/informe?${qsP()}&formato=pdf`, "Informe en PDF", true) + dlBtn(`/api/informe?${qsP()}&formato=xlsx`, "Informe en Excel") +
     `<p class="note" style="flex-basis:100%">Se genera al momento con los datos más recientes; puede tardar unos segundos.</p>`;
   ligarDescargas($("#iDl"));
@@ -799,12 +818,12 @@ function estadoLive() {
   a.setAttribute("aria-pressed", S.auto && !hist); a.disabled = !!hist;
   a.innerHTML = `${ICON(S.auto && !hist ? "pause" : "play")}<span class="t">${hist ? "Histórico" : S.auto ? "Auto" : "Pausado"}</span>`;
   a.title = hist ? "Consulta de un periodo pasado: no se actualiza en vivo" : S.auto ? "Actualización automática activa. Toca para pausar." : "Actualización en pausa. Toca para reanudar.";
-  const u = $("#updTxt"); if (u) u.textContent = textoActualizado() + (S.auto || hist ? "" : " · actualización en pausa");
+  const u = $("#updTxt"); if (u) u.textContent = (navigator.onLine ? "" : "Sin conexión · ") + textoActualizado() + (S.auto || hist ? "" : " · actualización en pausa");
 }
 let abiertoAntes = abierto();
 async function ciclo() {
   estadoLive();
-  if (!S.auto || document.hidden || S.busy || !S.data || !vivo()) return;
+  if (!S.auto || document.hidden || S.busy || !S.data || !vivo() || !navigator.onLine) return;
   const ab = abierto(), now = Date.now();
   try {
     if (abiertoAntes && !ab) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(); render(); }
@@ -835,11 +854,37 @@ function iniciarTema() {
   document.addEventListener("keydown", e => { if (e.key === "Escape") $("#menuTema").open = false; });
 }
 
+/* ---------------------------------------------------------------- sin internet */
+async function guardarTodo() {
+  const b = $("#guardarOffline"), est = $("#guardarEstado");
+  if (!navigator.onLine) { est.textContent = "Necesitas conexión para guardar los datos."; return; }
+  b.setAttribute("aria-busy", "true");
+  const q = qsP(), tks = [...S.selCmp].join(","), f = S.fechaDia || S.data?.acciones.find(a => !a.error)?.fecha;
+  const tareas = [["Mercado", `/api/analisis?${q}&tickers=${(S.tickers || []).join(",")}`], ["Entorno global", `/api/contexto?${q}`], ["Guía", "/api/guia"], ["Decisiones por día", `/api/archivo?${q}`],
+    ["Comparación", `/api/comparar?${q}&tickers=${tks}&moneda=${S.moneda}`], ["Simulación", `/api/simulacion?${q}&moneda=${S.moneda}`], ["Estado", "/api/estado"],
+    ["Informe en PDF", `/api/informe?${q}&formato=pdf`], ["Informe en Excel", `/api/informe?${q}&formato=xlsx`]];
+  if (f) tareas.push([`Día ${flarga(f)}`, `/api/dia?fecha=${f}`], ["PDF del día", `/api/dia?fecha=${f}&formato=pdf`], ["Excel del día", `/api/dia?fecha=${f}&formato=xlsx`]);
+  let ok = 0, fallas = [];
+  for (const [n, u] of tareas) {
+    est.textContent = `Guardando ${n}… (${ok + fallas.length + 1} de ${tareas.length})`;
+    try { const r = await fetch(u, { cache: "no-store" }); if (!r.ok) throw new Error(r.statusText); await r.blob(); ok++; } catch { fallas.push(n); }
+  }
+  b.removeAttribute("aria-busy");
+  est.textContent = fallas.length ? `Se guardaron ${ok} de ${tareas.length}. No se pudo guardar: ${fallas.join(", ")}.` : `Listo: ${ok} consultas guardadas. Ya puedes verlas sin internet.`;
+  S.guardado = Date.now();
+}
+function iniciarSinConexion() {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/static/sw.js", { scope: "/" }).catch(() => {});
+  addEventListener("offline", () => { S.sinConexion = true; avisoConexion(); estadoLive(); });
+  addEventListener("online", () => { S.sinConexion = false; avisoConexion(); estadoLive(); if (S.data) actualizar(true); });
+  avisoConexion();
+}
+
 /* -------------------------------------------------------------------- arranque */
 function init() {
   S.periodo = periodoGuardado();
   S.tickers = [];
-  renderNav(); renderPeriodo(); renderCinta(); iniciarTema();
+  renderNav(); renderPeriodo(); renderCinta(); iniciarTema(); iniciarSinConexion();
   $("#refresh").onclick = () => actualizar(true);
   $("#auto").onclick = () => { S.auto = !S.auto; store.set("auto", S.auto); estadoLive(); if (S.auto) ciclo(); };
   addEventListener("hashchange", () => setVista(location.hash.slice(1)));

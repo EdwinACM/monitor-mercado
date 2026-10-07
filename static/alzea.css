@@ -1,3 +1,12 @@
+@font-face{font-family:"Barlow";font-style:normal;font-weight:400;font-display:swap;src:url(/static/fonts/Barlow-Regular.ttf) format("truetype")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:500;font-display:swap;src:url(/static/fonts/Barlow-Medium.ttf) format("truetype")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:600;font-display:swap;src:url(/static/fonts/Barlow-SemiBold.ttf) format("truetype")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:700;font-display:swap;src:url(/static/fonts/Barlow-Bold.ttf) format("truetype")}
+@font-face{font-family:"Barlow";font-style:italic;font-weight:400;font-display:swap;src:url(/static/fonts/Barlow-Italic.ttf) format("truetype")}
+@font-face{font-family:"Barlow Semi Condensed";font-style:normal;font-weight:500 700;font-display:swap;src:url(/static/fonts/BarlowSemiCondensed-Bold.ttf) format("truetype")}
+.offline{background:var(--brand-suave);color:var(--brand-text);border-bottom:1px solid var(--rule-strong);padding:8px 16px;font:600 14px/1.4 var(--f-ui);text-align:center}
+.offline[hidden]{display:none}
+.offline button{margin-left:10px}
 /* Alzea · formato IPN. Colores oficiales del manual de identidad: guinda #750946, negro #231F20, gris #636569 y blanco.
    Sube/baja (verde y rojo) son colores funcionales, no del manual. Ver DESIGN.md */
 :root,:root[data-theme="claro"]{

@@ -89,7 +89,10 @@ def md_dia(reg):
     for e in reg["emisoras"]:
         L += ["", f"### {e['nombre']}: {e['decision']}", "", "**Por qué:**", ""]
         L += [f"- {p}" for p in e["por_que"]]
-        L += ["", f"**Qué hacer:** {e['accion']}", "", f"**Qué pasó después:** {posterior(e)}"]
+        L += ["", f"**Qué hacer:** {e['accion']}"]
+        if e.get("respaldo"):
+            L += ["", f"**Respaldo estadístico:** {e['respaldo']}"]
+        L += ["", f"**Qué pasó después:** {posterior(e)}"]
     L += ["", "## Deuda gubernamental y privada", ""]
     for x in reg["deuda"]:
         L += [f"### {x['nombre']}: {x['decision']}", ""] + [f"- {p}" for p in x["por_que"]] + [""]
@@ -482,6 +485,16 @@ def _ficha_accion(pdf, x, ctx, e, g, hist):
     filas = [[c["criterio"], f"{c['puntos']:+d} de {c['max']}", c["detalle"]] for c in x["componentes"]]
     _tabla(pdf, ["Criterio", "Puntos", "Qué se observó"], filas, (44, 22, 112), ["LEFT", "RIGHT", "LEFT"], {(i, 1): _color_var(c["puntos"]) for i, c in enumerate(x["componentes"])}, size=8.2)
     _p(pdf, f"Confianza {x['confianza'].lower()} · tendencia de 30 sesiones {x['tendencia']['etiqueta']}. " + x["accion"], size=9.2)
+    _h3(pdf, "Respaldo estadístico de la decisión", GUINDA)
+    _p(pdf, x["respaldo"], size=9.2)
+    cal = x.get("calibracion")
+    if cal:
+        act = [c_ for c_ in cal["criterios"] if c_["activo"]]
+        _p(pdf, f"Pesos de hoy: se usan {len(act)} de 9 señales; la más confiable en las últimas {cal['sesiones']} sesiones fue "
+                f"{max(cal['criterios'], key=lambda z: abs(z['correlacion']))['criterio'].lower()} (correlación {max(cal['criterios'], key=lambda z: abs(z['correlacion']))['correlacion']:+.2f} con el rendimiento a 5 sesiones).", size=9.2)
+    _h3(pdf, "Qué podría hacer fallar la decisión", GUINDA)
+    for t_ in x["riesgos"]:
+        _li(pdf, t_, size=9.2)
     _h3(pdf, "Sugerencia", GUINDA)
     _p(pdf, _sugerencia(x, e), size=9.2)
     b = x["backtest"]
@@ -552,6 +565,8 @@ def pdf_dia(reg):
         for q in e["por_que"]:
             _li(pdf, q)
         _p(pdf, "Qué hacer: " + e["accion"], espacio=0.8)
+        if e.get("respaldo"):
+            _p(pdf, "Respaldo estadístico: " + e["respaldo"], size=9, italic=True, color=GRIS, espacio=0.8)
         _p(pdf, "Qué pasó después: " + posterior(e))
     _h2(pdf, "Deuda gubernamental y privada")
     for x in reg["deuda"]:
@@ -588,7 +603,8 @@ def pdf_periodo(inf):
     us = [x["nombre"] for x in acc if x["pais"] != "México"]
     _p(pdf, f"Acciones de México (Bolsa Mexicana de Valores): {', '.join(mx)}. Acciones de Estados Unidos (Nasdaq y NYSE): {', '.join(us)}. "
             f"Deuda: {', '.join(x['nombre'] for x in an['deuda'])}.")
-    _p(pdf, "Para cada acción se calcula un puntaje de -100 a +100 con seis criterios (tendencia por medias móviles, MACD, RSI, bandas de Bollinger, momentum a 20 sesiones y regresión lineal de 30 sesiones). "
+    _p(pdf, "Para cada acción se calcula un puntaje de -100 a +100 con nueve señales técnicas (rebote semanal y de un día, RSI, bandas de Bollinger, momentum de 20, 60 y 120 sesiones, tendencia frente a la media de 50 sesiones y MACD). "
+            "El peso de cada señal se recalcula todos los días según cuánto anticipó el rendimiento a 5 sesiones de las 10 emisoras en las últimas 250 sesiones, usando solo resultados ya conocidos (nunca el futuro); si una señal funcionó al revés, se invierte. "
             "Con +20 o más la decisión es comprar; con -20 o menos, vender; entre ambos, mantener. En deuda se compara el rendimiento de la última subasta con el promedio de las últimas 12 (puntaje z). "
             "Las decisiones son un ejercicio educativo y se contrastan con lo que ocurrió después (sección 6).")
 

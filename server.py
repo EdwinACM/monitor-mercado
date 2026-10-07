@@ -305,8 +305,8 @@ def _verificar_sesiones(rows, desde):
 
 
 def ventana_historial():
-    """Historial largo (≈14 meses) para que las medias y el backtest tengan datos."""
-    return date.today() - timedelta(days=420)
+    """Historial largo (≈2.5 años): el modelo necesita 120 sesiones para sus señales y 250 más para calibrar sus pesos."""
+    return date.today() - timedelta(days=900)
 
 
 def cotizacion(t):
@@ -339,7 +339,10 @@ def cotizaciones(tickers):
 
 def analisis_completo(tickers, desde, hasta):
     """Decisiones, estadística y series para la pantalla, con datos hasta el último cierre del periodo."""
-    accs = acciones(tickers, ventana_historial())
+    import modelo
+    todas_acc = acciones(list(ACCIONES), ventana_historial())
+    mod = modelo.obtener({a["ticker"]: a["historico"] for a in todas_acc if not a.get("error") and a["historico"]})
+    accs = [a for a in todas_acc if a["ticker"] in tickers]
     items, ult = [], None
     for a in accs:
         rows = _cortar(a.get("historico", []), hasta)
@@ -347,7 +350,7 @@ def analisis_completo(tickers, desde, hasta):
             items.append({"ticker": a["ticker"], "nombre": a["nombre"], "error": a.get("error") or "Historial insuficiente"})
             continue
         _verificar_sesiones(rows, desde)
-        d = analisis.analizar_serie(a["nombre"], rows, desde.isoformat())
+        d = analisis.analizar_serie(a["nombre"], rows, desde.isoformat(), modelo=mod, ticker=a["ticker"])
         vivo = hasta >= date.today() and rows[-1]["fecha"] == a["historico"][-1]["fecha"]
         d.update(ticker=a["ticker"], nombre=a["nombre"], moneda=a.get("moneda"), mercado=a.get("mercado"), pais=a.get("pais"),
                  precio=a.get("precio") if vivo else None, hora=a.get("hora") if vivo else None)
@@ -450,6 +453,8 @@ class Handler(SimpleHTTPRequestHandler):
     def end_headers(self):
         if not self.path.startswith("/api/"):
             self.send_header("Cache-Control", "no-cache")  # el celular siempre recibe la versión más reciente
+        if self.path.split("?")[0] == "/static/sw.js":
+            self.send_header("Service-Worker-Allowed", "/")
         super().end_headers()
 
     def log_message(self, fmt, *args):
@@ -496,7 +501,7 @@ class Handler(SimpleHTTPRequestHandler):
                     raise ValueError("Falta la fecha (AAAA-MM-DD)")
                 reg = cached(("dia", f, date.today()), 600, lambda: dia(f))
                 fmt = qs.get("formato", ["json"])[0]
-                nombre = f"Alzea_analisis_{f}"
+                nombre = f"Analisis_del_dia_{f}"
                 if fmt == "pdf":
                     return self.send(reportes.pdf_dia(reg), "application/pdf", extra={"Content-Disposition": f'attachment; filename="{nombre}.pdf"'})
                 if fmt == "xlsx":
@@ -523,7 +528,7 @@ class Handler(SimpleHTTPRequestHandler):
                 elif ruta == "/api/informe":
                     fmt = qs.get("formato", ["json"])[0]
                     inf = cached(("inf", clave), 600, lambda: informe(desde, hasta))
-                    nombre = f"Alzea_informe_{desde:%Y%m%d}_{hasta:%Y%m%d}"
+                    nombre = f"Informe_de_mercados_{desde:%Y-%m-%d}_a_{hasta:%Y-%m-%d}"
                     if fmt == "pdf":
                         return self.send(reportes.pdf_periodo(inf), "application/pdf", extra={"Content-Disposition": f'attachment; filename="{nombre}.pdf"'})
                     if fmt == "xlsx":
