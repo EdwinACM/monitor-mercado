@@ -788,6 +788,7 @@ async function renderInforme() {
     const A = await cargarArchivo();
     if (!S.fechaDia || S.fechaDia < p.desde || S.fechaDia > p.hasta) S.fechaDia = A.dias.at(-1)?.fecha;
     pintarArchivo(A);
+    cargarDia(false);
   } catch (e) { $("#aciertos").innerHTML = `<p class="note">No se pudo calcular: ${esc(e.message)}</p>`; }
 }
 function pintarVivo() {
