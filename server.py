@@ -1,13 +1,17 @@
-"""Monitor de Mercado — consulta de datos y análisis.
+"""Alzea: consulta de datos y análisis.
 
-Consulta Yahoo Finance (acciones BMV) y Banco de México (subastas de deuda).
-En producción lo usan las funciones de Vercel (api/*.py); en la Mac puede correr
-como servidor local (solo 127.0.0.1) con:  python server.py
+Acciones: Yahoo Finance (datos de mercado). Deuda, tipo de cambio y tasas: Banco de México (SIE).
+Entorno de EE. UU.: Tesoro de EE. UU., Reserva Federal de Nueva York, BLS y Cboe (ver fuentes.py).
+En producción lo usan las funciones de Vercel (api/*.py); en la Mac puede correr como servidor
+local (solo 127.0.0.1) con:  python server.py
 """
 import io
 import json
+import re
 import threading
 import time
+import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -20,15 +24,17 @@ import analisis
 import diario
 import reportes
 import truststore
-from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl import load_workbook
 
 truststore.inject_into_ssl()  # usa los certificados de macOS/Windows (redes con proxy)
 
 PORT = 8765
 TZ = ZoneInfo("America/Mexico_City")
 STATIC = Path(__file__).parent / "static"
-UA = {"User-Agent": "Mozilla/5.0 (Macintosh) MonitorMercado/1.0"}
+UA = {"User-Agent": "Mozilla/5.0 (Macintosh) Alzea/1.0"}
+
+# Primer día consultable: todos los periodos arrancan el 1 de marzo de 2026 o después.
+INICIO = date(2026, 3, 1)
 
 ACCIONES = {
     "WALMEX.MX": "Walmart de México",
@@ -36,15 +42,53 @@ ACCIONES = {
     "KOFUBL.MX": "Coca-Cola FEMSA",
     "KIMBERA.MX": "Kimberly-Clark de México",
     "OMAB.MX": "Grupo Aeroportuario Centro Norte",
+    "AAPL": "Apple",
+    "MSFT": "Microsoft",
+    "NVDA": "NVIDIA",
+    "TSLA": "Tesla",
+    "KO": "The Coca-Cola Company",
+}
+META = {
+    "WALMEX.MX": {"mercado": "BMV", "moneda": "MXN", "pais": "México"},
+    "AMXB.MX": {"mercado": "BMV", "moneda": "MXN", "pais": "México"},
+    "KOFUBL.MX": {"mercado": "BMV", "moneda": "MXN", "pais": "México"},
+    "KIMBERA.MX": {"mercado": "BMV", "moneda": "MXN", "pais": "México"},
+    "OMAB.MX": {"mercado": "BMV", "moneda": "MXN", "pais": "México"},
+    "AAPL": {"mercado": "Nasdaq", "moneda": "USD", "pais": "EE. UU."},
+    "MSFT": {"mercado": "Nasdaq", "moneda": "USD", "pais": "EE. UU."},
+    "NVDA": {"mercado": "Nasdaq", "moneda": "USD", "pais": "EE. UU."},
+    "TSLA": {"mercado": "Nasdaq", "moneda": "USD", "pais": "EE. UU."},
+    "KO": {"mercado": "NYSE", "moneda": "USD", "pais": "EE. UU."},
 }
 
-# (cuadro Banxico, sección, renglón buscado, emisor, unidad, tipo)
+# cuadro Banxico, sección, renglón principal, emisor, unidad, tipo, renglones complementarios
 DEUDA = {
-    "CETES 28 días": ("CF107", "Cetes a 28 días", "Tasa de rendimiento", "Gobierno Federal", "% anual", "tasa"),
-    "BONDES F 2 años": ("CF107", "Bondes F a 2 años", "Precio Promedio", "Gobierno Federal", "$ por título de $100", "precio"),
-    "UDIBONOS 10 años": ("CF107", "Udibonos a 10 años", "Tasa de rendimiento real", "Gobierno Federal", "% real anual", "tasa"),
-    "BPAG28 3 años": ("CF115", "BPAG28", "Sobretasa", "IPAB", "puntos % sobre referencia", "tasa"),
-    "BONOS M 10 años": ("CF107", "Bonos a tasa fija a 10 años", "Tasa de rendimiento", "Gobierno Federal", "% anual", "tasa"),
+    "CETES 28 días": dict(codigo="CETES 28", cuadro="CF107", seccion="Cetes a 28 días", renglon="Tasa de rendimiento",
+                          emisor="Gobierno Federal", unidad="% anual", tipo="tasa",
+                          extras=[("Monto asignado (millones de pesos)", "Monto asignado")]),
+    "BONOS M 10 años": dict(codigo="BONO M 10A", cuadro="CF107", seccion="Bonos a tasa fija a 10 años", renglon="Tasa de rendimiento",
+                            emisor="Gobierno Federal", unidad="% anual", tipo="tasa",
+                            extras=[("Monto asignado (millones de pesos)", "Monto asignado")]),
+    "UDIBONOS 10 años": dict(codigo="UDIBONO 10A", cuadro="CF107", seccion="Udibonos a 10 años", renglon="Tasa de rendimiento real",
+                             emisor="Gobierno Federal", unidad="% real anual", tipo="tasa",
+                             extras=[("Monto asignado (millones de UDIS)", "Monto asignado")]),
+    "PAPEL COMERCIAL": dict(codigo="PAPEL COM.", cuadro="CF133", seccion="Papel Comercial", renglon="Monto colocado",
+                            emisor="Empresas emisoras (BMV)", unidad="miles de pesos colocados por semana", tipo="monto",
+                            extras=[("Saldo vigente (miles de pesos)", "Saldo vigente")]),
+    "CERTIFICADOS BURSÁTILES": dict(codigo="CEBURES CP", cuadro="CF133", seccion="Certificados Bursátiles a Corto Plazo",
+                                    renglon="Tasa promedio ponderada", emisor="Empresas emisoras (BMV)",
+                                    unidad="% anual (corto plazo)", tipo="tasa",
+                                    extras=[("Monto colocado (miles de pesos)", "Monto colocado"),
+                                            ("Saldo vigente (miles de pesos)", "Saldo vigente"),
+                                            ("Plazo promedio de colocación (días)", "Plazo promedio ponderado de colocación")]),
+    "CETES 91 días (referencia)": dict(codigo="CETES 91", cuadro="CF107", seccion="Cetes a 91 días", renglon="Tasa de rendimiento",
+                                       emisor="Gobierno Federal", unidad="% anual", tipo="tasa", extras=[], oculto=True),
+    "BONDES F 2 años": dict(codigo="BONDE F 2A", cuadro="CF107", seccion="Bondes F a 2 años", renglon="Precio Promedio",
+                            emisor="Gobierno Federal", unidad="$ por título de $100", tipo="precio",
+                            extras=[("Monto asignado (millones de pesos)", "Monto asignado")]),
+    "BPAG28 3 años": dict(codigo="BPAG28 3A", cuadro="CF115", seccion="BPAG28", renglon="Sobretasa",
+                          emisor="IPAB", unidad="puntos % sobre referencia", tipo="tasa",
+                          extras=[("Monto asignado (millones de pesos)", "Monto asignado")]),
 }
 
 _cache, _lock = {}, threading.Lock()
@@ -61,10 +105,27 @@ def cached(key, ttl, fn):
     return val
 
 
-def http_get(url, timeout=60):
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
+def http_get(url, timeout=60, reintentos=3, cabeceras=None):
+    """GET con reintentos (los portales oficiales limitan ráfagas con HTTP 429)."""
+    for k in range(reintentos):
+        try:
+            req = urllib.request.Request(url, headers={**UA, **(cabeceras or {})})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 500, 502, 503, 504) and k < reintentos - 1:
+                time.sleep(1.5 * (k + 1))
+                continue
+            raise
+        except (TimeoutError, urllib.error.URLError):
+            if k < reintentos - 1:
+                time.sleep(1.0)
+                continue
+            raise
+
+
+def sin_acentos(t):
+    return "".join(c for c in unicodedata.normalize("NFKD", str(t)) if not unicodedata.combining(c)).lower()
 
 
 def mercado_abierto(now=None):
@@ -113,7 +174,9 @@ def historico(ticker, desde):
     return {
         "ticker": ticker,
         "nombre": ACCIONES.get(ticker, meta.get("longName") or meta.get("shortName") or ticker),
-        "moneda": meta.get("currency"),
+        "moneda": META.get(ticker, {}).get("moneda") or meta.get("currency"),
+        "mercado": META.get(ticker, {}).get("mercado"),
+        "pais": META.get(ticker, {}).get("pais"),
         "precio": precio,
         "hora": datetime.fromtimestamp(hora, TZ).isoformat() if hora else None,
         "historico": filas,
@@ -130,7 +193,23 @@ def intradia(ticker):
 
 
 # ---------------- Banco de México ----------------
-def banxico_cuadro(cuadro, desde, hasta):
+_MESES3 = {"ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6, "jul": 7, "ago": 8, "sep": 9, "oct": 10, "nov": 11, "dic": 12}
+
+
+def _fecha_columna(v):
+    """Encabezado de columna del SIE: dd/mm/aaaa (diaria o semanal) o «Mar 2026» (mensual, primer día del mes)."""
+    if not isinstance(v, str):
+        return None
+    v = v.strip()
+    if re.fullmatch(r"\d\d/\d\d/\d{4}", v):
+        return datetime.strptime(v, "%d/%m/%Y").date().isoformat()
+    m = re.fullmatch(r"([A-Za-zñÑ]{3})[a-z]* (\d{4})", v)
+    if m and m.group(1).lower() in _MESES3:
+        return date(int(m.group(2)), _MESES3[m.group(1).lower()], 1).isoformat()
+    return None
+
+
+def _banxico_cuadro(cuadro, desde, hasta):
     ms = lambda d: int(datetime.combine(d, datetime.min.time(), TZ).timestamp() * 1000)
     url = ("https://www.banxico.org.mx/SieInternet/consultarDirectorioInternetAction.do?"
            f"sector=22&accion=consultarCuadro&idCuadro={cuadro}&locale=es&formatoXLS.x=1"
@@ -140,40 +219,55 @@ def banxico_cuadro(cuadro, desde, hasta):
         raise RuntimeError(f"Banxico no devolvió el cuadro {cuadro}")
     ws = load_workbook(io.BytesIO(raw)).active
     rows = [list(r) for r in ws.iter_rows(values_only=True)]
-    fila_fechas = next(r for r in rows if any(isinstance(v, str) and v.count("/") == 2 and len(v) == 10 for v in r[2:]))
-    fechas = [datetime.strptime(v, "%d/%m/%Y").date().isoformat() if isinstance(v, str) and v.count("/") == 2 else None
-              for v in fila_fechas]
-    return fechas, rows
+    fila = next((r for r in rows if sum(1 for v in r[2:] if _fecha_columna(v)) >= 1), None)
+    if fila is None:
+        raise RuntimeError(f"El cuadro {cuadro} no trae fechas en el periodo")
+    return [_fecha_columna(v) if j >= 2 else None for j, v in enumerate(fila)], rows
 
 
-def serie_deuda(nombre, desde, hasta, cuadros):
-    cuadro, seccion, renglon, emisor, unidad, tipo = DEUDA[nombre]
-    fechas, rows = cuadros[cuadro]
-    actual, datos = None, []
+def banxico_cuadro(cuadro, desde, hasta):
+    return cached(("bx", cuadro, desde, hasta), 3 * 3600, lambda: _banxico_cuadro(cuadro, desde, hasta))
+
+
+def valores_en_seccion(fechas, rows, seccion, renglon):
+    """{fecha: valor} del primer renglón que contiene `renglon` dentro de la sección `seccion` (marcada con ●)."""
+    actual = None
     for r in rows:
         label = (r[1] or "") if len(r) > 1 else ""
         if "●" in label:
             actual = label.split("●")[-1].strip()
         elif actual and actual.startswith(seccion) and renglon.lower() in label.lower():
-            datos = [{"fecha": fechas[j], "valor": float(v)} for j, v in enumerate(r)
-                     if j >= 2 and fechas[j] and isinstance(v, (int, float))]
-            break
-    for i, d in enumerate(datos):
+            vals = {fechas[j]: float(v) for j, v in enumerate(r) if j >= 2 and fechas[j] and isinstance(v, (int, float))}
+            if vals:  # los encabezados de subsección (sin cifras) se saltan
+                return vals
+    return {}
+
+
+def serie_deuda(nombre, cuadros):
+    d = DEUDA[nombre]
+    fechas, rows = cuadros[d["cuadro"]]
+    principal = valores_en_seccion(fechas, rows, d["seccion"], d["renglon"])
+    extras = {etq: valores_en_seccion(fechas, rows, d["seccion"], ren) for etq, ren in d["extras"]}
+    datos = [{"fecha": f, "valor": v, "extra": {e: extras[e].get(f) for e in extras}} for f, v in sorted(principal.items())]
+    for i, x in enumerate(datos):
         prev = datos[i - 1]["valor"] if i else None
-        d["var"] = d["valor"] - prev if prev is not None else None
-        d["var_pb"] = (d["valor"] - prev) * 100 if prev is not None and tipo == "tasa" else None
-        d["var_pct"] = d["valor"] / prev - 1 if prev else None
-    return {"nombre": nombre, "emisor": emisor, "unidad": unidad, "tipo": tipo, "datos": datos}
+        x["var"] = x["valor"] - prev if prev is not None else None
+        x["var_pb"] = (x["valor"] - prev) * 100 if prev is not None and d["tipo"] == "tasa" else None
+        x["var_pct"] = x["valor"] / prev - 1 if prev else None
+    return {"nombre": nombre, "codigo": d["codigo"], "emisor": d["emisor"], "unidad": d["unidad"], "tipo": d["tipo"],
+            "cuadro": d["cuadro"], "extras": [e for e, _ in d["extras"]], "datos": datos}
 
 
 def deuda(desde):
     hasta = datetime.now(TZ).date()
 
     def cargar():
-        cuadros = {c: banxico_cuadro(c, desde, hasta) for c in {v[0] for v in DEUDA.values()}}
-        return [serie_deuda(n, desde, hasta, cuadros) for n in DEUDA]
+        cuadros = {}
+        for c in sorted({v["cuadro"] for v in DEUDA.values()}):  # 3 cuadros, uno tras otro: Banxico limita ráfagas
+            cuadros[c] = banxico_cuadro(c, desde, hasta)
+        return [serie_deuda(n, cuadros) for n in DEUDA]
 
-    # las subastas son semanales: basta refrescar cada 3 h
+    # las subastas y colocaciones son semanales: basta refrescar cada 3 h
     return cached(("deuda", desde, hasta), 3 * 3600, cargar)
 
 
@@ -190,11 +284,24 @@ def acciones(tickers, desde):
         return list(ex.map(uno, tickers))
 
 
-def validar_desde(accs, desde):
-    """La fecha inicial debe ser anterior al último cierre disponible; si no, el periodo queda vacío."""
-    ult = max((a["historico"][-1]["fecha"] for a in accs if a.get("historico")), default=None)
-    if ult and desde.isoformat() >= ult:
-        raise ValueError(f"La fecha inicial ({desde.isoformat()}) debe ser anterior al último cierre ({ult}). Elige una fecha más antigua.")
+def periodo(qs):
+    """Periodo consultable: nunca antes del 1 de marzo de 2026 ni después de hoy."""
+    hoy = datetime.now(TZ).date()
+    d = date.fromisoformat(qs.get("desde", [INICIO.isoformat()])[0])
+    h = date.fromisoformat(qs.get("hasta", [hoy.isoformat()])[0])
+    d, h = max(d, INICIO), min(h, hoy)
+    if d >= h:
+        raise ValueError("El periodo debe empezar el 1 de marzo de 2026 o después, y «Desde» debe ser anterior a «Hasta».")
+    return d, h
+
+
+def _cortar(rows, hasta):
+    return [r for r in rows if r["fecha"] <= hasta.isoformat()]
+
+
+def _verificar_sesiones(rows, desde):
+    if sum(1 for r in rows if r["fecha"] >= desde.isoformat()) < 2:
+        raise ValueError("El periodo elegido no incluye al menos dos sesiones de mercado. Amplía las fechas.")
 
 
 def ventana_historial():
@@ -230,105 +337,104 @@ def cotizaciones(tickers):
         return list(ex.map(uno, tickers))
 
 
-def analisis_completo(tickers, desde):
-    """Señales, estadística y series para la pantalla (todo calculado en el servidor)."""
+def analisis_completo(tickers, desde, hasta):
+    """Decisiones, estadística y series para la pantalla, con datos hasta el último cierre del periodo."""
     accs = acciones(tickers, ventana_historial())
-    validar_desde(accs, desde)
-    items = []
+    items, ult = [], None
     for a in accs:
-        if a.get("error") or len(a["historico"]) < 30:
+        rows = _cortar(a.get("historico", []), hasta)
+        if a.get("error") or len(rows) < 30:
             items.append({"ticker": a["ticker"], "nombre": a["nombre"], "error": a.get("error") or "Historial insuficiente"})
             continue
-        d = analisis.analizar_serie(a["nombre"], a["historico"], desde.isoformat())
-        d.update(ticker=a["ticker"], nombre=a["nombre"], precio=a.get("precio"), hora=a.get("hora"))
+        _verificar_sesiones(rows, desde)
+        d = analisis.analizar_serie(a["nombre"], rows, desde.isoformat())
+        vivo = hasta >= date.today() and rows[-1]["fecha"] == a["historico"][-1]["fecha"]
+        d.update(ticker=a["ticker"], nombre=a["nombre"], moneda=a.get("moneda"), mercado=a.get("mercado"), pais=a.get("pais"),
+                 precio=a.get("precio") if vivo else None, hora=a.get("hora") if vivo else None)
         items.append(d)
+        ult = max(ult or d["fecha"], d["fecha"])
     ok = [x for x in items if "error" not in x]
     deu = []
-    for s in deuda(date.today() - timedelta(days=300)):
-        d = analisis.analizar_deuda(s)
-        d["datos"] = [x for x in s["datos"] if x["fecha"] >= desde.isoformat()]
+    todas = deuda(date.today() - timedelta(days=300))
+    cetes91 = next((x for x in todas if x["nombre"].startswith("CETES 91")), None)
+    for sd in todas:
+        if DEUDA[sd["nombre"]].get("oculto"):
+            continue
+        d = analisis.analizar_deuda(sd, hasta=hasta.isoformat(), desde=desde.isoformat())
+        datos = [x for x in sd["datos"] if desde.isoformat() <= x["fecha"] <= hasta.isoformat()]
+        if sd["nombre"] == "CERTIFICADOS BURSÁTILES" and cetes91 and datos:
+            ref = [(x["fecha"], x["valor"]) for x in cetes91["datos"]]
+            fx_ = [f for f, _ in ref]
+            for x in datos:
+                i = max(0, __import__("bisect").bisect_right(fx_, x["fecha"]) - 1)
+                x["extra"]["Prima sobre CETES a 91 días (puntos base)"] = round((x["valor"] - ref[i][1]) * 100, 2) if ref else None
+            if datos[-1]["extra"].get("Prima sobre CETES a 91 días (puntos base)") is not None:
+                pr = datos[-1]["extra"]["Prima sobre CETES a 91 días (puntos base)"]
+                d["por_que"].append(f"Los certificados bursátiles de corto plazo pagaron {pr:+.2f} pb sobre los CETES a 91 días en la última semana: es la prima por riesgo de crédito.")
+                d["extras"] = d.get("extras", []) + ["Prima sobre CETES a 91 días (puntos base)"]
+        d["datos"] = datos
         deu.append(d)
     return {"ahora": datetime.now(TZ).isoformat(), "mercado_abierto": mercado_abierto(),
+            "periodo": {"desde": desde.isoformat(), "hasta": hasta.isoformat(), "inicio": INICIO.isoformat(),
+                        "ultimo_cierre": ult, "vivo": hasta >= date.today()},
             "mercado": analisis.resumen_mercado(ok), "acciones": items, "deuda": deu}
+
+
+def _historiales(tickers=None):
+    accs = acciones(list(tickers or ACCIONES), ventana_historial())
+    return {a["ticker"]: a["historico"] for a in accs if not a.get("error") and a["historico"]}
+
+
+def _fx():
+    """Tipo de cambio de cierre de jornada (Banxico) para convertir cierres de acciones de EE. UU. a pesos."""
+    import fuentes
+    return fuentes.fx_cierre(INICIO - timedelta(days=15), datetime.now(TZ).date())
 
 
 def dia(fecha_iso):
     """Registro de un día: decisiones, porqué y qué pasó después (para descargar en PDF, Excel o Markdown)."""
-    hist = {a["ticker"]: a["historico"] for a in acciones(list(ACCIONES), ventana_historial()) if a["historico"]}
-    deu = deuda(date.today() - timedelta(days=300))
-    reg = diario.registro_dia(fecha_iso, hist, deu, ACCIONES)
+    f = date.fromisoformat(fecha_iso)
+    if f < INICIO:
+        raise ValueError("Solo hay análisis desde el 1 de marzo de 2026.")
+    hist = _historiales()
+    reg = diario.registro_dia(fecha_iso, hist, deuda(date.today() - timedelta(days=300)), ACCIONES, META)
     if not reg:
-        raise ValueError("No hubo sesión de la BMV en esa fecha o no hay historial suficiente")
-    return diario.completar([reg], hist)[0]
+        raise ValueError("No hubo sesión de mercado en esa fecha o no hay historial suficiente")
+    reg = diario.completar([reg], hist)[0]
+    try:
+        import contexto
+        reg["entorno"] = contexto.entorno_del_dia(fecha_iso)
+    except Exception as e:  # el reporte sale aunque alguna fuente externa falle
+        reg["entorno"] = {"error": str(e), "indicadores": []}
+    return reg
 
 
-def simulacion(desde):
-    accs = acciones(list(ACCIONES), ventana_historial())
-    validar_desde(accs, desde)
-    hist = {a["ticker"]: a["historico"] for a in accs if a["historico"]}
-    return analisis.simular(hist, desde.isoformat())
+def archivo(desde, hasta):
+    """Decisiones día por día dentro del periodo y qué tan seguido acertaron (cálculo directo, sin archivos)."""
+    return diario.resumen_periodo(_historiales(), desde.isoformat(), hasta.isoformat(), META)
 
 
-def comparacion(tickers, desde):
-    accs = acciones(tickers, ventana_historial())
-    validar_desde(accs, desde)
-    hist = {a["ticker"]: a["historico"] for a in accs if not a.get("error") and a["historico"]}
-    return analisis.comparar(hist, desde.isoformat())
+def simulacion(desde, hasta, moneda="mxn"):
+    hist = _historiales()
+    fx = _fx() if moneda == "mxn" else None
+    return analisis.simular(hist, desde.isoformat(), hasta.isoformat(), fx=fx, meta=META)
 
 
-# ---------------- Exportar a Excel ----------------
-def excel(tickers, desde):
-    G = "6C1D45"
-    hdr, hf = PatternFill("solid", fgColor=G), Font(bold=True, color="FFFFFF")
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Resumen"
-    ws.append([f"Monitor de mercado — del {desde:%d/%m/%Y} al {datetime.now(TZ):%d/%m/%Y %H:%M}"])
-    ws["A1"].font = Font(bold=True, size=13, color=G)
+def comparacion(tickers, desde, hasta, moneda="mxn"):
+    hist = _historiales(tickers)
+    fx = _fx() if moneda == "mxn" else None
+    for t in list(hist):
+        _verificar_sesiones(_cortar(hist[t], hasta), desde)
+    return analisis.comparar(hist, desde.isoformat(), hasta.isoformat(), fx=fx, meta=META)
 
-    def encabezado(sheet, cols):
-        sheet.append(cols)
-        for c in sheet[sheet.max_row]:
-            c.fill, c.font, c.alignment = hdr, hf, Alignment(horizontal="center", wrap_text=True)
 
-    acc = acciones(tickers, desde)
-    ws.append([])
-    encabezado(ws, ["Acción", "Ticker", "Cierre inicial", "Último", "Var. $", "Var. %"])
-    for a in acc:
-        h = a["historico"]
-        if h:
-            ws.append([a["nombre"], a["ticker"], h[0]["cierre"], h[-1]["cierre"],
-                       h[-1]["cierre"] - h[0]["cierre"], h[-1]["var_acum_pct"]])
-            ws.cell(ws.max_row, 6).number_format = "0.00%"
-    deu = deuda(desde)
-    ws.append([])
-    encabezado(ws, ["Instrumento", "Emisor", "Valor inicial", "Último", "Variación", "Unidad"])
-    for d in deu:
-        s = d["datos"]
-        if s:
-            delta = s[-1]["valor"] - s[0]["valor"]
-            ws.append([d["nombre"], d["emisor"], s[0]["valor"], s[-1]["valor"],
-                       f"{delta * 100:+.0f} pb" if d["tipo"] == "tasa" else round(delta, 5), d["unidad"]])
-    for col, w in zip("ABCDEF", (36, 18, 14, 12, 12, 26)):
-        ws.column_dimensions[col].width = w
-
-    for a in acc:
-        s = wb.create_sheet(a["ticker"].replace(".MX", "")[:31])
-        encabezado(s, ["Fecha", "Apertura", "Máximo", "Mínimo", "Cierre", "Volumen", "Var. $", "Var. %", "Var. acum. %"])
-        for f in a["historico"]:
-            s.append([f["fecha"], f["apertura"], f["maximo"], f["minimo"], f["cierre"], f["volumen"],
-                      f["var"], f["var_pct"], f["var_acum_pct"]])
-            for j in (8, 9):
-                s.cell(s.max_row, j).number_format = "0.00%"
-    for d in deu:
-        s = wb.create_sheet(d["nombre"][:31])
-        encabezado(s, ["Fecha subasta", f"Valor ({d['unidad']})", "Var. (pb)" if d["tipo"] == "tasa" else "Var. $", "Var. %"])
-        for f in d["datos"]:
-            s.append([f["fecha"], f["valor"], f["var_pb"] if d["tipo"] == "tasa" else f["var"], f["var_pct"]])
-            s.cell(s.max_row, 4).number_format = "0.00%"
-    buf = io.BytesIO()
-    wb.save(buf)
-    return buf.getvalue()
+def informe(desde, hasta):
+    """Todo lo necesario para el informe del periodo (pantalla, PDF y Excel)."""
+    import contexto
+    an = analisis_completo(list(ACCIONES), desde, hasta)
+    return {"periodo": an["periodo"], "analisis": an,
+            "contexto": contexto.construir(desde, hasta, an["acciones"]),
+            "archivo": archivo(desde, hasta), "simulacion": simulacion(desde, hasta, "mxn")}
 
 
 # ---------------- Servidor HTTP ----------------
@@ -364,57 +470,75 @@ class Handler(SimpleHTTPRequestHandler):
         if not u.path.startswith("/api/"):
             return super().do_GET()
         qs = urllib.parse.parse_qs(u.query)
-        if "fresco" in qs:  # botón Actualizar: ignora la caché y vuelve a consultar las fuentes
+        if "fresco" in qs:  # actualizar: vuelve a pedir precios; los datos de Banxico y del Tesoro (cambian por semana o día) conservan su caché
             with _lock:
-                _cache.clear()
+                for k in [k for k in _cache if isinstance(k, tuple) and k[0] in ("acc", "cot", "intra", "sim", "arch", "dia", "inf", "ctx")]:
+                    del _cache[k]
         try:
-            desde = date.fromisoformat(qs.get("desde", ["2026-03-01"])[0])
-            tickers = [t.strip().upper() for t in qs.get("tickers", [",".join(ACCIONES)])[0].split(",") if t.strip()]
-            if u.path == "/api/estado":
-                data = {"ahora": datetime.now(TZ).isoformat(), "mercado_abierto": mercado_abierto(),
-                        "acciones": ACCIONES, "deuda": list(DEUDA)}
-            elif u.path == "/api/acciones":
-                data = acciones(tickers, desde)
-            elif u.path == "/api/intradia":
+            tickers = [t.strip() for t in qs.get("tickers", [",".join(ACCIONES)])[0].split(",") if t.strip() in ACCIONES]
+            ruta = u.path
+            if ruta == "/api/estado":
+                data = {"ahora": datetime.now(TZ).isoformat(), "mercado_abierto": mercado_abierto(), "inicio": INICIO.isoformat(),
+                        "acciones": ACCIONES, "meta": META, "deuda": [n for n, d in DEUDA.items() if not d.get("oculto")]}
+            elif ruta == "/api/intradia":
                 t = qs["ticker"][0]
+                if t not in ACCIONES:
+                    raise ValueError("Emisora desconocida")
                 data = cached(("intra", t), 60, lambda: intradia(t))
-            elif u.path == "/api/deuda":
-                data = deuda(desde)
-            elif u.path == "/api/analisis":
-                data = analisis_completo(tickers, desde)
-            elif u.path == "/api/comparar":
-                data = comparacion(tickers, desde)
-            elif u.path == "/api/cotizaciones":
+            elif ruta == "/api/cotizaciones":
                 data = cotizaciones(tickers)
-            elif u.path == "/api/simulacion":
-                data = cached(("sim", desde, date.today()), 120, lambda: simulacion(desde))
-            elif u.path == "/api/dia":
+            elif ruta == "/api/guia":
+                import glosario
+                data = glosario.guia(ACCIONES, META, {n: d for n, d in DEUDA.items() if not d.get("oculto")})
+            elif ruta == "/api/dia":
                 f = qs.get("fecha", [None])[0]
                 if not f:
                     raise ValueError("Falta la fecha (AAAA-MM-DD)")
-                date.fromisoformat(f)
-                reg = cached(("dia", f, date.today()), 120, lambda: dia(f))
+                reg = cached(("dia", f, date.today()), 600, lambda: dia(f))
                 fmt = qs.get("formato", ["json"])[0]
+                nombre = f"Alzea_analisis_{f}"
                 if fmt == "pdf":
-                    return self.send(reportes.pdf_dia(reg), "application/pdf", extra={"Content-Disposition": f'attachment; filename="Alzea_analisis_{f}.pdf"'})
+                    return self.send(reportes.pdf_dia(reg), "application/pdf", extra={"Content-Disposition": f'attachment; filename="{nombre}.pdf"'})
                 if fmt == "xlsx":
-                    return self.send(reportes.xlsx_dia(reg), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                     extra={"Content-Disposition": f'attachment; filename="Alzea_analisis_{f}.xlsx"'})
+                    return self.send(reportes.xlsx_dia(reg), XLSX, extra={"Content-Disposition": f'attachment; filename="{nombre}.xlsx"'})
                 if fmt == "md":
-                    return self.send(reportes.md_dia(reg).encode(), "text/markdown; charset=utf-8", extra={"Content-Disposition": f'attachment; filename="Alzea_analisis_{f}.md"'})
+                    return self.send(reportes.md_dia(reg).encode(), "text/markdown; charset=utf-8", extra={"Content-Disposition": f'attachment; filename="{nombre}.md"'})
                 data = reg
-            elif u.path == "/api/excel":
-                name = f"Mercado_{desde:%Y%m%d}_{datetime.now(TZ):%Y%m%d}.xlsx"
-                return self.send(excel(tickers, desde),
-                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                 extra={"Content-Disposition": f'attachment; filename="{name}"'})
             else:
-                return self.send(b'{"error":"ruta no encontrada"}', status=404)
+                desde, hasta = periodo(qs)
+                clave = (desde, hasta, date.today())
+                if ruta == "/api/analisis":
+                    data = analisis_completo(tickers, desde, hasta)
+                elif ruta == "/api/deuda":
+                    data = analisis_completo(list(ACCIONES)[:1], desde, hasta)["deuda"]
+                elif ruta == "/api/comparar":
+                    data = comparacion(tickers, desde, hasta, qs.get("moneda", ["mxn"])[0])
+                elif ruta == "/api/simulacion":
+                    data = cached(("sim", clave, qs.get("moneda", ["mxn"])[0]), 300, lambda: simulacion(desde, hasta, qs.get("moneda", ["mxn"])[0]))
+                elif ruta == "/api/archivo":
+                    data = cached(("arch", clave), 300, lambda: archivo(desde, hasta))
+                elif ruta == "/api/contexto":
+                    import contexto
+                    data = contexto.construir(desde, hasta)
+                elif ruta == "/api/informe":
+                    fmt = qs.get("formato", ["json"])[0]
+                    inf = cached(("inf", clave), 600, lambda: informe(desde, hasta))
+                    nombre = f"Alzea_informe_{desde:%Y%m%d}_{hasta:%Y%m%d}"
+                    if fmt == "pdf":
+                        return self.send(reportes.pdf_periodo(inf), "application/pdf", extra={"Content-Disposition": f'attachment; filename="{nombre}.pdf"'})
+                    if fmt == "xlsx":
+                        return self.send(reportes.xlsx_periodo(inf), XLSX, extra={"Content-Disposition": f'attachment; filename="{nombre}.xlsx"'})
+                    data = inf
+                else:
+                    return self.send(b'{"error":"ruta no encontrada"}', status=404)
             self.send(json.dumps(data, ensure_ascii=False).encode())
         except Exception as e:
             self.send(json.dumps({"error": str(e)}, ensure_ascii=False).encode(), status=502)
 
 
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
 if __name__ == "__main__":
-    print(f"Monitor de mercado en http://localhost:{PORT}  (Ctrl+C para detener)")
+    print(f"Alzea en http://localhost:{PORT}  (Ctrl+C para detener)")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

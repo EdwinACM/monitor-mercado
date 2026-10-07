@@ -1,4 +1,4 @@
-# Función de Vercel: reutiliza la lógica de server.py (rutas /api/*)
+# Función de Vercel: ruta /api/informe
 import sys
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path

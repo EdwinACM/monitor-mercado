@@ -4,6 +4,7 @@ Todo es determinista y explicable: cada señal se compone de seis criterios con
 puntos (máx. ±100) y se describe en español. Es una herramienta educativa; no
 constituye asesoría financiera.
 """
+import bisect
 import math
 from statistics import mean, pstdev, stdev
 
@@ -323,7 +324,7 @@ def resumen_mercado(items):
     peor = min(items, key=lambda x: x["var_pct"])
     cuenta = {}
     for x in items:
-        k = "COMPRAR" if "COMPRA" in x["veredicto"] else "VENDER" if "VENTA" in x["veredicto"] else "MANTENER"
+        k = "COMPRAR" if "COMPRA" in x["veredicto"] else "VENDER" if x["veredicto"] in ("VENDER", "VENTA FUERTE") else "MANTENER"
         cuenta[k] = cuenta.get(k, 0) + 1
     prom = mean(x["score"] for x in items)
     sesgo = "positivo" if prom >= 10 else "negativo" if prom <= -10 else "neutral"
@@ -332,20 +333,42 @@ def resumen_mercado(items):
              f"Mejor: {mejor['nombre']} ({mejor['var_pct']:+.2f}%); peor: {peor['nombre']} ({peor['var_pct']:+.2f}%). "
              f"Decisiones: {cuenta.get('COMPRAR', 0)} de comprar, {cuenta.get('MANTENER', 0)} de mantener, "
              f"{cuenta.get('VENDER', 0)} de vender (puntaje promedio {prom:+.2f}, sesgo {sesgo}).")
-    return {"texto": texto, "suben": len(suben), "bajan": len(bajan), "puntaje_promedio": round(prom, 2),
-            "sesgo": sesgo, "senales": cuenta}
+    out = {"texto": texto, "suben": len(suben), "bajan": len(bajan), "puntaje_promedio": round(prom, 2),
+           "sesgo": sesgo, "senales": cuenta}
+    if all(x.get("ret_periodo") is not None for x in items):  # texto del periodo consultado (rendimiento en la moneda de cada emisora)
+        pos = [x for x in items if x["ret_periodo"] > 0]
+        mj = max(items, key=lambda x: x["ret_periodo"])
+        pr = min(items, key=lambda x: x["ret_periodo"])
+        out["texto_periodo"] = (f"En el periodo, {len(pos)} de {len(items)} emisoras tuvieron rendimiento positivo en su moneda. "
+                                f"Mejor: {mj['nombre']} ({mj['ret_periodo']:+.2f}%); peor: {pr['nombre']} ({pr['ret_periodo']:+.2f}%). "
+                                f"Al último cierre: {cuenta.get('COMPRAR', 0)} decisiones de comprar, {cuenta.get('MANTENER', 0)} de mantener y {cuenta.get('VENDER', 0)} de vender.")
+    return out
 
 
 # ---------------------------------------------------------------- comparación
-def comparar(hist, desde):
-    """hist: {ticker: [filas]}. Alinea fechas comunes ≥ desde y calcula base 100, correlación y ranking."""
+def _fx_en(fx_f, fx_v, f):
+    """Tipo de cambio vigente en la fecha f (el último publicado; el primero si f es anterior)."""
+    i = bisect.bisect_right(fx_f, f)
+    return fx_v[max(i - 1, 0)]
+
+
+def _cierres_en_pesos(rows, fx):
+    """Cierres de una acción en dólares convertidos a pesos con el tipo de cambio de cierre de Banxico."""
+    fx_f, fx_v = [x[0] for x in fx], [x[1] for x in fx]
+    return [r["cierre"] * _fx_en(fx_f, fx_v, r["fecha"]) for r in rows]
+
+
+def comparar(hist, desde, hasta, fx=None, meta=None):
+    """hist: {ticker: [filas]}. Alinea las fechas comunes del periodo y calcula base 100, correlación y ranking.
+
+    Con `fx` (lista [(fecha, pesos por dólar)]) las acciones de EE. UU. se miden en pesos; sin él, en su moneda."""
     tks = list(hist)
-    conjuntos = [{r["fecha"] for r in rows if r["fecha"] >= desde} for rows in hist.values()]
+    en_pesos = {t: (fx and meta and meta.get(t, {}).get("moneda") == "USD") for t in tks}
+    px = {t: (dict(zip([r["fecha"] for r in hist[t]], _cierres_en_pesos(hist[t], fx))) if en_pesos[t]
+              else {r["fecha"]: r["cierre"] for r in hist[t]}) for t in tks}
+    conjuntos = [{f for f in px[t] if desde <= f <= hasta} for t in tks]
     fechas = sorted(set.intersection(*conjuntos)) if conjuntos else []
-    cierres = {}
-    for t in tks:
-        m = {r["fecha"]: r["cierre"] for r in hist[t]}
-        cierres[t] = [m[f] for f in fechas]
+    cierres = {t: [px[t][f] for f in fechas] for t in tks}
     base = {t: [round(x / v[0] * 100, 2) for x in v] for t, v in cierres.items() if v}
     rets = {t: [v[j] / v[j - 1] - 1 for j in range(1, len(v))] for t, v in cierres.items() if len(v) > 2}
 
@@ -371,18 +394,22 @@ def comparar(hist, desde):
                         "max_drawdown": round(dd * 100, 2),
                         "mejor_dia": round(max(r) * 100, 2), "peor_dia": round(min(r) * 100, 2),
                         "dias_alza": round(100 * sum(1 for x in r if x > 0) / len(r), 2)})
-    return {"fechas": fechas, "cierres": cierres, "base100": base,
+    return {"fechas": fechas, "cierres": {k: [round(x, 4) for x in v] for k, v in cierres.items()}, "base100": base,
+            "moneda": "pesos" if fx else "original", "en_pesos": [t for t in tks if en_pesos[t]],
             "corr": {"tickers": orden, "matriz": matriz}, "ranking": ranking}
 
 
 # ----------------------------------------------------------------------- deuda
-def analizar_deuda(d, hasta=None):
+def analizar_deuda(d, hasta=None, desde=None):
     datos = [x for x in d["datos"] if hasta is None or x["fecha"] <= hasta]
-    base = {"nombre": d["nombre"], "emisor": d["emisor"], "unidad": d["unidad"], "tipo": d["tipo"]}
+    base = {"nombre": d["nombre"], "codigo": d.get("codigo", d["nombre"]), "emisor": d["emisor"], "unidad": d["unidad"], "tipo": d["tipo"],
+            "extras": d.get("extras", [])}
     if not datos:
         return {**base, "fecha": None, "valor": None, "senal": "SIN DATOS", "tendencia": "sin datos",
                 "decision": "Sin datos", "por_que": ["No hubo subastas del instrumento en el periodo."],
                 "texto": f"{d['nombre']}: sin subastas en el periodo."}
+    if d["tipo"] == "monto":
+        return _deuda_monto(d, base, datos, desde)
     vals = [x["valor"] for x in datos]
     last, prev = vals[-1], (vals[-2] if len(vals) > 1 else None)
     ven = vals[-12:]
@@ -418,18 +445,39 @@ def analizar_deuda(d, hasta=None):
             "pendiente": round(sl_u, 2), "tendencia": tend, "senal": senal, "n": len(vals), "texto": texto}
 
 
+def _deuda_monto(d, base, datos, desde):
+    """Instrumentos que se siguen por volumen colocado (no por tasa), como el papel comercial."""
+    per = [x for x in datos if desde is None or x["fecha"] >= desde] or datos
+    total = sum(x["valor"] for x in per) / 1000  # miles de pesos -> millones de pesos
+    con = sum(1 for x in per if x["valor"] > 0)
+    ult = per[-1]
+    saldo = next((x["extra"].get(e) for x in [ult] for e in x["extra"] if e.startswith("Saldo")), None)
+    saldo_txt = "" if saldo is None else f" El saldo vigente al {ult['fecha'][8:]}/{ult['fecha'][5:7]}/{ult['fecha'][:4]} es de ${saldo / 1000:,.2f} millones de pesos."
+    if total == 0:
+        texto = (f"{d['nombre']}: en las {len(per)} semanas del periodo no se registraron colocaciones.{saldo_txt} "
+                 "Banxico agrupa este instrumento con los certificados bursátiles de corto plazo en sus indicadores semanales de valores privados.")
+    else:
+        texto = (f"{d['nombre']}: en las {len(per)} semanas del periodo se colocaron ${total:,.2f} millones de pesos "
+                 f"({con} semanas con colocaciones; en la última semana ${ult['valor'] / 1000:,.2f} millones).{saldo_txt}")
+    por_que = ["Este instrumento se sigue por volumen colocado, no por rendimiento: no genera señal de compra o venta.", texto]
+    return {**base, "fecha": ult["fecha"], "valor": ult["valor"], "var": None, "var_pb": None, "z": None, "pendiente": None,
+            "tendencia": "sin colocaciones" if total == 0 else "con colocaciones", "senal": "INFORMATIVO",
+            "decision": "Solo informativo", "por_que": por_que, "n": len(per), "texto": texto,
+            "total_periodo_millones": round(total, 2), "semanas_con_colocacion": con}
+
+
 # ------------------------------------------------------------------- simulación
-def simular(hist, desde, capital=100000.0, costo=0.002):
+def simular(hist, desde, hasta, capital=100000.0, costo=0.002, fx=None, meta=None):
     """Qué habría pasado siguiendo las señales (comprar cuando puntaje >= 20, salir a efectivo cuando <= -20).
 
     La señal calculada al cierre del día j se ejecuta al cierre del día j+1 (sin ver el futuro) y cada
     operación paga `costo` (0.20 % por defecto). Se compara contra comprar y mantener en partes iguales.
-    """
+    Con `fx`, las acciones de EE. UU. generan su señal con su precio en dólares pero ganan o pierden en pesos."""
     tks = list(hist)
-    conj = [{r["fecha"] for r in rows if r["fecha"] >= desde} for rows in hist.values()]
+    conj = [{r["fecha"] for r in rows if desde <= r["fecha"] <= hasta} for rows in hist.values()]
     fechas = sorted(set.intersection(*conj)) if conj else []
     if len(fechas) < 3:
-        return {"fechas": [], "error": "Periodo demasiado corto"}
+        return {"fechas": [], "error": "El periodo es demasiado corto para simular (se necesitan al menos 3 sesiones)."}
     parte = capital / len(tks)
     estrategia = [0.0] * len(fechas)
     comprarmant = [0.0] * len(fechas)
@@ -437,6 +485,8 @@ def simular(hist, desde, capital=100000.0, costo=0.002):
     for t in tks:
         rows = hist[t]
         c = [r["cierre"] for r in rows]
+        usd = bool(fx and meta and meta.get(t, {}).get("moneda") == "USD")
+        cp = _cierres_en_pesos(rows, fx) if usd else c  # precios con los que se gana o se pierde
         ind = indicadores(c)
         pos_idx = {r["fecha"]: k for k, r in enumerate(rows)}
         valor, pos, pend, ops, dias_pos = parte, 0, 0, 0, 0
@@ -444,7 +494,7 @@ def simular(hist, desde, capital=100000.0, costo=0.002):
         for j in range(1, len(fechas)):
             k, kp = pos_idx[fechas[j]], pos_idx[fechas[j - 1]]
             if pos:
-                valor *= c[k] / c[kp]
+                valor *= cp[k] / cp[kp]
                 dias_pos += 1
             if pend != pos:                      # ejecución de la decisión del día anterior
                 valor *= (1 - costo)
@@ -453,13 +503,13 @@ def simular(hist, desde, capital=100000.0, costo=0.002):
             pend = 1 if sc >= 20 else 0 if sc <= -20 else pend
             serie_v.append(valor)
         k0, kn = pos_idx[fechas[0]], pos_idx[fechas[-1]]
-        bh = [parte * c[pos_idx[f]] / c[k0] for f in fechas]
+        bh = [parte * cp[pos_idx[f]] / cp[k0] for f in fechas]
         for j in range(len(fechas)):
             estrategia[j] += serie_v[j]
             comprarmant[j] += bh[j]
         por.append({"ticker": t, "ret_estrategia": round((serie_v[-1] / parte - 1) * 100, 2),
-                    "ret_comprar_mantener": round((c[kn] / c[k0] - 1) * 100, 2), "operaciones": ops,
-                    "tiempo_en_mercado": round(100 * dias_pos / (len(fechas) - 1), 2)})
+                    "ret_comprar_mantener": round((cp[kn] / cp[k0] - 1) * 100, 2), "operaciones": ops,
+                    "tiempo_en_mercado": round(100 * dias_pos / (len(fechas) - 1), 2), "en_pesos": usd})
 
     def dd(v):
         pico, m = v[0], 0.0
@@ -468,7 +518,7 @@ def simular(hist, desde, capital=100000.0, costo=0.002):
             m = min(m, x / pico - 1)
         return round(m * 100, 2)
 
-    return {"fechas": fechas, "capital": capital, "costo_pct": round(costo * 100, 2),
+    return {"fechas": fechas, "capital": capital, "costo_pct": round(costo * 100, 2), "moneda": "pesos" if fx else "original",
             "estrategia": [round(x, 2) for x in estrategia], "comprar_mantener": [round(x, 2) for x in comprarmant],
             "metricas": {"ret_estrategia": round((estrategia[-1] / capital - 1) * 100, 2),
                          "ret_comprar_mantener": round((comprarmant[-1] / capital - 1) * 100, 2),

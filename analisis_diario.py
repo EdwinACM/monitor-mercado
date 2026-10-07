@@ -6,7 +6,6 @@
 Lo ejecuta GitHub Actions cada día hábil después del cierre (ver .github/workflows).
 Archivos generados:
     analisis_diario.json    lo lee la sección «Archivo» de la app
-    cambios.json            últimos cambios de decisión (archivo pequeño para la pantalla Mercado)
     analisis_acciones.csv   una fila por fecha y emisora, con la decisión y sus razones
     analisis_deuda.csv      una fila por fecha e instrumento
     analisis_diario.xlsx    las mismas tablas en Excel
@@ -27,9 +26,9 @@ import reportes
 import server
 
 OUT = server.STATIC / "data"
-INICIO = "2026-03-02"
+INICIO = server.INICIO.isoformat()
 
-COLS_ACC = ["fecha", "ticker", "nombre", "cierre", "var", "var_pct", "ret5", "ret20", "rsi", "macd_hist", "pctb", "tendencia",
+COLS_ACC = ["fecha", "ticker", "nombre", "mercado", "moneda", "cierre", "var", "var_pct", "ret5", "ret20", "rsi", "macd_hist", "pctb", "tendencia",
             "pendiente", "r2", "vol_anual", "max_drawdown", "score", "veredicto", "decision", "confianza", "veredicto_ant",
             "cambio", "razones", "accion", "ret_5", "ret_10", "acierto"]
 COLS_DEU = ["fecha", "nombre", "emisor", "fecha_subasta", "valor", "var_pb", "z", "pendiente", "tendencia", "senal", "decision", "razones"]
@@ -58,7 +57,7 @@ def escribir_csv(nombre, cols, filas_):
 
 
 def escribir_xlsx(registros, acc, deu):
-    G, hf = PatternFill("solid", fgColor="15191D"), Font(bold=True, color="FFFFFF")
+    G, hf = PatternFill("solid", fgColor="750946"), Font(bold=True, color="FFFFFF")  # guinda IPN
     verde, rojo = PatternFill("solid", fgColor="CFEBDD"), PatternFill("solid", fgColor="F6D3CF")
     wb = Workbook()
 
@@ -81,12 +80,13 @@ def escribir_xlsx(registros, acc, deu):
          [{"fecha": r["fecha"], **{k: r["mercado"].get(k) for k in ("suben", "bajan", "puntaje_promedio", "sesgo", "texto")}} for r in registros],
          [12, 8, 8, 16, 10, 120])
     ws = wb.create_sheet("Decisiones")
-    hoja(ws, COLS_ACC, acc, [12, 11, 28, 10, 9, 9, 8, 8, 8, 10, 7, 11, 10, 7, 10, 12, 8, 15, 22, 10, 14, 8, 100, 60, 10, 10, 9], wrap=(22, 23))
+    anchos = {"fecha": 12, "ticker": 11, "nombre": 30, "mercado": 9, "moneda": 8, "razones": 100, "accion": 60, "decision": 22}
+    hoja(ws, COLS_ACC, acc, [anchos.get(c, 10) for c in COLS_ACC], wrap=(COLS_ACC.index("razones"), COLS_ACC.index("accion")))
     for fila in ws.iter_rows(min_row=2):
         d = fila[COLS_ACC.index("decision")]
         d.fill = verde if "Comprar" in str(d.value) else rojo if "Vender" in str(d.value) else PatternFill()
-        for j in (3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 24, 25):
-            fila[j].number_format = "0.00"
+        for c in ("cierre", "var", "var_pct", "ret5", "ret20", "rsi", "macd_hist", "pctb", "pendiente", "r2", "vol_anual", "max_drawdown", "ret_5", "ret_10"):
+            fila[COLS_ACC.index(c)].number_format = "0.00"
     ws = wb.create_sheet("Deuda")
     hoja(ws, COLS_DEU, deu, [12, 20, 18, 14, 10, 10, 8, 11, 11, 11, 22, 100], wrap=(11,))
     wb.save(OUT / "analisis_diario.xlsx")
@@ -120,7 +120,7 @@ def main():
 
     nuevos = 0
     for f in pendientes:
-        reg = diario.registro_dia(f, hist, deu, server.ACCIONES)
+        reg = diario.registro_dia(f, hist, deu, server.ACCIONES, server.META)
         if reg:
             existente[f] = reg
             nuevos += 1
@@ -130,9 +130,6 @@ def main():
         (OUT / "diario" / f"{reg['fecha']}.md").write_text(reportes.md_dia(reg), encoding="utf-8")
     ruta.write_text(json.dumps({"actualizado": datetime.now(server.TZ).isoformat(), "aviso": reportes.AVISO, "registros": registros},
                                ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    cambios = [{"fecha": r["fecha"], "ticker": e["ticker"], "de": e["veredicto_ant"], "a": e["veredicto"]}
-               for r in reversed(registros) for e in r["emisoras"] if e.get("cambio")][:20]
-    (OUT / "cambios.json").write_text(json.dumps(cambios, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     acc, deud = filas(registros)
     escribir_csv("analisis_acciones.csv", COLS_ACC, acc)
     escribir_csv("analisis_deuda.csv", COLS_DEU, deud)
