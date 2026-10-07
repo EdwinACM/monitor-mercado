@@ -77,7 +77,7 @@ async function descargar(url, btn) {
   btn.setAttribute("aria-busy", "true");
   const txt = btn.innerHTML; btn.innerHTML = `${ICON("refresh")}Generando…`;
   try {
-    const r = await fetch(url);
+    const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'fresco=1&t=' + Date.now());
     if (!r.ok) { let m = r.statusText; try { m = (await r.json()).error || m; } catch { /* no es json */ } throw new Error(m); }
     const nombre = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") || "")?.[1] || "reporte";
     const u = URL.createObjectURL(await r.blob());
@@ -676,16 +676,16 @@ function drawSim() {
   const s = S.sim, m = s.metricas;
   if (!s.fechas.length) { $("#simTexto").textContent = s.error || "No hay datos suficientes."; return; }
   const peso = n => "$" + fmt(n), ink = hexOf("--line"), acc = css("--s2");
-  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las ${s.por_emisora.length} emisoras${s.moneda === "pesos" ? " (las acciones de EE. UU. medidas en pesos)" : " (cada una en su moneda)"}, desde ${fhumana(s.fechas[0])}: seguir las decisiones de Alzea terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
-  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones de Alzea</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
-  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Alzea", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] },
+  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las ${s.por_emisora.length} emisoras${s.moneda === "pesos" ? " (las acciones de EE. UU. medidas en pesos)" : " (cada una en su moneda)"}, desde ${fhumana(s.fechas[0])}: seguir las decisiones terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
+  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
+  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Decisiones", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] },
     options: opts({ fy: v => fmt(v), ftip: v => peso(v), right: 8, title: it => flarga(s.fechas[it[0].dataIndex]) }) });
-  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Alzea</th><th>Comprar y mantener</th></tr></thead><tbody>
+  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Decisiones</th><th>Comprar y mantener</th></tr></thead><tbody>
     <tr><td>Rendimiento del periodo</td><td class="${cls(m.ret_estrategia)}"><b>${pct(m.ret_estrategia)}</b></td><td class="${cls(m.ret_comprar_mantener)}"><b>${pct(m.ret_comprar_mantener)}</b></td></tr>
     <tr><td>Valor final</td><td>${peso(s.estrategia.at(-1))}</td><td>${peso(s.comprar_mantener.at(-1))}</td></tr>
     <tr><td>Caída máxima</td><td class="down">${pct(m.caida_estrategia)}</td><td class="down">${pct(m.caida_comprar_mantener)}</td></tr>
     <tr><td>Operaciones</td><td>${m.operaciones}</td><td>1 por emisora</td></tr></tbody>`;
-  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Alzea</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
+  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Decisiones</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
     s.por_emisora.map(p => `<tr><td><b>${tk(p.ticker)}</b></td><td class="${cls(p.ret_estrategia)}">${pct(p.ret_estrategia)}</td><td class="${cls(p.ret_comprar_mantener)}">${pct(p.ret_comprar_mantener)}</td><td>${p.operaciones}</td><td>${fmt(p.tiempo_en_mercado)}%</td></tr>`).join("") + "</tbody>";
   $("#simAviso").textContent = `Reglas: se compra cuando el puntaje llega a +20 o más y se sale a efectivo cuando baja a −20 o menos; la decisión de un día se ejecuta al cierre del día siguiente y cada operación paga ${fmt(s.costo_pct)}% de comisión. Es una prueba dentro de la misma muestra, sin impuestos ni deslizamiento, con fines educativos; no constituye asesoría financiera y el resultado pasado no garantiza resultados futuros.`;
 }
@@ -693,6 +693,7 @@ function drawSim() {
 /* ------------------------------------------------------------------------ informe */
 const INFORME_HTML = `
   <div class="head"><h1>Informe</h1><p class="sub" id="iSub"></p><p class="intro" style="margin-top:10px">Descarga el informe del periodo que elegiste arriba o el análisis de un día. Todo lleva el formato institucional del IPN e incluye qué es cada instrumento, el entorno global con fuentes oficiales, la decisión de comprar, mantener o vender y por qué.</p></div>
+  <section class="sec"><h2>Cierres y decisiones por emisora</h2><div class="scrollx" id="iVivo"></div><p class="note" id="iVivoNota" style="margin-top:8px"></p></section>
   <section class="sec"><h2>Informe del periodo</h2><div class="prose" id="iResumen"></div><div class="dl-grupo" id="iDl"></div></section>
   <section class="sec"><h2>Análisis de un día</h2><div class="daybar"><button class="icon-btn" id="diaPrev" aria-label="Día anterior" style="color:var(--brand-text)"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chevron"/></svg></button><input type="date" id="diaSel" aria-label="Elegir día"><button class="icon-btn" id="diaNext" aria-label="Día siguiente" style="color:var(--brand-text)"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button><span class="dl-grupo" id="diaDl" style="margin:0 0 0 8px"></span></div></section>
   <section class="sec"><h2>¿Acertaron las decisiones?</h2><div id="aciertos"><p class="cargando">Calculando…</p></div></section>
@@ -705,6 +706,7 @@ async function renderInforme() {
   $("#iSub").textContent = `Periodo del ${flarga(p.desde)} al ${flarga(p.hasta)}`;
   const ctx = S.ctx, an = S.data;
   $("#iResumen").innerHTML = `<p>${esc(an.mercado.texto_periodo || an.mercado.texto)}</p>` + (ctx ? `<p>${esc(ctx.lectura[0] || "")}</p>` : "");
+  pintarVivo();
   $("#iDl").innerHTML = dlBtn(`/api/informe?${qsP()}&formato=pdf`, "Informe en PDF", true) + dlBtn(`/api/informe?${qsP()}&formato=xlsx`, "Informe en Excel") +
     `<p class="note" style="flex-basis:100%">Se genera al momento con los datos más recientes; puede tardar unos segundos.</p>`;
   ligarDescargas($("#iDl"));
@@ -715,6 +717,19 @@ async function renderInforme() {
     if (!S.fechaDia || S.fechaDia < p.desde || S.fechaDia > p.hasta) S.fechaDia = A.dias.at(-1)?.fecha;
     pintarArchivo(A);
   } catch (e) { $("#aciertos").innerHTML = `<p class="note">No se pudo calcular: ${esc(e.message)}</p>`; }
+}
+function pintarVivo() {
+  const el = $("#iVivo"); if (!el || !S.data) return;
+  const acc = S.data.acciones.filter(a => !a.error);
+  let h = `<table class="tbl"><thead><tr><th>Emisora</th><th>Moneda</th><th>Cierre inicial</th><th>Precio actual o último cierre</th><th>Cambio del día</th><th>Periodo</th><th>Decisión</th><th>Puntaje</th></tr></thead><tbody>`, g = "";
+  acc.forEach(a => {
+    const mx = a.pais === "México", t = mx ? "México · BMV" : "EE. UU. · Nasdaq y NYSE";
+    if (t !== g) { g = t; h += `<tr><td colspan="8" class="l" style="background:var(--brand-suave);font-weight:700;color:var(--brand-text)">${t}</td></tr>`; }
+    const [v, p] = cambioVivo(a);
+    h += `<tr><td><b>${esc(a.nombre)}</b></td><td>${a.moneda}</td><td>${money(a.serie.cierre[0], a.moneda)}</td><td><b>${money(precioVivo(a), a.moneda)}</b></td><td class="${cls(v)}">${pct(p)}</td><td class="${cls(a.ret_periodo)}">${pct(a.ret_periodo)}</td><td>${sig(a.veredicto)}</td><td>${sg(a.score)}${Math.abs(a.score)}</td></tr>`;
+  });
+  el.innerHTML = h + "</tbody></table>";
+  $("#iVivoNota").textContent = vivo() ? `Los precios se actualizan solos mientras la bolsa está abierta. Al descargar, el informe se genera de nuevo con los datos del momento (${new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}).` : "Consulta histórica: cifras al cierre del último día del periodo.";
 }
 const VCLS = { "COMPRA FUERTE": "v-buy2", COMPRAR: "v-buy", MANTENER: "", VENDER: "v-sell", "VENTA FUERTE": "v-sell2" };
 function pintarArchivo(A) {
@@ -760,6 +775,7 @@ async function pollQuotes() {
   if (!S.data || !vivo()) return;
   const q = await api(`/api/cotizaciones?tickers=${S.data.acciones.map(a => a.ticker).join(",")}`);
   S.quotes = Object.fromEntries(q.map(x => [x.ticker, x])); S.tQuote = Date.now();
+  if (S.vista === "informe") pintarVivo();
   if (S.vista !== "mercado") return;
   $$("#board tbody tr[data-t]").forEach(tr => {
     const a = S.data.acciones.find(x => x.ticker === tr.dataset.t); if (!a || a.error) return;
