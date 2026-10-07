@@ -1,5 +1,5 @@
 {
   "rewrites": [{ "source": "/", "destination": "/static/index.html" }],
-  "functions": { "api/*.py": { "maxDuration": 60, "includeFiles": "{fonts,recursos}/**" } },
+  "functions": { "api/*.py": { "maxDuration": 60 } },
   "headers": [{ "source": "/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }]
 }
