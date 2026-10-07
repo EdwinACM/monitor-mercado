@@ -220,8 +220,8 @@ def xlsx_periodo(inf):
                                            "Colocado papel comercial", "Colocado CB corto plazo", "Colocado mediano y largo plazo"],
               [[m["mes"][:7], m["tasa_pc"], m["tasa_cb_cp"], m["tasa_cb_mp"], m["col_cp"], m["col_pc"], m["col_cb_cp"], m["col_mlp"]] for m in ctx["privados"]],
               [10, 18, 18, 22, 26, 22, 22, 24], formatos={1: "0.00", 2: "0.00", 3: "0.00", 4: "#,##0", 5: "#,##0", 6: "#,##0", 7: "#,##0"})
-    filas = [[d["fecha"], e["t"], e["v"], e["s"], "Sí" if e["c"] else "No", e["r5"], {True: "Sí", False: "No", None: "Por evaluar"}[e["a"]]] for d in arc["dias"] for e in d["e"]]
-    _hoja(wb, "Decisiones por día", ["Fecha", "Emisora", "Decisión", "Puntaje", "¿Cambió?", "Rend. a 5 sesiones %", "¿Acertó?"], filas, [12, 12, 20, 9, 10, 18, 12], formatos={5: "0.00"})
+    filas = sorted(([e["t"], d["fecha"], e["cierre"], e["v"], e["s"], "Sí" if e["c"] else "No", e["r5"], {True: "Sí", False: "No", None: "Por evaluar"}[e["a"]]] for d in arc["dias"] for e in d["e"]), key=lambda r: (r[0], r[1]))
+    _hoja(wb, "Cierres y decisiones", ["Emisora", "Fecha", "Cierre", "Decisión", "Puntaje", "¿Cambió?", "Rend. a 5 sesiones %", "¿Acertó?"], filas, [12, 12, 12, 20, 9, 10, 18, 12], formatos={2: "#,##0.00", 6: "0.00"})
     _hoja(wb, "Aciertos", ["Decisión", "Casos evaluados", "Aciertos", "% de aciertos", "Rend. medio a 5 sesiones %"],
           [[a["decision"], a["casos"], a["aciertos"], a["pct"], a["ret5_medio"]] for a in arc["aciertos"]], [16, 16, 12, 14, 24], formatos={3: "0.00", 4: "0.00"})
     if sim.get("fechas"):
@@ -347,6 +347,7 @@ def _li(pdf, txt, size=9.6):
 def _tabla(pdf, cols, filas, anchos, aligns=None, estilos=None, size=8.6):
     """Tabla con encabezado guinda y renglones alternados. `estilos`: {(fila, col): color} para sube/baja."""
     aligns = aligns or ["LEFT"] + ["RIGHT"] * (len(cols) - 1)
+    pdf.set_fill_color(*BLANCO)
     pdf.set_font("Barlow", "", size)
     with pdf.table(col_widths=anchos, text_align=aligns, line_height=5.2, borders_layout="HORIZONTAL_LINES",
                    headings_style=FontFace(emphasis="BOLD", color=BLANCO, fill_color=GUINDA), cell_fill_color=GUINDA_SUAVE, cell_fill_mode="ROWS",
@@ -374,6 +375,276 @@ def _entorno_dia(pdf, reg):
     filas = [[x["nombre"], n2(x["valor"]), cambio(x["cambio"], x["cambio_unidad"]), "Oficial" if x["oficial"] else "Referencia"] for x in ent]
     est = {(i, 2): _color_var(x["cambio"]) for i, x in enumerate(ent)}
     _tabla(pdf, ["Indicador", "Valor al cierre", "Cambio contra la sesión previa", "Fuente"], filas, (68, 30, 50, 30), ["LEFT", "RIGHT", "RIGHT", "LEFT"], est)
+
+
+# ------------------------------------------------- estadística por emisora
+def estadisticas(x):
+    """Medidas de riesgo y rendimiento calculadas con los cierres diarios del periodo (rendimientos simples)."""
+    c, f = x["serie"]["cierre"], x["serie"]["fechas"]
+    r = [(c[i] / c[i - 1] - 1) * 100 for i in range(1, len(c)) if c[i - 1]]
+    if len(r) < 5:
+        return {}
+    n = len(r)
+    media = sum(r) / n
+    desv = (sum((v - media) ** 2 for v in r) / (n - 1)) ** 0.5
+    orden = sorted(r)
+    k = max(1, int(n * 0.05))
+    asim = sum(((v - media) / desv) ** 3 for v in r) / n if desv else 0
+    imax, imin = max(range(len(c)), key=c.__getitem__), min(range(len(c)), key=c.__getitem__)
+    mejor, peor = max(range(1, len(c)), key=lambda i: c[i] / c[i - 1]), min(range(1, len(c)), key=lambda i: c[i] / c[i - 1])
+    return {"sesiones": n, "media_diaria": media, "desv_diaria": desv, "var95": -orden[k - 1], "cvar95": -sum(orden[:k]) / k,
+            "dias_alza": sum(1 for v in r if v > 0) / n * 100, "asimetria": asim,
+            "maximo": (c[imax], f[imax]), "minimo": (c[imin], f[imin]),
+            "mejor": ((c[mejor] / c[mejor - 1] - 1) * 100, f[mejor]), "peor": ((c[peor] / c[peor - 1] - 1) * 100, f[peor]),
+            "rango_1d": desv}
+
+
+def _factores(x, ctx):
+    """Lo que hoy podría mover el precio, con cifras reales del entorno y de la sensibilidad de la emisora."""
+    ind = {i["id"]: i for i in ctx["indicadores"]}
+    sens = next((s for s in ctx["sensibilidades"] if s["ticker"] == x["ticker"]), None)
+    efe = next((e for e in ctx["efecto_cambiario"] if e["ticker"] == x["ticker"]), None)
+    us = x["pais"] != "México"
+    out = []
+
+    def ch(k):
+        return ind[k]["cambio"] if k in ind else None
+    if sens and sens.get("beta_sp500") is not None:
+        sp = f" El S&P 500 {'avanzó' if (ch('sp500') or 0) >= 0 else 'retrocedió'} {n2(abs(ch('sp500')))} % en el periodo." if ch("sp500") is not None else ""
+        out.append(f"Bolsa de EE. UU. Su beta frente al S&P 500 es {n2(sens['beta_sp500'])} y su correlación {n2(sens['corr_sp500'])}: por cada 1 % que se mueve el S&P 500, esta emisora tiende a moverse {n2(sens['beta_sp500'])} %.{sp}")
+    if us and efe:
+        out.append(f"Tipo de cambio. En dólares rindió {pct(efe['ret_usd'])} y, como el dólar varió {pct(efe['ret_dolar'])} frente al peso, en pesos rindió {pct(efe['ret_pesos'])}. Un peso más débil suma rendimiento a quien invierte desde México; uno más fuerte lo resta.")
+    elif sens and sens.get("corr_dolar") is not None:
+        out.append(f"Dólar. Su correlación con el tipo de cambio es {n2(sens['corr_dolar'])}: " + ("tiende a subir cuando el peso se aprecia." if sens["corr_dolar"] < -0.1 else "tiende a subir cuando el peso se deprecia." if sens["corr_dolar"] > 0.1 else "casi no se relaciona con el dólar."))
+    if "ust10y" in ind and "tasa_obj" in ind:
+        out.append(f"Tasas. El Tesoro de EE. UU. a 10 años rinde {n2(ind['ust10y']['fin']['valor'])} % ({cambio(ind['ust10y']['cambio'], 'pb')} en el periodo) y la tasa objetivo de Banxico es {n2(ind['tasa_obj']['fin']['valor'])} %. "
+                   "Tasas más altas encarecen el crédito y hacen más atractivos los bonos frente a las acciones" + (", lo que suele presionar más a las empresas de crecimiento." if x["ticker"] in ("MSFT", "NVDA", "TSLA", "AAPL") else "."))
+    if "vix" in ind:
+        v = ind["vix"]["fin"]["valor"]
+        out.append(f"Riesgo del mercado. El VIX está en {n2(v)} ({'calma' if v < 20 else 'nerviosismo moderado' if v < 30 else 'estrés'}). Con un VIX alto las caídas de las acciones tienden a ser más bruscas y simultáneas.")
+    if not us and "ipc" in ind and sens and sens.get("corr_ipc") is not None:
+        out.append(f"Mercado mexicano. El S&P/BMV IPC cambió {pct(ind['ipc']['cambio'])} en el periodo; la correlación de esta emisora con el IPC es {n2(sens['corr_ipc'])}.")
+    return out
+
+
+def _sugerencia(x, e):
+    d = x["veredicto"]
+    s, r = x["stats"]["soporte"], x["stats"]["resistencia"]
+    m = x["moneda"]
+    rango = f" En una sesión normal el precio se mueve alrededor de ±{n2(e.get('desv_diaria', 0))} % (una desviación estándar diaria)." if e else ""
+    if d in ("COMPRA FUERTE", "COMPRAR"):
+        base = f"La lectura técnica favorece comprar o aumentar poco a poco. Referencias: soporte en {precio(s, m)} y resistencia en {precio(r, m)}; si el precio cierra por debajo del soporte, la señal pierde validez y conviene revisar la posición."
+    elif d in ("VENTA FUERTE", "VENDER"):
+        base = f"La lectura técnica sugiere reducir o no abrir posición. Referencias: soporte en {precio(s, m)} y resistencia en {precio(r, m)}; un cierre por encima de la resistencia sería una señal de que la caída se está agotando."
+    else:
+        base = f"La lectura técnica es neutral: conviene mantener lo que ya se tiene y esperar una señal clara. Referencias: soporte en {precio(s, m)} y resistencia en {precio(r, m)}."
+    return base + rango + " Ninguna decisión debe superar tu tolerancia al riesgo: diversifica y no concentres tu dinero en una sola emisora."
+
+
+def _grafica(pdf, series, fechas, fmt=lambda v: n2(v), h=44, etiquetas=None):
+    """Gráfica de líneas dibujada con primitivas del PDF. series: [{vals, color, w}]; la primera es la principal."""
+    if pdf.get_y() + h + 12 > 277:
+        pdf.add_page()
+    x0, w, y0 = 33, 161, pdf.get_y() + 2
+    vals = [v for s in series for v in s["vals"] if v is not None]
+    lo, hi = min(vals), max(vals)
+    pad = (hi - lo) * 0.06 or 1
+    lo, hi = lo - pad, hi + pad
+    py = lambda v: y0 + h - (v - lo) / (hi - lo) * h
+    n = len(series[0]["vals"])
+    px = lambda i: x0 + i / max(1, n - 1) * w
+    pdf.set_font("Barlow", "", 7.2)
+    pdf.set_draw_color(*GRIS_SUAVE)
+    pdf.set_line_width(0.15)
+    for k in range(5):
+        v = lo + (hi - lo) * k / 4
+        pdf.line(x0, py(v), x0 + w, py(v))
+        pdf.set_text_color(*GRIS)
+        pdf.set_xy(16, py(v) - 1.8)
+        pdf.cell(16, 3.6, fmt(v), align="R")
+    for s in series[::-1]:
+        pdf.set_draw_color(*s["color"])
+        pdf.set_line_width(s.get("w", 0.5))
+        prev = None
+        for i, v in enumerate(s["vals"]):
+            if v is None:
+                prev = None
+                continue
+            if prev is not None:
+                pdf.line(px(i - 1), py(prev), px(i), py(v))
+            prev = v
+    pdf.set_line_width(0.2)
+    u = series[0]["vals"][-1]
+    pdf.set_fill_color(*series[0]["color"])
+    pdf.ellipse(px(n - 1) - 0.9, py(u) - 0.9, 1.8, 1.8, "F")
+    pdf.set_text_color(*GRIS)
+    for i in (0, n // 2, n - 1):
+        pdf.set_xy(min(max(px(i) - 10, x0 - 2), x0 + w - 18), y0 + h + 1)
+        pdf.cell(20, 3.6, fecha_corta(fechas[i]), align="C")
+    pdf.set_y(y0 + h + 6)
+    if etiquetas:
+        pdf.set_x(x0)
+        for txt, col in etiquetas:
+            pdf.set_fill_color(*col)
+            pdf.rect(pdf.get_x(), pdf.get_y() + 1.1, 4, 1.6, "F")
+            pdf.set_x(pdf.get_x() + 5.5)
+            pdf.set_font("Barlow", "", 7.6)
+            pdf.set_text_color(*GRIS)
+            pdf.cell(pdf.get_string_width(txt) + 5, 4, txt)
+        pdf.ln(5)
+
+
+def _tarjetas(pdf, items):
+    """Fila de tarjetas con una cifra grande: items = [(etiqueta, valor, color|None)]."""
+    if pdf.get_y() > 245:
+        pdf.add_page()
+    n = len(items)
+    w = 178 / n
+    y = pdf.get_y()
+    for i, (et, val, col) in enumerate(items):
+        x = 16 + i * w
+        pdf.set_fill_color(*GUINDA_SUAVE)
+        pdf.rect(x + 0.8, y, w - 1.6, 17, "F")
+        pdf.set_fill_color(*GUINDA)
+        pdf.rect(x + 0.8, y, 1.2, 17, "F")
+        pdf.set_xy(x + 3.5, y + 1.6)
+        pdf.set_font("Barlow", "", 7.6)
+        pdf.set_text_color(*GRIS)
+        pdf.cell(w - 6, 4, et)
+        pdf.set_xy(x + 3.5, y + 6.5)
+        pdf.set_font("BarlowC", "B", 14)
+        pdf.set_text_color(*(col or NEGRO))
+        pdf.cell(w - 6, 8, val)
+    pdf.set_y(y + 21)
+
+
+def _cabecera_ficha(pdf, titulo, sub, decision, veredicto):
+    pdf.add_page()
+    col = SUBE if veredicto in ("COMPRA FUERTE", "COMPRAR") else BAJA if veredicto in ("VENTA FUERTE", "VENDER") else GRIS
+    y = pdf.get_y() - 2
+    pdf.set_fill_color(*GUINDA)
+    pdf.rect(16, y, 178, 15, "F")
+    pdf.set_xy(20, y + 1.8)
+    pdf.set_font("BarlowC", "B", 15)
+    pdf.set_text_color(*BLANCO)
+    pdf.cell(118, 6, titulo)
+    pdf.set_xy(20, y + 8.3)
+    pdf.set_font("Barlow", "", 8.6)
+    pdf.cell(118, 4.5, sub)
+    ancho = 40
+    pdf.set_fill_color(*BLANCO)
+    pdf.rect(194 - ancho - 3, y + 3, ancho, 9, "F")
+    pdf.set_xy(194 - ancho - 3, y + 3.2)
+    pdf.set_font("Barlow", "B", 10)
+    pdf.set_text_color(*col)
+    pdf.cell(ancho, 8.6, decision, align="C")
+    pdf.set_y(y + 19)
+
+
+def _ficha_accion(pdf, x, ctx, e, g, hist):
+    s = x["stats"]
+    _cabecera_ficha(pdf, f"{x['nombre']} ({x['ticker'].replace('.MX', '')})", f"{x['mercado']} · {x['moneda']} · cierre del {fecha_corta(x['fecha'])}", x["decision"], x["veredicto"])
+    _tarjetas(pdf, [(f"Cierre ({x['moneda']})", precio(x["cierre"], x["moneda"]), None), ("Cambio del día", pct(x["var_pct"]), _color_var(x["var_pct"])),
+                    ("Rendimiento del periodo", pct(x["ret_periodo"]), _color_var(x["ret_periodo"])), ("Puntaje de -100 a +100", f"{x['score']:+d}", None)])
+    sr = x["serie"]
+    _h3(pdf, "Precio de cierre del periodo", GUINDA)
+    _grafica(pdf, [{"vals": sr["cierre"], "color": GUINDA, "w": 0.55}, {"vals": sr["sma20"], "color": GRIS, "w": 0.3}, {"vals": sr["sma50"], "color": (160, 162, 166), "w": 0.3}], sr["fechas"],
+             fmt=lambda v: n2(v), etiquetas=[("Cierre", GUINDA), ("Media de 20 sesiones", GRIS), ("Media de 50 sesiones", (160, 162, 166))])
+    _h3(pdf, "Estadística del periodo", GUINDA)
+    f = []
+    if e:
+        f = [["Volatilidad anual", pct(s["vol_anual"], False), "Pérdida diaria probable (VaR 95 %)", pct(e["var95"], False)],
+             ["Caída máxima del periodo", pct(s["max_drawdown"]), "Pérdida si ocurre lo peor (CVaR 95 %)", pct(e["cvar95"], False)],
+             ["Rendimiento / riesgo", n2(s["ratio_rend_riesgo"]), "Días al alza", pct(e["dias_alza"], False)],
+             ["Mejor día", f"{pct(e['mejor'][0])} ({fecha_corta(e['mejor'][1])})", "Peor día", f"{pct(e['peor'][0])} ({fecha_corta(e['peor'][1])})"],
+             ["Máximo del periodo", f"{precio(e['maximo'][0], x['moneda'])} ({fecha_corta(e['maximo'][1])})", "Mínimo del periodo", f"{precio(e['minimo'][0], x['moneda'])} ({fecha_corta(e['minimo'][1])})"],
+             ["RSI (14 sesiones)", n2(x["rsi"]), "Rend. 5 y 20 sesiones", f"{pct(x['ret5'])} y {pct(x['ret20'])}"],
+             ["Soporte (20 ses.)", precio(s["soporte"], x["moneda"]), "Resistencia (20 ses.)", precio(s["resistencia"], x["moneda"])]]
+    else:
+        f = [["Volatilidad anual", pct(s["vol_anual"], False), "Caída máxima", pct(s["max_drawdown"])]]
+    _tabla(pdf, ["Medida", "Valor", "Medida", "Valor"], f, (48, 42, 52, 36), ["LEFT", "RIGHT", "LEFT", "RIGHT"], size=8.2)
+    _p(pdf, "VaR 95 %: con los datos del periodo, en 95 de cada 100 sesiones la pérdida diaria no pasó de esa cifra. CVaR: promedio de las pérdidas en el 5 % de las peores sesiones. "
+            "Rendimiento / riesgo: rendimiento del periodo entre su volatilidad; más alto es mejor.", size=8.2, italic=True, color=GRIS)
+    _h3(pdf, "Cierres y decisiones de las últimas 8 sesiones", GUINDA)
+    filas, est = [], {}
+    for i, h in enumerate(hist[-8:][::-1]):
+        filas.append([fecha_corta(h["fecha"]), precio(h["cierre"], x["moneda"]), pct(h["var_pct"]) if h.get("var_pct") is not None else "-", h["decision"], f"{h['s']:+d}",
+                      pct(h["r5"]) if h["r5"] is not None else "por evaluar", {True: "Sí", False: "No", None: "-"}[h["a"]]])
+        if h.get("var_pct") is not None:
+            est[(i, 2)] = _color_var(h["var_pct"])
+    _tabla(pdf, ["Fecha", "Cierre", "Var. %", "Decisión", "Puntaje", "Rend. a 5 ses.", "¿Acertó?"], filas, (22, 28, 20, 36, 18, 28, 26), None, est, size=8.2)
+    _h3(pdf, "Qué es", GUINDA)
+    _p(pdf, g.get("que_es", ""), size=9.2)
+    _p(pdf, "Qué la mueve. " + g.get("que_la_mueve", ""), size=9.2)
+    fac = _factores(x, ctx)
+    if fac:
+        _h3(pdf, "Qué podría mover su precio ahora", GUINDA)
+        for t in fac:
+            _li(pdf, t, size=9.2)
+    _h3(pdf, f"Por qué la decisión es {x['decision'].lower()}", GUINDA)
+    filas = [[c["criterio"], f"{c['puntos']:+d} de {c['max']}", c["detalle"]] for c in x["componentes"]]
+    _tabla(pdf, ["Criterio", "Puntos", "Qué se observó"], filas, (44, 22, 112), ["LEFT", "RIGHT", "LEFT"], {(i, 1): _color_var(c["puntos"]) for i, c in enumerate(x["componentes"])}, size=8.2)
+    _p(pdf, f"Confianza {x['confianza'].lower()} · tendencia de 30 sesiones {x['tendencia']['etiqueta']}. " + x["accion"], size=9.2)
+    _h3(pdf, "Sugerencia", GUINDA)
+    _p(pdf, _sugerencia(x, e), size=9.2)
+    b = x["backtest"]
+    if b["n_compra"] >= 8 or b["n_venta"] >= 8:
+        _p(pdf, f"Prueba histórica (a {b['horizonte']} sesiones, {b['muestra']} sesiones): comprar acertó {n2(b['aciertos_compra'])} % en {b['n_compra']} casos y vender {n2(b['aciertos_venta'])} % en {b['n_venta']}. "
+                f"Rendimiento medio de cualquier sesión: {pct(b['base_rend_medio'])}. Es una prueba dentro de la misma muestra: calibra la confianza, no la garantiza.", size=8.6, italic=True, color=GRIS)
+    if (g.get("fuente") or {}).get("nombre"):
+        _p(pdf, f"Fuente oficial: {g['fuente']['nombre']} ({g['fuente']['url']}). Precios: Yahoo Finance (referencia).", size=8.2, color=GRIS, align="L")
+
+
+def _ficha_deuda(pdf, x, ctx, g):
+    tipo = x["tipo"]
+    _cabecera_ficha(pdf, x["nombre"], f"{x['emisor']} · {x['unidad']}", x["decision"], x["senal"] if x["senal"] in ("COMPRAR", "VENDER") else "MANTENER")
+    val = "s/d" if x["valor"] is None else (f"${n2(x['valor'] / 1000)} mdp" if tipo == "monto" else f"${x['valor']:,.5f}" if tipo == "precio" else n2(x["valor"]) + (" %" if x["unidad"].startswith("%") else ""))
+    cam = f"{n2(x['var_pb'], True)} pb" if x.get("var_pb") is not None else "-"
+    _tarjetas(pdf, [(f"Última cifra ({fecha_corta(x['fecha'])})", val, None), ("Cambio vs. anterior", cam, _color_var(x.get("var_pb") or 0)),
+                    ("Puntaje z (12 subastas)", n2(x["z"], True) if x.get("z") is not None else "-", None), ("Tendencia", x["tendencia"].capitalize(), None)])
+    datos = x["datos"]
+    if len(datos) >= 3:
+        _h3(pdf, "Evolución en el periodo" if tipo != "monto" else "Monto colocado por semana (millones de pesos)", GUINDA)
+        v = [d["valor"] / (1000 if tipo == "monto" else 1) for d in datos]
+        ma = [None if i < 3 else sum(v[i - 3:i + 1]) / 4 for i in range(len(v))]
+        _grafica(pdf, [{"vals": v, "color": GUINDA, "w": 0.55}, {"vals": ma, "color": GRIS, "w": 0.3}], [d["fecha"] for d in datos], fmt=lambda t: n2(t) if tipo != "precio" else f"{t:.3f}",
+                 etiquetas=[("Valor en cada subasta o semana", GUINDA), ("Promedio móvil de 4", GRIS)], h=40)
+    _h3(pdf, "Últimos resultados", GUINDA)
+    ex = x["extras"]
+    cols = ["Fecha", "Valor"] + (["Cambio (pb)"] if tipo == "tasa" else []) + [e_.split(" (")[0] for e_ in ex]
+    filas = []
+    for d in datos[-8:][::-1]:
+        fila = [fecha_corta(d["fecha"]), f"{d['valor']:,.5f}" if tipo == "precio" else n2(d["valor"])]
+        if tipo == "tasa":
+            fila.append(n2(d["var_pb"], True) if d.get("var_pb") is not None else "-")
+        fila += [n2((d.get("extra") or {}).get(e_)) if (d.get("extra") or {}).get(e_) is not None else "-" for e_ in ex]
+        filas.append(fila)
+    anch = [24] + [30] * (len(cols) - 1)
+    k = 178 / sum(anch)
+    _tabla(pdf, cols, filas, tuple(a * k for a in anch), None, size=8.2)
+    _h3(pdf, "Qué es", GUINDA)
+    _p(pdf, g.get("que_es", ""), size=9.2)
+    _p(pdf, "Qué lo mueve. " + g.get("que_lo_mueve", ""), size=9.2)
+    ind = {i["id"]: i for i in ctx["indicadores"]}
+    fac = []
+    if "tasa_obj" in ind:
+        fac.append(f"Banxico. La tasa objetivo es {n2(ind['tasa_obj']['fin']['valor'])} % ({cambio(ind['tasa_obj']['cambio'], 'pb')} en el periodo). Las tasas de los CETES y los bonos siguen de cerca esa referencia.")
+    for d in ctx["diferenciales"]:
+        fac.append(f"{d['nombre']}: {n2(d['pb'], True)} pb. {d['lectura']}")
+    if "infl_mx" in ind:
+        fac.append(f"Inflación en México: {n2(ind['infl_mx']['fin']['valor'])} % anual. Si sube, el mercado exige más rendimiento y los precios de los bonos bajan; en Udibonos el capital se ajusta con la inflación.")
+    if "fx" in ind:
+        fac.append(f"Tipo de cambio: {n2(ind['fx']['fin']['valor'])} pesos por dólar ({pct(ind['fx']['cambio'])} en el periodo). Un peso débil presiona a Banxico a mantener tasas altas y afecta el apetito de extranjeros por bonos mexicanos.")
+    if fac:
+        _h3(pdf, "Qué podría mover su rendimiento ahora", GUINDA)
+        for t in fac[:5]:
+            _li(pdf, t, size=9.2)
+    _h3(pdf, "Lectura y decisión", GUINDA)
+    for q in x["por_que"]:
+        _li(pdf, q, size=9.2)
+    _p(pdf, "Si las tasas suben, el precio de los bonos ya emitidos baja; fijar tasa conviene cuando el rendimiento está alto frente a sus últimas subastas. Es un apoyo educativo, no asesoría financiera.", size=8.6, italic=True, color=GRIS)
+    if (g.get("fuente") or {}).get("nombre"):
+        _p(pdf, f"Fuente oficial: {g['fuente']['nombre']} ({g['fuente']['url']}).", size=8.2, color=GRIS, align="L")
 
 
 def pdf_dia(reg):
@@ -457,39 +728,43 @@ def pdf_periodo(inf):
         est = {(i, j): _color_var(v) for i, e in enumerate(ctx["efecto_cambiario"]) for j, v in ((1, e["ret_usd"]), (2, e["ret_dolar"]), (3, e["ret_pesos"]))}
         _tabla(pdf, ["Acción", "Rend. en dólares", "Variación del dólar", "Rend. en pesos"], filas, (62, 38, 40, 38), None, est)
 
-    _h2(pdf, "4. Acciones: qué son y qué dicen las decisiones")
-    filas = [[x["nombre"], x["mercado"], precio(x["serie"]["cierre"][0], x["moneda"]), precio(x["cierre"], x["moneda"]), pct(x["ret_periodo"]), pct(x["stats"]["vol_anual"], False),
-              x["decision"], f"{x['score']:+d}"] for x in acc]
-    est = {(i, 4): _color_var(x["ret_periodo"]) for i, x in enumerate(acc)}
-    _tabla(pdf, ["Emisora", "Mercado", "Cierre inicial", "Cierre final", "Rend. periodo", "Volatilidad", "Decisión", "Puntaje"], filas, (36, 16, 23, 23, 20, 20, 26, 14), None, est, size=8.2)
-    gl = {a["ticker"]: a for a in glosario.guia({x["ticker"]: x["nombre"] for x in acc}, __import__("server").META, {})["acciones"]}
-    for x in acc:
-        g = gl.get(x["ticker"], {})
-        _h3(pdf, f"{x['nombre']} ({x['ticker'].replace('.MX', '')}) · {x['mercado']} · {x['moneda']}", GUINDA)
-        _p(pdf, f"Qué es. {g.get('que_es', '')}", size=9.2, espacio=0.8)
-        _p(pdf, f"Qué la mueve. {g.get('que_la_mueve', '')}", size=9.2, espacio=0.8)
-        _p(pdf, f"Decisión al cierre del {fecha_corta(x['fecha'])}: {x['decision']} (puntaje {x['score']:+d}, confianza {x['confianza'].lower()}). " + " ".join(x["por_que"][1:4]), size=9.2, espacio=0.8)
-        if (g.get("fuente") or {}).get("nombre"):
-            _p(pdf, f"Fuente oficial: {g['fuente']['nombre']} ({g['fuente']['url']}).", size=8.4, color=GRIS, align="L")
-
-    _h2(pdf, "5. Deuda gubernamental y privada")
-    filas = [[x["nombre"], x["emisor"], "s/d" if x["valor"] is None else (n2(x["valor"] / 1000) + " mdp" if x["tipo"] == "monto" else n2(x["valor"])), n2(x.get("var_pb"), True) if x.get("var_pb") is not None else "-",
+    _h2(pdf, "4. Tablero de cierres y decisiones")
+    for etiqueta, pais_mx in (("Acciones de México (Bolsa Mexicana de Valores, pesos)", True), ("Acciones de Estados Unidos (Nasdaq y NYSE, dólares)", False)):
+        grupo = [x for x in acc if (x["pais"] == "México") == pais_mx]
+        if not grupo:
+            continue
+        _h3(pdf, etiqueta, GUINDA)
+        filas = [[x["nombre"], precio(x["serie"]["cierre"][0], x["moneda"]), precio(x["cierre"], x["moneda"]), pct(x["var_pct"]), pct(x["ret_periodo"]), x["decision"], f"{x['score']:+d}"] for x in grupo]
+        est = {(i, j): _color_var(v) for i, x in enumerate(grupo) for j, v in ((3, x["var_pct"]), (4, x["ret_periodo"]))}
+        _tabla(pdf, ["Emisora", "Cierre inicial", "Cierre final", "Var. día", "Rend. periodo", "Decisión", "Puntaje"], filas, (50, 25, 25, 18, 24, 26, 10), None, est, size=8.2)
+    _h3(pdf, "Deuda gubernamental y privada", GUINDA)
+    filas = [[x["nombre"], "s/d" if x["valor"] is None else (n2(x["valor"] / 1000) + " mdp" if x["tipo"] == "monto" else n2(x["valor"])), n2(x.get("var_pb"), True) if x.get("var_pb") is not None else "-",
               n2(x["z"], True) if x.get("z") is not None else "-", x["tendencia"], x["decision"]] for x in an["deuda"]]
-    _tabla(pdf, ["Instrumento", "Emisor", "Última cifra", "Cambio (pb)", "Z", "Tendencia", "Decisión"], filas, (38, 32, 24, 20, 12, 26, 26), None, size=8.2)
+    _tabla(pdf, ["Instrumento", "Última cifra", "Cambio (pb)", "Z", "Tendencia", "Decisión"], filas, (48, 28, 24, 14, 26, 38), None, size=8.2)
+    _p(pdf, "Las fichas siguientes siguen el mismo orden: primero las acciones de México, luego las de Estados Unidos y al final la deuda. Cada ficha trae el cierre, la gráfica del periodo, la estadística de riesgo, qué es, qué podría mover su precio, por qué la decisión y una sugerencia.", size=9, italic=True)
+
+    hist = {}
+    for d in arc["dias"]:
+        for en in d["e"]:
+            hist.setdefault(en["y"], []).append({"fecha": d["fecha"], "cierre": en["cierre"], "decision": en["v"].capitalize(), "s": en["s"], "r5": en["r5"], "a": en["a"]})
+    for h in hist.values():
+        for i, r in enumerate(h):
+            r["var_pct"] = (r["cierre"] / h[i - 1]["cierre"] - 1) * 100 if i and h[i - 1]["cierre"] else None
+    gl = {a_["ticker"]: a_ for a_ in glosario.guia({x["ticker"]: x["nombre"] for x in acc}, __import__("server").META, {})["acciones"]}
     gd = {d["nombre"]: d for d in glosario.guia({}, {}, {n: {"codigo": "", "emisor": ""} for n in glosario.DEUDA})["deuda"]}
+    _h2(pdf, "5. Fichas por emisora e instrumento")
+    pdf.pie = "Informe de mercados · fichas"
+    for x in acc:
+        _ficha_accion(pdf, x, ctx, estadisticas(x), gl.get(x["ticker"], {}), hist.get(x["ticker"], []))
     for x in an["deuda"]:
-        g = gd.get(x["nombre"], {})
-        _h3(pdf, f"{x['nombre']} · {x['emisor']}", GUINDA)
-        _p(pdf, f"Qué es. {g.get('que_es', '')}", size=9.2, espacio=0.8)
-        _p(pdf, f"Qué lo mueve. {g.get('que_lo_mueve', '')}", size=9.2, espacio=0.8)
-        _p(pdf, f"Lectura. {x['texto']}", size=9.2, espacio=0.8)
-        if (g.get("fuente") or {}).get("nombre"):
-            _p(pdf, f"Fuente oficial: {g['fuente']['nombre']} ({g['fuente']['url']}).", size=8.4, color=GRIS, align="L")
+        _ficha_deuda(pdf, x, ctx, gd.get(x["nombre"], {}))
     if ctx["privados"]:
+        pdf.add_page()
         _h3(pdf, "Papel comercial y certificados bursátiles por mes (Banxico, cuadros CF302 y CF304)", GUINDA)
         filas = [[m["mes"][:7], n2(m["tasa_cb_cp"]), n2(m["tasa_cb_mp"]), n2((m["col_cp"] or 0) / 1e6), n2((m["col_pc"] or 0) / 1e6), n2((m["col_mlp"] or 0) / 1e6)] for m in ctx["privados"]]
         _tabla(pdf, ["Mes", "Tasa CB corto plazo %", "Tasa CB mediano plazo %", "Colocado corto plazo (mdp)", "Colocado papel comercial (mdp)", "Colocado mediano y largo (mdp)"], filas, (18, 28, 30, 36, 36, 30), None, size=8)
         _p(pdf, "mdp = millones de pesos. Una tasa de 0.00 significa que no hubo colocaciones de ese instrumento en el mes.", size=8.6, italic=True)
+    pdf.pie = f"Informe de mercados · {fecha_corta(p['desde'])} al {fecha_corta(p['hasta'])}"
 
     _h2(pdf, "6. ¿Acertaron las decisiones?")
     filas = [[a["decision"], str(a["casos"]), str(a["aciertos"]), pct(a["pct"], False), pct(a["ret5_medio"])] for a in arc["aciertos"]]
