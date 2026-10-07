@@ -437,7 +437,8 @@ def informe(desde, hasta):
     an = analisis_completo(list(ACCIONES), desde, hasta)
     return {"periodo": an["periodo"], "analisis": an,
             "contexto": contexto.construir(desde, hasta, an["acciones"]),
-            "archivo": archivo(desde, hasta), "simulacion": simulacion(desde, hasta, "mxn")}
+            "archivo": archivo(desde, hasta), "simulacion": simulacion(desde, hasta, "mxn"),
+            "portafolio": (lambda: comparacion(list(ACCIONES), desde, hasta, "mxn").get("portafolio"))()}
 
 
 # ---------------- Servidor HTTP ----------------

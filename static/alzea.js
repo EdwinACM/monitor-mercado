@@ -283,6 +283,8 @@ const MERCADO_HTML = `
     <div class="split"><section class="sec"><h2>Qué es</h2><div id="queEs"></div></section><section class="sec"><h2>Estadística del periodo</h2><dl class="dl" id="stats"></dl></section></div>
     <div class="split"><section class="sec"><h2>Decisión del día y por qué</h2><div class="prose" id="texto"></div><div class="row-btns" id="descDia"></div></section>
       <section class="sec"><h2>Relación con EE. UU. y el dólar</h2><div id="mxVista"></div></section></div>
+    <section class="sec"><h2>Proyección de precio</h2><p class="intro" id="proyTexto"></p><div class="legend" id="legProy"></div><div class="chartbox md"><canvas id="chProy" role="img" aria-label="Rango proyectado del precio"></canvas></div>
+      <div class="scrollx"><table class="tbl" id="tblProy"></table></div><p class="note" id="proyNota" style="margin-top:8px"></p></section>
     <div class="split"><section class="sec"><h2>RSI y MACD</h2><div class="chartbox sm"><canvas id="chRsi" role="img" aria-label="RSI de 14 sesiones"></canvas></div><div class="chartbox sm" style="margin-top:12px"><canvas id="chMacd" role="img" aria-label="MACD"></canvas></div></section>
       <section class="sec"><h2>Prueba histórica de la señal</h2><div id="bt"></div></section></div>
     <section class="sec"><h2>Últimos cambios de decisión</h2><div id="histCambios"><p class="note">Cargando…</p></div></section>
@@ -400,9 +402,34 @@ async function renderDetalle() {
     fila("Compra", b.n_compra, b.aciertos_compra, b.rend_medio_compra, okC, okC ? "respaldada" : "sin respaldo") + fila("Venta", b.n_venta, b.aciertos_venta, b.rend_medio_venta, okV, okV ? "respaldada" : "sin respaldo") +
     `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Es una prueba dentro de la muestra de calibración (${b.muestra} sesiones de esta emisora): sirve para dimensionar la confianza, no la garantiza.</p>`;
   mxVista(a);
+  proyeccion(a);
   queEs(a);
   cargarCambios();
   await graficaPrecio(a);
+}
+function proyeccion(a) {
+  const p = a.proyeccion, mn = a.moneda;
+  if (!p) { $("#proyTexto").textContent = "No hay historial suficiente para proyectar."; return; }
+  const H = Math.min(60, a.serie.fechas.length), ab = p.abanico, col = hexOf("--line");
+  const hist = a.serie.cierre.slice(-H), n = ab.h.length, nul = k => Array(k).fill(null);
+  const proj = arr => [...nul(H - 1), hist[H - 1], ...arr];
+  const L = [...a.serie.fechas.slice(-H).map(fcorta), ...ab.h.map(h => `+${h}`)];
+  const brand = hexOf("--brand-text");
+  mk("chProy", { type: "line", data: { labels: L, datasets: [
+    { label: "Banda 95 % alta", data: proj(ab.hi95), borderColor: "transparent", backgroundColor: alpha(brand, .10), pointRadius: 0, fill: "+1", tip: false },
+    { label: "Banda 95 % baja", data: proj(ab.lo95), borderColor: "transparent", pointRadius: 0, fill: false, tip: false },
+    { label: "Banda 68 % alta", data: proj(ab.hi68), borderColor: "transparent", backgroundColor: alpha(brand, .18), pointRadius: 0, fill: "+1", tip: false },
+    { label: "Banda 68 % baja", data: proj(ab.lo68), borderColor: "transparent", pointRadius: 0, fill: false, tip: false },
+    linea("Cierre", [...hist, ...nul(n)], col, { w: 2.3 }),
+    linea("Mediana proyectada", proj(ab.mediana), css("--ink"), { w: 1.6, borderDash: [6, 4] }),
+    linea("Si continúa la tendencia", proj(ab.tendencia), css("--s2"), { w: 1.6, borderDash: [2, 3] })] },
+    options: opts({ ftip: v => money(v, mn), right: 12, title: it => it[0].label.startsWith("+") ? `Dentro de ${it[0].label.slice(1)} sesiones` : it[0].label }) });
+  $("#legProy").innerHTML = `<span style="--c:${col}"><i></i>Cierre de las últimas ${H} sesiones</span><span style="--c:${css("--ink")}"><i class="d"></i>Mediana proyectada</span><span style="--c:${css("--s2")}"><i class="t"></i>Si continúa la tendencia</span>
+    <span style="--c:${brand}"><i class="f"></i>Rango de 68 % y de 95 %</span>`;
+  $("#proyTexto").textContent = p.texto;
+  $("#tblProy").innerHTML = `<thead><tr><th>Horizonte</th><th>Rango con 68 %</th><th>Rango con 95 %</th><th>Si continúa la tendencia</th><th>Acierto histórico del rango de 95 %</th></tr></thead><tbody>` +
+    p.horizontes.map(h => `<tr><td>${h.h} sesiones</td><td>${money(h.b68[0], mn)} a ${money(h.b68[1], mn)}</td><td>${money(h.b95[0], mn)} a ${money(h.b95[1], mn)}</td><td>${money(h.tendencia, mn)}</td><td>${h.cobertura ? fmt(h.cobertura.p95) + " % de " + h.cobertura.n + " sesiones" : "—"}</td></tr>`).join("") + "</tbody>";
+  $("#proyNota").textContent = `Volatilidad diaria reciente: ${fmt(p.sigma_diaria)} % (${fmt(p.sigma_anual)} % anual), estimada con un promedio móvil exponencial que pesa más lo reciente. El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. La línea de tendencia extiende la recta de las últimas 30 sesiones, ponderada por su ajuste (R² ${fmt(p.r2_tendencia)}). Son rangos de probabilidad, no un pronóstico.`;
 }
 async function queEs(a) {
   try {
@@ -421,6 +448,9 @@ function mxVista(a) {
   if (s) h += `<dl class="dl">${row("Correlación con el S&P 500", fmt(s.corr_sp500))}${row("Beta frente al S&P 500", fmt(s.beta_sp500))}${row("Correlación con el dólar", fmt(s.corr_dolar))}${s.corr_ipc != null ? row("Correlación con el IPC", fmt(s.corr_ipc)) : ""}</dl>`;
   if (e) h += `<p class="h3" style="margin-top:14px">Visto desde México</p><dl class="dl">${row("Rendimiento en dólares", pct(e.ret_usd), cls(e.ret_usd))}${row("Variación del dólar", pct(e.ret_dolar), cls(e.ret_dolar))}${row("Rendimiento en pesos", pct(e.ret_pesos), cls(e.ret_pesos))}</dl>
     <p class="note" style="margin-top:8px">El tipo de cambio es el de cierre de Banxico. Un peso más débil suma al rendimiento de una acción en dólares; uno más fuerte lo resta.</p>`;
+  const rm = S.ctx.riesgo_mercado?.find(x => x.ticker === a.ticker);
+  if (rm) h += `<p class="h3" style="margin-top:14px">Rendimiento ajustado por riesgo</p><dl class="dl">${row("Razón de Sharpe", fmt(rm.sharpe))}${row("Razón de Sortino", fmt(rm.sortino))}${row("Alfa anual frente al " + rm.indice, pct(rm.alfa_anual), cls(rm.alfa_anual))}${row("Beta frente al " + rm.indice, fmt(rm.beta))}${row("R² del modelo", fmt(rm.r2))}${row("Asimetría", fmt(rm.asimetria))}${row("Pérdida probable a 20 sesiones (VaR 95 %)", fmt(rm.var20) + " %")}</dl>
+    <p class="note" style="margin-top:8px">Sharpe: rendimiento por encima de la ${esc(rm.tasa_libre_nombre)} (${fmt(rm.tasa_libre)} % anual) por unidad de riesgo; Sortino solo penaliza las caídas. Alfa: rendimiento anual que no explica el índice (modelo CAPM). R²: qué parte de los movimientos explica el índice. Asimetría negativa: las caídas fuertes pesan más que las alzas. Calculado con ${rm.n} sesiones del periodo.</p>`;
   h += `<p class="note" style="margin-top:10px">Correlación y beta de los rendimientos diarios del periodo (${s ? s.n : "—"} sesiones). Un valor alto indica que se mueven juntos; no prueba que uno cause al otro.</p>`;
   el.innerHTML = h;
 }
@@ -561,6 +591,7 @@ const DEUDA_HTML = `
     <div class="detail-head"><h2 id="deuNombre"></h2></div>
     <div class="cols"><div><div class="legend" id="legDeuda"></div><div class="chartbox md"><canvas id="chDeuda" role="img" aria-label="Rendimiento por semana o subasta"></canvas></div></div><aside class="verdict" id="deuLectura"></aside></div>
     <div class="split"><section class="sec"><h2>Qué es</h2><div id="deuQue"></div></section><section class="sec"><h2>Resultados semana a semana</h2><div class="scroll"><table class="tbl" id="tblDeuda"></table></div></section></div>
+    <section class="sec" id="deuProy" hidden><h2>Proyección y sensibilidad a la tasa</h2><div class="prose" id="deuProyT"></div></section>
     <section class="sec" id="deuPriv" hidden><h2>Papel comercial y certificados bursátiles por mes</h2><div class="scrollx" id="deuPrivT"></div></section>
   </div>
   <p class="aviso">Si las tasas suben, el precio de los bonos ya emitidos baja. La decisión es un apoyo educativo y no constituye asesoría financiera.</p>`;
@@ -603,6 +634,9 @@ function renderDeuda() {
     [...x.datos].reverse().map(r => `<tr><td>${flarga(r.fecha)}</td><td><b>${tipo === "precio" ? fmt(r.valor, 5) : fmt(r.valor)}</b></td>${tasa ? `<td class="${cls(r.var_pb)}">${r.var_pb == null ? "—" : sg(r.var_pb) + Math.abs(r.var_pb).toFixed(2)}</td>` : ""}${ex.map(e => `<td>${r.extra?.[e] == null ? "—" : fmt(r.extra[e])}</td>`).join("")}</tr>`).join("") + "</tbody>";
   cargarGuia().then(g => { const q = g.deuda.find(z => z.nombre === x.nombre); if (q && S.data.deuda[S.selD]?.nombre === x.nombre)
     $("#deuQue").innerHTML = `<div class="prose"><p>${esc(q.que_es)}</p><p><b>Qué lo mueve.</b> ${esc(q.que_lo_mueve)}</p></div>` + (q.fuente ? `<p class="note" style="margin-top:8px">Fuente oficial: <a class="fuente" href="${esc(q.fuente.url)}" target="_blank" rel="noopener">${esc(q.fuente.nombre)}</a></p>` : ""); }).catch(() => {});
+  const pr = x.proyeccion, se = x.sensibilidad;
+  $("#deuProy").hidden = !pr && !se;
+  $("#deuProyT").innerHTML = (pr ? `<p>Con una recta ajustada a las últimas ${pr.n} cifras (error típico ${fmt(pr.error_tipico)} puntos), el rendimiento de la próxima subasta podría estar entre <b>${fmt(pr.proyecciones[0].bajo)} %</b> y <b>${fmt(pr.proyecciones[0].alto)} %</b> (centro ${fmt(pr.proyecciones[0].centro)} %), y dentro de 4 subastas entre <b>${fmt(pr.proyecciones[1].bajo)} %</b> y <b>${fmt(pr.proyecciones[1].alto)} %</b>, con 95 % de probabilidad bajo el supuesto de que la tendencia reciente continúe. No es un pronóstico: las decisiones de Banxico y la inflación pueden cambiarla.</p>` : "") + (se ? `<p>${esc(se.texto)}</p>` : "");
   const priv = x.nombre === "PAPEL COMERCIAL" || x.nombre === "CERTIFICADOS BURSÁTILES";
   $("#deuPriv").hidden = !priv;
   if (priv) {
@@ -628,6 +662,7 @@ const COMPARAR_HTML = `
           <div class="seg" id="atajos"><button data-a="ini">Periodo</button><button data-a="sem">1 semana</button><button data-a="mes">1 mes</button></div></div>
         <div class="scrollx"><table class="tbl" id="tblConsulta"></table></div><p class="note" style="margin-top:8px">Si la fecha no fue día hábil se usa el cierre anterior. Los cierres se muestran en la moneda elegida arriba.</p></section>
       <section class="sec"><h2>Ranking del periodo</h2><div class="scrollx"><table class="tbl" id="tblRanking"></table></div></section></div>
+    <section class="sec"><h2>Portafolio y diversificación</h2><div class="scrollx" id="tblPort"></div><p class="note" id="portNota" style="margin-top:8px"></p></section>
     <div class="split"><section class="sec"><h2>Correlación de rendimientos diarios</h2><div class="heat" id="heat"></div><p class="note" style="margin-top:10px">+1.00 se mueven igual, 0.00 sin relación, −1.00 en sentido contrario. Valores bajos diversifican.</p></section>
       <section class="sec"><h2>Cierres diarios</h2><details class="acc"><summary>${ICON("chevron")}Ver tabla completa</summary><div class="scroll"><table class="tbl" id="tblCierres"></table></div></details></section></div>
   </div>
@@ -684,6 +719,13 @@ function drawComparar() {
   $$("#atajos button").forEach(b => b.onclick = () => { const u = L.length - 1; fb.value = L[u]; fa.value = b.dataset.a === "ini" ? L[0] : L[Math.max(0, u - (b.dataset.a === "sem" ? 5 : 21))]; tabla(); });
   $("#tblRanking").innerHTML = `<thead><tr><th>Emisora</th><th>Rend.</th><th>Vol.</th><th>R/R</th><th>Caída</th><th>Días al alza</th></tr></thead><tbody>` +
     [...c.ranking].sort((a, b) => b.ret - a.ret).map(r => `<tr><td><b>${tk(r.ticker)}</b></td><td class="${cls(r.ret)}"><b>${pct(r.ret)}</b></td><td>${fmt(r.vol_anual)}%</td><td>${r.ratio == null ? "—" : fmt(r.ratio)}</td><td class="down">${pct(r.max_drawdown)}</td><td>${fmt(r.dias_alza)}%</td></tr>`).join("") + "</tbody>";
+  const po = c.portafolio;
+  if (po) {
+    $("#tblPort").innerHTML = `<table class="tbl"><thead><tr><th>Emisora</th><th>Peso equiponderado</th><th>Peso de mínima varianza</th></tr></thead><tbody>` +
+      po.tickers.map((t, i) => `<tr><td><b>${tk(t)}</b></td><td>${fmt(po.equiponderado.pesos[i])} %</td><td>${fmt(po.min_varianza.pesos[i])} %</td></tr>`).join("") +
+      `<tr><td><b>Volatilidad anual</b></td><td>${fmt(po.equiponderado.vol_anual)} %</td><td>${fmt(po.min_varianza.vol_anual)} %</td></tr><tr><td><b>Rendimiento anualizado del periodo</b></td><td>${pct(po.equiponderado.ret_anual)}</td><td>${pct(po.min_varianza.ret_anual)}</td></tr></tbody></table>`;
+    $("#portNota").textContent = `La volatilidad promedio de las emisoras por separado es ${fmt(po.vol_individual_promedio)} % y la del portafolio equiponderado ${fmt(po.equiponderado.vol_anual)} %: la razón de diversificación es ${fmt(po.razon_diversificacion)} (más de 1 significa que combinarlas reduce el riesgo). El portafolio de mínima varianza reparte el dinero para tener la menor volatilidad posible sin ventas en corto; usa solo datos pasados y sus pesos cambian con el periodo, así que no garantiza el mismo resultado hacia adelante.`;
+  } else $("#tblPort").innerHTML = "<p class='note'>Selecciona al menos dos emisoras.</p>";
   const m = c.corr.matriz, n = c.corr.tickers.length, g = $("#heat");
   g.style.gridTemplateColumns = `auto repeat(${n},minmax(0,1fr))`;
   g.innerHTML = `<div class="h"></div>` + c.corr.tickers.map(t => `<div class="h">${tk(t)}</div>`).join("") +

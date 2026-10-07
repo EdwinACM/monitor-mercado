@@ -465,6 +465,23 @@ def _ficha_accion(pdf, x, ctx, e, g, hist):
     _tabla(pdf, ["Medida", "Valor", "Medida", "Valor"], f, (48, 42, 52, 36), ["LEFT", "RIGHT", "LEFT", "RIGHT"], size=8.2)
     _p(pdf, "VaR 95 %: con los datos del periodo, en 95 de cada 100 sesiones la pérdida diaria no pasó de esa cifra. CVaR: promedio de las pérdidas en el 5 % de las peores sesiones. "
             "Rendimiento / riesgo: rendimiento del periodo entre su volatilidad; más alto es mejor.", size=8.2, italic=True, color=GRIS)
+    if x.get("proyeccion"):
+        pr = x["proyeccion"]
+        _h3(pdf, "Proyección del precio", GUINDA)
+        _p(pdf, pr["texto"], size=9.2)
+        filas = [[f"{h['h']} sesiones", f"{precio(h['b68'][0], x['moneda'])} a {precio(h['b68'][1], x['moneda'])}", f"{precio(h['b95'][0], x['moneda'])} a {precio(h['b95'][1], x['moneda'])}",
+                  precio(h["tendencia"], x["moneda"]), f"{n2(h['cobertura']['p95'])} %" if h.get("cobertura") else "-"] for h in pr["horizontes"]]
+        _tabla(pdf, ["Horizonte", "Rango con 68 %", "Rango con 95 %", "Si sigue la tendencia", "Acierto histórico del rango de 95 %"], filas, (24, 44, 44, 32, 34), ["LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"], size=8.2)
+        _p(pdf, f"Volatilidad diaria reciente {n2(pr['sigma_diaria'])} % (EWMA, factor de decaimiento 0.94). El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. "
+                "Son rangos de probabilidad, no un pronóstico.", size=8.2, italic=True, color=GRIS)
+    rm = next((z for z in ctx.get("riesgo_mercado", []) if z["ticker"] == x["ticker"]), None)
+    if rm:
+        _h3(pdf, f"Rendimiento ajustado por riesgo (frente al {rm['indice']})", GUINDA)
+        _tabla(pdf, ["Medida", "Valor", "Medida", "Valor"],
+               [["Razón de Sharpe", n2(rm["sharpe"]), "Alfa anual", pct(rm["alfa_anual"])], ["Razón de Sortino", n2(rm["sortino"]), "Beta", n2(rm["beta"])],
+                ["Asimetría", n2(rm["asimetria"]), "R²", n2(rm["r2"])], ["Pérdida probable a 20 sesiones (VaR 95 %)", pct(rm["var20"], False), "Tasa libre de riesgo", pct(rm["tasa_libre"], False)]],
+               (62, 26, 56, 34), ["LEFT", "RIGHT", "LEFT", "RIGHT"], size=8.2)
+        _p(pdf, f"Sharpe: rendimiento por encima de la {rm['tasa_libre_nombre']} por unidad de riesgo; Sortino solo penaliza las caídas. Alfa: rendimiento anual que el índice no explica (CAPM). R²: parte de los movimientos que explica el índice.", size=8.2, italic=True, color=GRIS)
     _h3(pdf, "Cierres y decisiones de las últimas 8 sesiones", GUINDA)
     filas, est = [], {}
     for i, h in enumerate(hist[-8:][::-1]):
@@ -532,6 +549,13 @@ def _ficha_deuda(pdf, x, ctx, g):
     anch = [24] + [30] * (len(cols) - 1)
     k = 178 / sum(anch)
     _tabla(pdf, cols, filas, tuple(a * k for a in anch), None, size=8.2)
+    if x.get("proyeccion"):
+        pr = x["proyeccion"]
+        _h3(pdf, "Proyección de la tasa", GUINDA)
+        _p(pdf, f"Con una recta ajustada a las últimas {pr['n']} cifras (error típico {n2(pr['error_tipico'])} puntos), la próxima subasta podría quedar entre {n2(pr['proyecciones'][0]['bajo'])} % y {n2(pr['proyecciones'][0]['alto'])} % "
+                f"(centro {n2(pr['proyecciones'][0]['centro'])} %), y dentro de 4 subastas entre {n2(pr['proyecciones'][1]['bajo'])} % y {n2(pr['proyecciones'][1]['alto'])} %, con 95 % de probabilidad si la tendencia reciente continúa. No es un pronóstico.", size=9.2)
+    if x.get("sensibilidad"):
+        _p(pdf, x["sensibilidad"]["texto"], size=9.2)
     _h3(pdf, "Qué es", GUINDA)
     _p(pdf, g.get("que_es", ""), size=9.2)
     _p(pdf, "Qué lo mueve. " + g.get("que_lo_mueve", ""), size=9.2)
@@ -664,7 +688,15 @@ def pdf_periodo(inf):
         _p(pdf, "mdp = millones de pesos. Una tasa de 0.00 significa que no hubo colocaciones de ese instrumento en el mes.", size=8.6, italic=True)
     pdf.pie = f"Informe de mercados · {fecha_corta(p['desde'])} al {fecha_corta(p['hasta'])}"
 
-    _h2(pdf, "6. ¿Acertaron las decisiones?")
+    po = inf.get("portafolio")
+    if po:
+        _h2(pdf, "6. Portafolio y diversificación")
+        filas = [[t.replace(".MX", ""), f"{n2(po['equiponderado']['pesos'][i])} %", f"{n2(po['min_varianza']['pesos'][i])} %"] for i, t in enumerate(po["tickers"])]
+        filas += [["Volatilidad anual", f"{n2(po['equiponderado']['vol_anual'])} %", f"{n2(po['min_varianza']['vol_anual'])} %"], ["Rendimiento anualizado", pct(po["equiponderado"]["ret_anual"]), pct(po["min_varianza"]["ret_anual"])]]
+        _tabla(pdf, ["Emisora", "Equiponderado", "Mínima varianza"], filas, (70, 54, 54), None, size=8.4)
+        _p(pdf, f"La volatilidad promedio de las emisoras por separado es {n2(po['vol_individual_promedio'])} % y la del portafolio equiponderado {n2(po['equiponderado']['vol_anual'])} %: la razón de diversificación es {n2(po['razon_diversificacion'])} "
+                "(más de 1 significa que combinarlas reduce el riesgo). El portafolio de mínima varianza reparte el dinero para tener la menor volatilidad posible sin ventas en corto; usa solo datos pasados y no garantiza el mismo resultado hacia adelante.", size=9)
+    _h2(pdf, "7. ¿Acertaron las decisiones?")
     filas = [[a["decision"], str(a["casos"]), str(a["aciertos"]), pct(a["pct"], False), pct(a["ret5_medio"])] for a in arc["aciertos"]]
     _tabla(pdf, ["Decisión", "Casos evaluados", "Aciertos", "% de aciertos", "Rend. medio a 5 sesiones"], filas, (40, 36, 30, 32, 40), None, size=8.8)
     _p(pdf, "Comprar acierta si el precio subió a 5 sesiones; vender, si bajó; mantener, si se movió 2 % o menos. Un porcentaje cercano a 50 % indica que la regla no supera al azar en el periodo.", size=9, italic=True)
@@ -674,7 +706,7 @@ def pdf_periodo(inf):
             _li(pdf, f"{fecha_corta(c['fecha'])} · {c['ticker']}: de {(c['de'] or 'sin dato').lower()} a {c['a'].lower()}.")
     if sim.get("fechas"):
         m = sim["metricas"]
-        _h2(pdf, "7. Simulación")
+        _h2(pdf, "8. Simulación")
         _p(pdf, f"Con $100,000.00 repartidos en partes iguales entre las {len(sim['por_emisora'])} emisoras (acciones de EE. UU. medidas en pesos), seguir las decisiones habría terminado en {pct(m['ret_estrategia'])} "
                 f"y comprar y mantener en {pct(m['ret_comprar_mantener'])}. Caída máxima: {pct(m['caida_estrategia'])} contra {pct(m['caida_comprar_mantener'])}. "
                 f"Se compra con +20 o más, se sale con -20 o menos, se opera al cierre siguiente y cada operación paga {n2(sim['costo_pct'])} % de comisión.")
@@ -683,7 +715,7 @@ def pdf_periodo(inf):
     for x in ctx["indicadores"]:
         _p(pdf, f"{x['nombre']}. {x['que_es']} {x['como_afecta']}", size=9, espacio=1.2)
 
-    _h2(pdf, "8. Fuentes")
+    _h2(pdf, "9. Fuentes")
     for f in ctx["fuentes"]:
         _li(pdf, f"{f['nombre']} ({'oficial' if f['oficial'] else 'referencia, no oficial'}): {f['url']}", size=8.8)
     _li(pdf, "Precios de las acciones: Yahoo Finance (proveedor de datos de mercado; no es una fuente oficial). Para reportes oficiales de las empresas: SEC EDGAR (EE. UU.) y Bolsa Mexicana de Valores / CNBV (México).", size=8.8)

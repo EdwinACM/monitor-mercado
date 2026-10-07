@@ -253,6 +253,9 @@ def analizar_serie(nombre, rows, desde_vista=None, con_serie=True, con_backtest=
         d["veredicto_ant"] = None
     d["cambio"] = d["veredicto_ant"] is not None and d["veredicto_ant"] != d["veredicto"]
     d["decision"] = DECISION[d["veredicto"]]
+    if con_serie:
+        import proyeccion as _p
+        d["proyeccion"] = _p.proyectar(c)
     d["calibracion"] = modelo.calibracion(fecha)
     resp = modelo.respaldo(fecha)
     d["respaldo"] = _respaldo_texto(d["veredicto"], resp)
@@ -356,7 +359,9 @@ def comparar(hist, desde, hasta, fx=None, meta=None):
                         "max_drawdown": round(dd * 100, 2),
                         "mejor_dia": round(max(r) * 100, 2), "peor_dia": round(min(r) * 100, 2),
                         "dias_alza": round(100 * sum(1 for x in r if x > 0) / len(r), 2)})
+    import proyeccion as _p
     return {"fechas": fechas, "cierres": {k: [round(x, 4) for x in v] for k, v in cierres.items()}, "base100": base,
+            "portafolio": _p.portafolio({t: rets[t] for t in orden}) if len(orden) >= 2 else None,
             "moneda": "pesos" if fx else "original", "en_pesos": [t for t in tks if en_pesos[t]],
             "corr": {"tickers": orden, "matriz": matriz}, "ranking": ranking}
 
@@ -401,7 +406,15 @@ def analizar_deuda(d, hasta=None, desde=None):
     por_que = [f"El rendimiento de la última subasta fue {val_txt}{var_txt}.",
                f"Frente al promedio de las últimas 12 subastas su puntaje z es {z:+.2f}.",
                f"La tendencia es {tend} ({sl_u:+.2f} {'pb' if es_tasa else '$'} por subasta).", razon]
+    import proyeccion as _p
+    dur = _p.duracion(d["nombre"], last)
+    sens = None
+    if dur is not None:
+        sens = {"duracion": round(dur, 2), "efecto_100pb": round(-dur, 2),
+                "texto": (f"Duración modificada aproximada: {dur:.2f} años. Si la tasa sube 1 punto porcentual (100 pb), el precio de mercado baja alrededor de {dur:.2f}%; "
+                          f"si baja 1 punto, sube alrededor de {dur:.2f}%. " + ("Es bajo porque su plazo o su ajuste de tasa es muy corto." if dur < 0.5 else "Entre más largo el plazo, más sensible es el precio a las tasas."))}
     return {**base, "fecha": datos[-1]["fecha"], "valor": last, "var": None if var is None else round(var, 5),
+            "proyeccion": _p.proyectar_deuda(vals) if es_tasa else None, "sensibilidad": sens,
             "decision": decision, "por_que": por_que,
             "var_pb": round(var * 100, 2) if var is not None and es_tasa else None, "z": z,
             "pendiente": round(sl_u, 2), "tendencia": tend, "senal": senal, "n": len(vals), "texto": texto}

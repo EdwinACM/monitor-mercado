@@ -177,6 +177,22 @@ def sensibilidades(hist, serie_sp, serie_fx, serie_ipc, desde, hasta):
     return out
 
 
+def riesgo_acciones(hist, res, desde, hasta):
+    """Sharpe, Sortino, alfa y beta de cada acción frente a su índice (S&P 500 o S&P/BMV IPC) y a la tasa libre de riesgo."""
+    import proyeccion
+    out = []
+    for t, rows in hist.items():
+        mx = S.META[t]["pais"] == "México"
+        bench = res.get("ipc" if mx else "sp500") or []
+        rf = res.get("tasa_obj" if mx else "effr") or []
+        cierres = [(r["fecha"], r["cierre"]) for r in rows if desde <= r["fecha"] <= hasta]
+        m = proyeccion.riesgo_mercado(cierres, _corte(bench, desde, hasta), rf)
+        if m:
+            out.append({"ticker": t, "nombre": S.ACCIONES[t], "moneda": S.META[t]["moneda"], "indice": "S&P/BMV IPC" if mx else "S&P 500",
+                        "tasa_libre_nombre": "tasa objetivo de Banxico" if mx else "tasa efectiva de fondos federales (EFFR)", **m})
+    return out
+
+
 def efecto_cambiario(hist, serie_fx, desde, hasta):
     """Rendimiento de las acciones de EE. UU. en dólares y en pesos (con el tipo de cambio de cierre de Banxico)."""
     out = []
@@ -330,6 +346,7 @@ def construir(desde, hasta, acciones_items=None):
     hist = {t: rows for t, rows in hist.items() if (not acciones_items) or t in {a["ticker"] for a in acciones_items if "error" not in a}}
     sens = sensibilidades(hist, res.get("sp500", []), res.get("fxc", []), res.get("ipc", []), d_iso, h_iso) if res.get("sp500") and res.get("fxc") else []
     efecto = efecto_cambiario(hist, res.get("fxc", []), d_iso, h_iso) if res.get("fxc") else []
+    riesgo = riesgo_acciones(hist, res, d_iso, h_iso)
     difs = diferenciales(ind, d_iso, h_iso)
     privados = []
     try:
@@ -338,7 +355,7 @@ def construir(desde, hasta, acciones_items=None):
         err["privados"] = f"{type(e).__name__}: {e}"
     usadas = {x["fuente"]["id"]: x["fuente"] for x in ind}
     return {"periodo": {"desde": d_iso, "hasta": h_iso}, "indicadores": ind, "diferenciales": difs, "sensibilidades": sens,
-            "efecto_cambiario": efecto, "privados": privados, "lectura": _lectura(ind, difs, sens, efecto, res.get("_rango_fed")),
+            "efecto_cambiario": efecto, "riesgo_mercado": riesgo, "privados": privados, "lectura": _lectura(ind, difs, sens, efecto, res.get("_rango_fed")),
             "fuentes": list(usadas.values()), "errores": err, "rango_fed": res.get("_rango_fed")}
 
 
