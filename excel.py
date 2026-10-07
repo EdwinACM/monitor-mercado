@@ -222,6 +222,10 @@ SIGNIFICADOS = [
     ("Puntaje z", "Cuántas desviaciones estándar se aleja la última tasa del promedio de las últimas 12 subastas. Arriba de +1 es alta; debajo de −1, baja."),
     ("Correlación", "De −1 a +1: mide si dos precios se mueven juntos (cerca de +1), en sentido contrario (cerca de −1) o sin relación (cerca de 0)."),
     ("Beta", "Cuánto tiende a moverse una acción por cada 1 % que se mueve el S&P 500. Mayor que 1 es más volátil que el mercado."),
+    ("Razón de Sharpe y de Sortino", "Rendimiento por encima de la tasa libre de riesgo por unidad de riesgo (Sortino solo cuenta las caídas). Más alto es mejor."),
+    ("Alfa y R²", "Alfa: rendimiento anual que el índice no explica (modelo CAPM). R²: parte de los movimientos de la acción que explica el índice."),
+    ("VaR y proyección", "VaR: pérdida que no se superaría en 95 de cada 100 ocasiones. Las proyecciones son rangos de probabilidad con la volatilidad reciente, no pronósticos."),
+    ("Duración", "Cuánto baja el precio de un bono por cada punto porcentual que sube su tasa; entre más largo el plazo, mayor."),
     ("Fuente oficial y referencia", "Oficial: la publica la propia institución (Banxico, Tesoro de EE. UU., Reserva Federal de Nueva York, BLS, Cboe). Referencia: datos de mercado de Yahoo Finance, no oficiales."),
     ("Redondeo", "Todas las cifras se muestran con dos decimales; las celdas conservan la precisión original para que puedas calcular con ellas."),
 ]
@@ -256,7 +260,7 @@ def libro_periodo(inf):
     hist = R.historial(arc)
     gl = {a["ticker"]: a for a in glosario.guia({x["ticker"]: x["nombre"] for x in acc}, srv.META, {})["acciones"]}
     gd = {d["nombre"]: d for d in glosario.guia({}, {}, {n: {"codigo": "", "emisor": ""} for n in glosario.DEUDA})["deuda"]}
-    usados = {"Léeme", "Resumen", "Entorno global", "Relación con EE. UU.", "Aciertos de las decisiones", "Simulación", "Fuentes"}
+    usados = {"Léeme", "Resumen", "Portafolio", "Entorno global", "Relación con EE. UU.", "Aciertos de las decisiones", "Simulación", "Fuentes"}
     hojas_acc = {x["ticker"]: nombre_hoja(x["ticker"].replace(".MX", ""), usados) for x in acc}
     hojas_deu = {x["nombre"]: nombre_hoja(frase(x["nombre"]), usados) for x in an["deuda"]}
     sub = f"Periodo del {R.fecha_corta(p['desde'])} al {R.fecha_corta(p['hasta'])} · último cierre {R.fecha_corta(p['ultimo_cierre'] or p['hasta'])}"
@@ -267,6 +271,7 @@ def libro_periodo(inf):
               ("Relación con EE. UU.", "Qué tan ligada está cada acción al S&P 500 y al dólar, y el efecto del tipo de cambio en las acciones de EE. UU.")]
     indice += [(hojas_acc[x["ticker"]], f"{x['nombre']}: cierre, decisión y por qué, estadística de riesgo, qué la mueve y cierres diarios con su gráfica.") for x in acc]
     indice += [(hojas_deu[x["nombre"]], f"{frase(x['nombre'])}: qué es, última cifra, decisión y resultados semana a semana con su gráfica.") for x in an["deuda"]]
+    indice += [("Portafolio", "Cómo cambia el riesgo al combinar las emisoras: equiponderado frente a mínima varianza.")] if inf.get("portafolio") else []
     indice += [("Aciertos de las decisiones", "Cuántas veces acertó cada tipo de decisión y los últimos cambios de decisión."),
                ("Simulación", "Qué habría pasado al seguir las decisiones frente a comprar y mantener."),
                ("Fuentes", "De dónde vienen los datos y si la fuente es oficial.")]
@@ -339,6 +344,14 @@ def libro_periodo(inf):
     for x in an["deuda"]:
         _hoja_deuda(wb, hojas_deu[x["nombre"]], x, ctx, gd.get(x["nombre"], {}), sub)
 
+    po = inf.get("portafolio")
+    if po:
+        h = Hoja(wb, "Portafolio", "Portafolio y diversificación", sub)
+        h.parrafo(f"La volatilidad promedio de las emisoras por separado es {po['vol_individual_promedio']:.2f} % y la del portafolio equiponderado {po['equiponderado']['vol_anual']:.2f} %: la razón de diversificación es {po['razon_diversificacion']:.2f} "
+                  "(más de 1 significa que combinarlas reduce el riesgo). El de mínima varianza reparte el dinero para tener la menor volatilidad posible sin ventas en corto.")
+        h.tabla(["Emisora", "Peso equiponderado", "Peso de mínima varianza"], [[t.replace(".MX", ""), (po["equiponderado"]["pesos"][i], PCT_S), (po["min_varianza"]["pesos"][i], PCT_S)] for i, t in enumerate(po["tickers"])]
+                + [["Volatilidad anual", (po["equiponderado"]["vol_anual"], PCT_S), (po["min_varianza"]["vol_anual"], PCT_S)], ["Rendimiento anualizado del periodo", (po["equiponderado"]["ret_anual"], PCT), (po["min_varianza"]["ret_anual"], PCT)]])
+        h.nota("Con datos pasados del periodo y en pesos; los pesos de mínima varianza cambian con el periodo y no garantizan el mismo resultado hacia adelante.")
     # --- Aciertos
     h = Hoja(wb, "Aciertos de las decisiones", "¿Acertaron las decisiones?", sub)
     h.nota("Una decisión de comprar acierta si el precio subió a 5 sesiones; la de vender, si bajó; la de mantener, si se movió 2 % o menos. Las decisiones de los últimos 5 días aún no se pueden evaluar.")
@@ -459,6 +472,22 @@ def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
                    ("Variación del dólar frente al peso", efe["ret_dolar"], PCT, "Cuánto subió o bajó el dólar en el mismo lapso."),
                    ("Rendimiento en pesos", efe["ret_pesos"], PCT, "Lo que ganó o perdió quien invirtió desde México.")]
         h.medidas(it)
+    rm = next((z for z in ctx.get("riesgo_mercado", []) if z["ticker"] == x["ticker"]), None)
+    if rm:
+        h.bloque(f"Rendimiento ajustado por riesgo (frente al {rm['indice']})")
+        h.medidas([("Razón de Sharpe", rm["sharpe"], N2, f"Rendimiento por encima de la {rm['tasa_libre_nombre']} ({rm['tasa_libre']:.2f} % anual) por unidad de riesgo; más alto es mejor."),
+                   ("Razón de Sortino", rm["sortino"], N2, "Como Sharpe, pero solo penaliza las caídas."),
+                   ("Alfa anual", rm["alfa_anual"], PCT, "Rendimiento anual que el índice no explica (modelo CAPM); positivo es mejor que lo esperado por su riesgo de mercado."),
+                   ("Beta", rm["beta"], N2, "Cuánto se mueve por cada 1 % del índice."), ("R²", rm["r2"], N2, "Parte de los movimientos de la acción que explica el índice (0 a 1)."),
+                   ("Asimetría", rm["asimetria"], N2, "Negativa: las caídas fuertes pesan más que las alzas."),
+                   ("Pérdida probable a 20 sesiones (VaR 95 %)", rm["var20"], PCT_S, "Pérdida que no se superaría en 95 de cada 100 ocasiones, con la volatilidad del periodo.")])
+    pr = x.get("proyeccion")
+    if pr:
+        h.bloque("Proyección del precio")
+        h.parrafo(pr["texto"])
+        h.tabla(["Horizonte", "Rango con 68 %: mínimo", "Rango con 68 %: máximo", "Rango con 95 %: mínimo", "Rango con 95 %: máximo", "Si continúa la tendencia", "Acierto histórico del rango de 95 %"],
+                [[f"{q['h']} sesiones", (q["b68"][0], mon), (q["b68"][1], mon), (q["b95"][0], mon), (q["b95"][1], mon), (q["tendencia"], mon), (q["cobertura"]["p95"], PCT_S) if q.get("cobertura") else "—"] for q in pr["horizontes"]])
+        h.nota(f"Volatilidad diaria reciente {pr['sigma_diaria']:.2f} % (promedio móvil exponencial, λ = 0.94). El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. Son rangos de probabilidad, no un pronóstico.")
     h.bloque("Qué es y qué la mueve")
     h.parrafo(g.get("que_es", ""))
     h.parrafo("Qué la mueve. " + g.get("que_la_mueve", ""))
@@ -519,6 +548,14 @@ def _hoja_deuda(wb, nombre, x, ctx, g, sub):
     h.bloque("Evolución")
     ancla = h.r
     h.r += 16
+    if x.get("proyeccion") or x.get("sensibilidad"):
+        h.bloque("Proyección y sensibilidad a la tasa")
+        pr = x.get("proyeccion")
+        if pr:
+            h.tabla(["Horizonte", "Mínimo con 95 %", "Centro", "Máximo con 95 %"], [[f"{q['pasos']} subasta" + ("s" if q["pasos"] > 1 else ""), (q["bajo"], PCT_S), (q["centro"], PCT_S), (q["alto"], PCT_S)] for q in pr["proyecciones"]])
+            h.nota(f"Recta ajustada a las últimas {pr['n']} cifras (error típico {pr['error_tipico']:.2f} puntos), válida si la tendencia reciente continúa. No es un pronóstico: las decisiones de Banxico y la inflación pueden cambiarla.")
+        if x.get("sensibilidad"):
+            h.parrafo(x["sensibilidad"]["texto"])
     h.bloque("Qué es y qué lo mueve")
     h.parrafo(g.get("que_es", ""))
     h.parrafo("Qué lo mueve. " + g.get("que_lo_mueve", ""))
