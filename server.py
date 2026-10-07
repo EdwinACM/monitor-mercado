@@ -453,6 +453,8 @@ class Handler(SimpleHTTPRequestHandler):
     def end_headers(self):
         if not self.path.startswith("/api/"):
             self.send_header("Cache-Control", "no-cache")  # el celular siempre recibe la versión más reciente
+        for k, v in CABECERAS_SEGURAS.items():
+            self.send_header(k, v)
         if self.path.split("?")[0] == "/static/sw.js":
             self.send_header("Service-Worker-Allowed", "/")
         super().end_headers()
@@ -537,10 +539,16 @@ class Handler(SimpleHTTPRequestHandler):
                 else:
                     return self.send(b'{"error":"ruta no encontrada"}', status=404)
             self.send(json.dumps(data, ensure_ascii=False).encode())
-        except Exception as e:
-            self.send(json.dumps({"error": str(e)}, ensure_ascii=False).encode(), status=502)
+        except (ValueError, KeyError) as e:  # entradas inválidas: el mensaje es para quien consulta
+            self.send(json.dumps({"error": str(e) if isinstance(e, ValueError) else "Falta un parámetro de la consulta"}, ensure_ascii=False).encode(), status=400)
+        except Exception as e:  # fallas de fuentes externas o internas: no se exponen rutas ni detalles del servidor
+            print(f"[ERROR] {self.path}: {type(e).__name__}: {e}")
+            self.send(json.dumps({"error": "No se pudo obtener la información de las fuentes. Intenta de nuevo en unos segundos."}, ensure_ascii=False).encode(), status=502)
 
 
+CABECERAS_SEGURAS = {  # mismas que en vercel.json
+    "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 

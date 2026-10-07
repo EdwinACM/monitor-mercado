@@ -112,7 +112,16 @@ const crosshair = { id: "crosshair", afterDatasetsDraw(ch) {
   const { ctx, chartArea: { top, bottom } } = ch, x = a[0].element.x;
   ctx.save(); ctx.strokeStyle = css("--rule-strong"); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.restore();
 } };
-const endLabels = { id: "endLabels", afterDatasetsDraw(ch, _, o) {
+const endLabels = { id: "endLabels",
+  beforeLayout(ch, _, o) {
+    if (!o?.on) return;
+    const c = ch.ctx; c.save(); c.font = `600 12px ${css("--f-num")}`;
+    const w = Math.max(0, ...ch.data.datasets.filter(d => d.endLabel).map(d => c.measureText(d.endLabel).width));
+    c.restore();
+    const lim = Math.round(ch.width * 0.34);  // en pantallas angostas las etiquetas no pueden comerse la gráfica
+    ch.options.layout.padding.right = Math.min(Math.ceil(w) + 26, lim);
+  },
+  afterDatasetsDraw(ch, _, o) {
   if (!o?.on) return;
   const { ctx } = ch, items = [];
   ch.data.datasets.forEach((ds, i) => {
@@ -124,7 +133,7 @@ const endLabels = { id: "endLabels", afterDatasetsDraw(ch, _, o) {
   items.sort((a, b) => a.y - b.y);
   for (let i = 1; i < items.length; i++) if (items[i].y - items[i - 1].y < 15) items[i].y = items[i - 1].y + 15;
   ctx.save(); ctx.font = `600 12px ${css("--f-num")}`; ctx.textBaseline = "middle";
-  items.forEach(it => { ctx.fillStyle = it.color; ctx.fillRect(it.x + 5, it.y - 4, 8, 8); ctx.fillStyle = css("--ink-2"); ctx.fillText(it.text, it.x + 18, it.y); });
+  items.forEach(it => { ctx.fillStyle = it.color; ctx.fillRect(it.x + 5, it.y - 4, 8, 8); ctx.fillStyle = css("--ink-2"); ctx.fillText(it.text, it.x + 18, it.y, Math.max(20, ch.width - it.x - 20)); });
   ctx.restore();
 } };
 const refLine = { id: "refLine", afterDatasetsDraw(ch, _, o) {
@@ -144,8 +153,8 @@ function opts({ fy = v => fmt(v), ftip, min, max, step, right = 8, extra, title 
         filter: it => it.dataset.tip !== false, callbacks: { label: c => ` ${c.dataset.label}: ${(ftip || fy)(c.parsed.y)}`, title: title } },
       ...(extra || {}) },
     scales: {
-      x: { grid: { display: false }, border: { color: css("--rule-strong") }, ticks: { color: css("--muted"), maxTicksLimit: 6, maxRotation: 0, font: { family: css("--f-num"), size: 12 } } },
-      y: { min, max, grid: { color: css("--rule") }, border: { display: false }, ticks: { color: css("--muted"), callback: fy, stepSize: step, font: { family: css("--f-num"), size: 12 } } },
+      x: { grid: { display: false }, border: { color: css("--rule-strong") }, ticks: { color: css("--muted"), maxTicksLimit: innerWidth < 600 ? 4 : 7, maxRotation: 0, autoSkip: true, font: { family: css("--f-num"), size: innerWidth < 600 ? 11 : 12 } } },
+      y: { min, max, grid: { color: css("--rule") }, border: { display: false }, ticks: { color: css("--muted"), callback: fy, stepSize: step, maxTicksLimit: 6, font: { family: css("--f-num"), size: innerWidth < 600 ? 11 : 12 } } },
     },
   };
 }
@@ -357,6 +366,7 @@ async function renderDetalle() {
   if (!a) return;
   $("#detalle").hidden = false;
   $("#dNombre").textContent = `${a.nombre} (${tk(a.ticker)}) · ${a.mercado} · ${a.moneda}`;
+  $("#chkMedias").onchange = $("#chkBandas").onchange = () => graficaPrecio(a);
   $("#rango").innerHTML = RANGOS.map(([v, t]) => `<button data-r="${v}" aria-pressed="${S.rango === v}" ${v === "hoy" && !vivo() ? "disabled" : ""}>${t}</button>`).join("");
   $$("#rango button").forEach(b => b.onclick = () => { S.rango = b.dataset.r; renderDetalle(); });
   if (S.rango === "hoy" && !vivo()) S.rango = "0";

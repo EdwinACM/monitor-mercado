@@ -192,9 +192,10 @@ svg.spark{width:92px;height:28px;display:block;margin-left:auto;overflow:visible
 .tgl input{accent-color:var(--brand);width:16px;height:16px}
 .cols{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:40px;align-items:start}
 .cols>*,.split>*{min-width:0}
-.chartbox{position:relative;height:380px}
-.chartbox.sm{height:150px}
-.chartbox.md{height:300px}
+.chartbox{position:relative;width:100%;min-width:0;height:clamp(280px,38vw,430px)}
+.chartbox canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.chartbox.sm{height:clamp(130px,16vw,170px)}
+.chartbox.md{height:clamp(240px,30vw,340px)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-2);margin-bottom:10px}
 .legend span{display:inline-flex;align-items:center;gap:8px}
 .legend i{width:18px;height:0;border-top:2px solid var(--c)} .legend i.d{border-top-style:dashed} .legend i.t{border-top-style:dotted;border-top-width:3px}
@@ -312,6 +313,8 @@ details.acc .cuerpo b{color:var(--brand-text)}
 @media (max-width:980px){
   .cols,.split{grid-template-columns:minmax(0,1fr);gap:28px}
   .chartbox{height:300px}
+  .chartbox.sm{height:140px}
+  .chartbox.md{height:260px}
 }
 @media (max-width:900px){
   .inst{display:none}
