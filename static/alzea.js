@@ -1,5 +1,5 @@
 "use strict";
-/* Alzea — interfaz. Los cálculos viven en el servidor (analisis.py); aquí solo se muestran. */
+/* Alzea · interfaz. Los cálculos viven en el servidor (analisis.py, contexto.py); aquí solo se muestran. */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -18,20 +18,38 @@ const tk = t => t.replace(".MX", "");
 const ymd = s => s.split("-").map(Number);
 const flarga = s => { const [y, m, d] = ymd(s); return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`; };
 const fcorta = s => { const [, m, d] = ymd(s); return `${d} ${MESES[m - 1].slice(0, 3)}`; };
+const fmes = s => { const [y, m] = ymd(s); return `${MESES[m - 1]} de ${y}`; };
 const fhumana = s => { const [y, m, d] = ymd(s); return `${DIAS[new Date(y, m - 1, d).getDay()]} ${d} de ${MESES[m - 1]}`; };
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const alpha = (hex, a) => { const n = parseInt(hex.replace("#", ""), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
-const serie = i => css("--s" + (i % 8 + 1));
+const hexOf = v => { const c = css(v); return c.startsWith("#") ? c : "#888888"; };
+const serie = i => css("--s" + (i % 5 + 1));
 const ICON = (id, c = "ic") => `<svg class="${c}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const money = (v, m) => (m === "USD" ? "US$" : "$") + fmt(v);
 const SIG = { "COMPRA FUERTE": ["buy", "up", "Compra fuerte"], COMPRAR: ["buy", "up", "Comprar"], MANTENER: ["hold", "flat", "Mantener"],
-  VENDER: ["sell", "down", "Vender"], "VENTA FUERTE": ["sell", "down", "Venta fuerte"], ESPERAR: ["wait", "wait", "Esperar"], "SIN DATOS": ["hold", "flat", "Sin datos"] };
+  VENDER: ["sell", "down", "Vender"], "VENTA FUERTE": ["sell", "down", "Venta fuerte"], ESPERAR: ["wait", "wait", "Esperar"], INFORMATIVO: ["hold", "info", "Informativo"], "SIN DATOS": ["hold", "flat", "Sin datos"] };
 const sig = v => { const [k, i, t] = SIG[v] || SIG.MANTENER; return `<span class="sig ${k}">${ICON(i)}${t}</span>`; };
 const sigK = v => (SIG[v] || SIG.MANTENER)[0];
+const sigT = v => (SIG[v] || SIG.MANTENER)[2];
 
-const VISTAS = [["mercado", "Mercado", "board"], ["comparar", "Comparar", "compare"], ["deuda", "Deuda", "debt"], ["simulacion", "Simulación", "sim"], ["archivo", "Archivo", "archive"]];
+/* ------------------------------------------------------------------- estado */
+const INICIO = "2026-03-01"; // el periodo de consulta nunca empieza antes
+const hoyMX = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Mexico_City" });
+const VISTAS = [["mercado", "Mercado", "board"], ["entorno", "Entorno", "globe"], ["deuda", "Deuda", "debt"], ["comparar", "Comparar", "compare"], ["informe", "Informe", "report"]];
 const RANGOS = [["hoy", "Hoy"], ["21", "1M"], ["63", "3M"], ["126", "6M"], ["0", "Periodo"]];
-const S = { vista: "mercado", data: null, sel: null, selD: 0, rango: "63", cmp: null, hist: null, sim: null, quotes: {}, shown: {}, intra: null,
-  auto: store.get("auto", true), tData: 0, tQuote: 0, busy: false, selCmp: new Set(), fechaDia: null, charts: {} };
+const S = { vista: "mercado", periodo: null, data: null, ctx: null, guia: null, sel: null, selD: 0, rango: "0", filtro: "todas", moneda: "mxn", modoC: "comparar",
+  cmp: null, sim: null, arch: null, quotes: {}, shown: {}, auto: store.get("auto", true), tData: 0, tQuote: 0, busy: false, selCmp: new Set(), fechaDia: null, dia: null, charts: {} };
+
+function ajustar(p) {
+  const hoy = hoyMX();
+  return { desde: p.desde < INICIO ? INICIO : p.desde > hoy ? hoy : p.desde, hasta: p.hasta > hoy ? hoy : p.hasta < INICIO ? INICIO : p.hasta };
+}
+function periodoGuardado() {
+  try { const p = JSON.parse(sessionStorage.getItem("periodo")); if (p?.desde && p?.hasta) return ajustar(p); } catch { /* sin almacenamiento */ }
+  return { desde: INICIO, hasta: hoyMX() };
+}
+const qsP = () => `desde=${S.periodo.desde}&hasta=${S.periodo.hasta}`;
+const vivo = () => !!S.data?.periodo?.vivo;
 
 /* ---------------------------------------------------------------- utilidades */
 async function api(path) {
@@ -42,20 +60,37 @@ async function api(path) {
   return j;
 }
 const showErr = m => { const e = $("#err"); e.textContent = m || ""; e.hidden = !m; };
-const desde = () => $("#desde").value;
 function relojNY() {
   const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(new Date());
   const g = k => p.find(x => x.type === k).value;
   return { finde: ["Sat", "Sun"].includes(g("weekday")), min: +g("hour") * 60 + +g("minute") };
 }
-// Horario de la BMV (igual al de Nueva York: 9:30 a 16:00). En días festivos de México el reloj diría «abierta»,
-// así que además se exige que haya cotizaciones recientes (o que apenas haya abierto la sesión).
+// La BMV, el Nasdaq y la NYSE operan lunes a viernes de 9:30 a 16:00 (hora de Nueva York). En días festivos el reloj diría «abierta»,
+// así que además se exige que haya cotizaciones recientes (o que apenas haya abierto la sesión). Ningún botón cambia este estado.
 function abiertoNY() { const r = relojNY(); return !r.finde && r.min >= 570 && r.min < 960; }
 function abierto() {
   if (!abiertoNY()) return false;
   const t = Math.max(0, ...Object.values(S.quotes).map(q => q.hora ? Date.parse(q.hora) : 0));
   return !t || Date.now() - t < 40 * 60000 || relojNY().min - 570 < 30;
 }
+async function descargar(url, btn) {
+  btn.setAttribute("aria-busy", "true");
+  const txt = btn.innerHTML; btn.innerHTML = `${ICON("refresh")}Generando…`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) { let m = r.statusText; try { m = (await r.json()).error || m; } catch { /* no es json */ } throw new Error(m); }
+    const nombre = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") || "")?.[1] || "reporte";
+    const u = URL.createObjectURL(await r.blob());
+    Object.assign(document.createElement("a"), { href: u, download: nombre }).click();
+    setTimeout(() => URL.revokeObjectURL(u), 3000);
+    showErr("");
+  } catch (e) { showErr(`No se pudo generar el archivo. ${e.message}. Intenta de nuevo en unos segundos.`); }
+  btn.removeAttribute("aria-busy"); btn.innerHTML = txt;
+}
+function ligarDescargas(raiz) {
+  $$("[data-dl]", raiz).forEach(b => b.onclick = e => { e.preventDefault(); descargar(b.dataset.dl, b); });
+}
+const dlBtn = (url, etq, solid) => `<a class="btn ${solid ? "solid" : ""}" href="${url}" data-dl="${url}">${ICON("download")}${etq}</a>`;
 
 /* ------------------------------------------------------------------- gráficas */
 const crosshair = { id: "crosshair", afterDatasetsDraw(ch) {
@@ -85,9 +120,9 @@ const refLine = { id: "refLine", afterDatasetsDraw(ch, _, o) {
 } };
 Chart.register(crosshair, endLabels, refLine);
 
-function mk(id, cfg) { S.charts[id]?.destroy(); S.charts[id] = new Chart(document.getElementById(id), cfg); return S.charts[id]; }
+function mk(id, cfg) { S.charts[id]?.destroy(); const c = document.getElementById(id); if (!c) return null; S.charts[id] = new Chart(c, cfg); return S.charts[id]; }
 function opts({ fy = v => fmt(v), ftip, min, max, step, right = 8, extra, title } = {}) {
-  const o = {
+  return {
     responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: "index", intersect: false }, layout: { padding: { right } },
     plugins: { legend: { display: false }, endLabels: { on: false }, refLine: {},
       tooltip: { backgroundColor: css("--surface"), titleColor: css("--muted"), bodyColor: css("--ink"), borderColor: css("--rule-strong"), borderWidth: 1,
@@ -99,11 +134,14 @@ function opts({ fy = v => fmt(v), ftip, min, max, step, right = 8, extra, title 
       y: { min, max, grid: { color: css("--rule") }, border: { display: false }, ticks: { color: css("--muted"), callback: fy, stepSize: step, font: { family: css("--f-num"), size: 12 } } },
     },
   };
-  return o;
 }
 const linea = (label, data, color, o = {}) => ({ label, data, borderColor: color, backgroundColor: color, borderWidth: o.w ?? 2, pointRadius: o.pr ?? 0,
   pointHoverRadius: 4, tension: .12, spanGaps: true, fill: false, ...o });
-const hexOf = v => { const c = css(v); return c.startsWith("#") ? c : "#888888"; };
+function alinear(lista, base100) {
+  const fechas = [...new Set(lista.flatMap(s => s.datos.map(x => x[0])))].sort();
+  return { fechas, valores: lista.map(s => { const m = new Map(s.datos); let ult = null, base = null;
+    return fechas.map(f => { if (m.has(f)) ult = m.get(f); if (ult == null) return null; if (base == null) base = ult; return base100 ? ult / base * 100 : ult; }); }) };
+}
 
 /* ------------------------------------------------------------------ navegación */
 function renderNav() {
@@ -120,58 +158,153 @@ function setVista(v) {
 async function render() {
   try {
     showErr("");
-    if (S.vista === "archivo") { await cargarHistorial(); renderArchivo(); return; }
     if (!S.data) return;
-    if (S.vista === "mercado") renderMercado();
-    else if (S.vista === "comparar") { await cargarComparar(); renderComparar(); }
-    else if (S.vista === "deuda") renderDeuda();
-    else if (S.vista === "simulacion") await renderSimulacion();
+    ({ mercado: renderMercado, entorno: renderEntorno, deuda: renderDeuda, comparar: renderComparar, informe: renderInforme })[S.vista]();
   } catch (e) { showErr(`No se pudo mostrar esta sección. ${e.message}. Intenta actualizar de nuevo.`); }
+}
+function armar(id, html) {
+  const el = $("#v-" + id);
+  if (!el.dataset.listo) { el.innerHTML = html; el.dataset.listo = "1"; }
+  return el;
+}
+
+/* ----------------------------------------------------------------- periodo */
+function renderPeriodo() {
+  const hoy = hoyMX(), p = S.periodo, [yh, mh] = ymd(hoy);
+  const meses = [];
+  for (let m = 3; m <= (yh === 2026 ? mh : 12); m++) {
+    const ini = `2026-${String(m).padStart(2, "0")}-01`, fin = `2026-${String(m).padStart(2, "0")}-${new Date(2026, m, 0).getDate()}`;
+    meses.push({ etq: MESES[m - 1].slice(0, 3), largo: MESES[m - 1], ini, fin: fin > hoy ? hoy : fin });
+  }
+  const dias = n => { const d = new Date(hoy + "T12:00:00"); d.setDate(d.getDate() - n + 1); const s = d.toLocaleDateString("en-CA"); return s < INICIO ? INICIO : s; };
+  const chips = [{ etq: "Todo", largo: "Todo el periodo desde el 1 de marzo", ini: INICIO, fin: hoy }, { etq: "7 días", largo: "Últimos 7 días", ini: dias(7), fin: hoy },
+    { etq: "30 días", largo: "Últimos 30 días", ini: dias(30), fin: hoy }, ...meses];
+  $("#periodo").innerHTML = `<div class="periodo-in"><span class="tit">Periodo de consulta</span>
+    <label>Desde <input type="date" id="pDesde" min="${INICIO}" max="${hoy}" value="${p.desde}"></label>
+    <label>Hasta <input type="date" id="pHasta" min="${INICIO}" max="${hoy}" value="${p.hasta}"></label>
+    <div class="pchips" role="group" aria-label="Periodos rápidos">${chips.map((c, i) => `<button class="pchip" data-i="${i}" title="${esc(c.largo)}" aria-pressed="${c.ini === p.desde && c.fin === p.hasta}">${esc(c.etq)}</button>`).join("")}</div>
+    <p class="nota">Las consultas siempre inician el 1 de marzo de 2026 o después; no hay datos ni informes anteriores a esa fecha.</p></div>`;
+  $$("#periodo .pchip").forEach(b => b.onclick = () => setPeriodo(chips[+b.dataset.i].ini, chips[+b.dataset.i].fin));
+  const cambio = () => setPeriodo($("#pDesde").value || INICIO, $("#pHasta").value || hoy);
+  $("#pDesde").onchange = $("#pHasta").onchange = cambio;
+}
+function setPeriodo(d, h) {
+  const aj = ajustar({ desde: d, hasta: h });
+  if (aj.desde >= aj.hasta) { showErr("El periodo debe tener al menos dos días: «Desde» tiene que ser anterior a «Hasta» y no antes del 1 de marzo de 2026."); renderPeriodo(); return; }
+  S.periodo = aj;
+  try { sessionStorage.setItem("periodo", JSON.stringify(aj)); } catch { /* sin almacenamiento */ }
+  renderPeriodo();
+  S.cmp = S.sim = S.arch = S.ctx = S.dia = null;
+  actualizar(false);
 }
 
 /* ----------------------------------------------------------------------- datos */
 async function cargar(fresco) {
-  const d = await api(`/api/analisis?desde=${desde()}${fresco ? "&fresco=1" : ""}`);
+  const d = await api(`/api/analisis?${qsP()}&tickers=${(S.tickers || []).join(",")}${fresco ? "&fresco=1" : ""}`);
   S.data = d; S.tData = Date.now();
   const tks = d.acciones.map(a => a.ticker);
   if (!S.sel || !tks.includes(S.sel)) S.sel = tks[0];
-  if (!S.selCmp.size) tks.forEach(t => S.selCmp.add(t));
+  if (!S.selCmp.size) ["AAPL", "NVDA", "WALMEX.MX", "AMXB.MX", "KO"].filter(t => tks.includes(t)).forEach(t => S.selCmp.add(t));
+}
+async function cargarCtx() {
+  if (S.ctx) return S.ctx;
+  const clave = qsP();
+  try { const c = await api(`/api/contexto?${clave}`); if (clave === qsP()) { S.ctx = c; } }
+  catch (e) { S.ctxError = e.message; }
+  renderCinta();
+  if (S.data && (S.vista === "entorno" || S.vista === "mercado" || S.vista === "deuda")) render();
+  return S.ctx;
+}
+async function cargarGuia() {
+  if (!S.guia) S.guia = await api("/api/guia");
+  return S.guia;
 }
 async function actualizar(fresco = true) {
   if (S.busy) return;
   S.busy = true; $("#refresh").classList.add("spin");
-  try { S.cmp = null; S.hist = null; S.sim = null; await cargar(fresco); await pollQuotes(true); await render(); showErr(""); }
-  catch (e) { showErr(`No se pudo actualizar. Revisa tu conexión e intenta de nuevo (${e.message}).`); }
+  try {
+    S.cmp = S.sim = S.arch = null;
+    if (fresco) S.ctx = null;
+    await cargar(fresco);
+    if (vivo()) await pollQuotes(true).catch(() => {});
+    S.busy = false;
+    await render(); showErr("");
+    cargarCtx();
+  } catch (e) { showErr(`No se pudo actualizar. ${e.message}`); }
   S.busy = false; $("#refresh").classList.remove("spin"); estadoLive();
 }
 
-/* ------------------------------------------------------------------ cotizaciones */
+/* ------------------------------------------------------------ cinta de indicadores */
+const CINTA = [["fx", "USD/MXN FIX"], ["sp500", "S&P 500"], ["nasdaq", "Nasdaq"], ["ipc", "IPC México"], ["dxy", "Dólar DXY"], ["ust10y", "Tesoro 10 a."], ["effr", "Fed (EFFR)"], ["tasa_obj", "Banxico"], ["vix", "VIX"]];
+function renderCinta() {
+  const el = $("#cinta");
+  if (!S.ctx) { el.innerHTML = `<div class="carga">${S.ctxError ? "No se pudo cargar el entorno global: " + esc(S.ctxError) : "Cargando indicadores del entorno global…"}</div>`; return; }
+  const d = Object.fromEntries(S.ctx.indicadores.map(x => [x.id, x]));
+  el.innerHTML = `<div class="cinta-in">` + CINTA.filter(([id]) => d[id]).map(([id, etq]) => {
+    const x = d[id], s = x.serie, v1 = s.at(-1)[1], v0 = s.length > 1 ? s.at(-2)[1] : v1;
+    const c = x.tipo === "tasa" ? (v1 - v0) * 100 : (v0 ? (v1 / v0 - 1) * 100 : 0), u = x.tipo === "tasa" ? " pb" : "%";
+    return `<a class="ci" href="#entorno" title="${esc(x.nombre)} al ${flarga(s.at(-1)[0])}"><div class="l">${esc(etq)}</div><div class="v num">${fmt(v1)}</div><div class="c num ${cls(c)}">${sg(c)}${Math.abs(c).toFixed(2)}${u}</div></a>`; }).join("") + `</div>`;
+}
+
+/* ------------------------------------------------------------------- mercado */
+const MERCADO_HTML = `
+  <div class="head"><h1 id="mTitulo">Mercado</h1><p class="sub" id="mSub"></p><div class="lectura prose" id="mLectura"></div></div>
+  <div id="alertas" aria-live="polite"></div>
+  <div class="filtro"><div class="seg" id="mFiltro" role="group" aria-label="Mercado a mostrar"></div><span class="note" id="mNota"></span></div>
+  <div class="board"><table id="board" aria-label="Cotizaciones de acciones"></table><div class="board-foot" id="boardFoot"></div></div>
+  <div class="detail" id="detalle" hidden>
+    <div class="detail-head"><h2 id="dNombre"></h2>
+      <div class="tools"><div class="seg" id="rango" role="group" aria-label="Rango de la gráfica"></div>
+        <label class="tgl"><input type="checkbox" id="chkMedias" checked> Medias móviles</label><label class="tgl"><input type="checkbox" id="chkBandas"> Bandas de Bollinger</label></div></div>
+    <div class="cols"><div><div class="legend" id="legPrecio"></div><div class="chartbox"><canvas id="chPrecio" role="img" aria-label="Gráfica de precio de cierre"></canvas></div></div><aside class="verdict" id="senal"></aside></div>
+    <div class="split"><section class="sec"><h2>Qué es</h2><div id="queEs"></div></section><section class="sec"><h2>Estadística del periodo</h2><dl class="dl" id="stats"></dl></section></div>
+    <div class="split"><section class="sec"><h2>Decisión del día y por qué</h2><div class="prose" id="texto"></div><div class="row-btns" id="descDia"></div></section>
+      <section class="sec"><h2>Relación con EE. UU. y el dólar</h2><div id="mxVista"></div></section></div>
+    <div class="split"><section class="sec"><h2>RSI y MACD</h2><div class="chartbox sm"><canvas id="chRsi" role="img" aria-label="RSI de 14 sesiones"></canvas></div><div class="chartbox sm" style="margin-top:12px"><canvas id="chMacd" role="img" aria-label="MACD"></canvas></div></section>
+      <section class="sec"><h2>Prueba histórica de la señal</h2><div id="bt"></div></section></div>
+    <section class="sec"><h2>Últimos cambios de decisión</h2><div id="histCambios"><p class="note">Cargando…</p></div></section>
+  </div>`;
+
+const visto = {};
+const entra = v => visto[v] ? "" : (visto[v] = "enter");
+function precioVivo(a) { const q = vivo() && S.quotes[a.ticker]; return q && q.precio != null ? q.precio : a.cierre; }
+function cambioVivo(a) { const p = precioVivo(a); return [p - a.previo, (p / a.previo - 1) * 100]; }
 function spark(vals, up) {
   const w = 92, h = 28, mn = Math.min(...vals), mx = Math.max(...vals), r = mx - mn || 1;
   const pts = vals.map((v, i) => `${(i / (vals.length - 1) * w).toFixed(1)},${(h - 2 - (v - mn) / r * (h - 4)).toFixed(1)}`);
   const c = up ? "var(--up-b)" : "var(--down-b)", last = pts.at(-1).split(",");
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline points="${pts.join(" ")}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="${c}"/></svg>`;
 }
-const visto = {};
-const entra = v => visto[v] ? "" : (visto[v] = "enter");
-function precioVivo(a) { const q = S.quotes[a.ticker]; return q && q.precio != null ? q.precio : a.cierre; }
-function cambioVivo(a) { const p = precioVivo(a); return [p - a.previo, (p / a.previo - 1) * 100]; }
-
+function filaAccion(a, i) {
+  if (a.error) return `<tr><td colspan="7" class="flat">${esc(tk(a.ticker))}: sin datos (${esc(a.error)})</td></tr>`;
+  const [v, p] = cambioVivo(a), s30 = a.serie.cierre.slice(-30);
+  return `<tr tabindex="0" data-t="${a.ticker}" aria-selected="${a.ticker === S.sel}" style="--i:${i}">
+    <td><div><div class="tk">${tk(a.ticker)}<span class="mk">${esc(a.mercado)}</span></div><div class="nm">${esc(a.nombre)}</div><div class="m-only">${sig(a.veredicto)}</div></div></td>
+    <td><span class="px num" data-px>${fmt(precioVivo(a))}</span><span class="mon">${a.moneda}</span></td>
+    <td class="c-chg"><span class="chg num ${cls(v)}" data-chg>${sg(v)}${fmt(Math.abs(v))}</span></td>
+    <td><span class="chg num ${cls(p)}" data-pct style="display:inline-flex;align-items:center;gap:4px">${ICON(v > 0 ? "up" : v < 0 ? "down" : "flat")}${Math.abs(p).toFixed(2)}%</span></td>
+    <td class="c-per"><span class="chg num ${cls(a.ret_periodo)}">${pct(a.ret_periodo)}</span></td>
+    <td class="c-spark">${spark(s30, s30.at(-1) >= s30[0])}</td>
+    <td class="c-sig">${sig(a.veredicto)}</td></tr>`;
+}
 function renderMercado() {
-  const d = S.data, ok = d.acciones.find(a => !a.error);
-  $("#titulo").textContent = abierto() ? "Sesión en curso" : ok ? `Cierre del ${fhumana(ok.fecha)}` : "Mercado";
-  $("#lectura").textContent = d.mercado.texto;
-  $("#board").innerHTML = `<thead><tr><th>Emisora</th><th>Último</th><th class="c-chg">Cambio</th><th>%</th><th class="c-spark">30 sesiones</th><th class="c-sig">Señal</th></tr></thead><tbody class="${entra("mercado")}">` +
-    d.acciones.map((a, i) => {
-      if (a.error) return `<tr><td colspan="6" class="flat">${esc(tk(a.ticker))}: sin datos (${esc(a.error)})</td></tr>`;
-      const [v, p] = cambioVivo(a), s30 = a.serie.cierre.slice(-30);
-      return `<tr tabindex="0" data-t="${a.ticker}" aria-selected="${a.ticker === S.sel}" style="--i:${i}">
-        <td><div class="who"><span class="sw" style="--c:${serie(i)}"></span><div><div class="tk">${tk(a.ticker)}</div><div class="nm">${esc(a.nombre)}</div><div class="m-only">${sig(a.veredicto)}</div></div></div></td>
-        <td><span class="px num" data-px>${fmt(precioVivo(a))}</span></td>
-        <td class="c-chg"><span class="chg num ${cls(v)}" data-chg>${sg(v)}${fmt(Math.abs(v))}</span></td>
-        <td><span class="chg num ${cls(p)}" data-pct style="display:inline-flex;align-items:center;gap:4px">${ICON(v > 0 ? "up" : v < 0 ? "down" : "flat")}${Math.abs(p).toFixed(2)}%</span></td>
-        <td class="c-spark">${spark(s30, s30.at(-1) >= s30[0])}</td>
-        <td class="c-sig">${sig(a.veredicto)}</td></tr>`; }).join("") + "</tbody>";
+  armar("mercado", MERCADO_HTML);
+  const d = S.data, ok = d.acciones.find(a => !a.error), hist = !vivo();
+  $("#mTitulo").textContent = !hist && abierto() ? "Sesión en curso" : ok ? `Cierre del ${fhumana(ok.fecha)}` : "Mercado";
+  $("#mSub").textContent = `Periodo del ${flarga(S.periodo.desde)} al ${flarga(S.periodo.hasta)}${hist ? " · consulta histórica, sin actualización en vivo" : ""}`;
+  $("#mLectura").innerHTML = `<p>${esc(d.mercado.texto_periodo || "")}</p><p>${esc(d.mercado.texto)}</p>`;
+  const filtros = [["todas", "Todas"], ["mx", "México · BMV"], ["us", "EE. UU. · Nasdaq y NYSE"]];
+  $("#mFiltro").innerHTML = filtros.map(([k, t]) => `<button data-f="${k}" aria-pressed="${S.filtro === k}">${t}</button>`).join("");
+  $$("#mFiltro button").forEach(b => b.onclick = () => { S.filtro = b.dataset.f; renderMercado(); });
+  $("#mNota").textContent = "Precios en la moneda de cada mercado: pesos (MXN) o dólares (USD). «Periodo» es el rendimiento en esa moneda.";
+  const lista = d.acciones.filter(a => S.filtro === "todas" || (S.filtro === "mx" ? a.pais === "México" : a.pais && a.pais !== "México"));
+  let cuerpo = "", grupo = null;
+  lista.forEach((a, i) => {
+    if (S.filtro === "todas" && !a.error) { const g = a.pais === "México" ? "México · Bolsa Mexicana de Valores · pesos" : "Estados Unidos · Nasdaq y NYSE · dólares";
+      if (g !== grupo) { grupo = g; cuerpo += `<tr class="grupo"><th colspan="7" scope="colgroup">${g}</th></tr>`; } }
+    cuerpo += filaAccion(a, i);
+  });
+  $("#board").innerHTML = `<thead><tr><th>Emisora</th><th>Último</th><th class="c-chg">Cambio</th><th>Día</th><th class="c-per">Periodo</th><th class="c-spark">30 sesiones</th><th class="c-sig">Decisión</th></tr></thead><tbody class="${entra("mercado")}">${cuerpo}</tbody>`;
   $$("#board tbody tr[data-t]").forEach(tr => {
     tr.onclick = () => seleccionar(tr.dataset.t, true);
     tr.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); seleccionar(tr.dataset.t, true); } };
@@ -180,15 +313,15 @@ function renderMercado() {
     S.shown[a.ticker] = nw;
   });
   pieCotizaciones();
-  renderAlertas();
-  cargarCambios();
+  if (vivo()) renderAlertas(); else $("#alertas").innerHTML = "";
   renderDetalle();
 }
 function pieCotizaciones() {
-  $("#boardFoot").innerHTML = `<span>Yahoo Finance · precios en pesos mexicanos</span><span id="updTxt">${textoActualizado()}</span>`;
+  $("#boardFoot").innerHTML = `<span>Precios: Yahoo Finance (referencia, con posible retraso de 15 a 20 minutos)</span><span id="updTxt">${textoActualizado()}</span>`;
 }
 function textoActualizado() {
   if (!S.tData) return "";
+  if (!vivo()) return "Consulta histórica";
   const q = S.tQuote ? Math.max(S.tQuote, S.tData) : S.tData, s = Math.round((Date.now() - q) / 1000);
   return s < 5 ? "Actualizado ahora" : s < 60 ? `Actualizado hace ${s} s` : `Actualizado hace ${Math.round(s / 60)} min`;
 }
@@ -199,7 +332,7 @@ function flip(el, sube) {
 }
 function seleccionar(t, scroll) {
   S.sel = t;
-  $$("#board tbody tr").forEach(tr => tr.setAttribute("aria-selected", tr.dataset.t === t));
+  $$("#board tbody tr[data-t]").forEach(tr => tr.setAttribute("aria-selected", tr.dataset.t === t));
   renderDetalle();
   if (scroll && innerWidth < 980) $("#detalle").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -209,13 +342,12 @@ async function renderDetalle() {
   const d = S.data, a = d.acciones.find(x => x.ticker === S.sel && !x.error) || d.acciones.find(x => !x.error);
   if (!a) return;
   $("#detalle").hidden = false;
-  const idx = d.acciones.findIndex(x => x.ticker === a.ticker);
-  $("#dNombre").textContent = `${a.nombre} (${tk(a.ticker)})`;
-  $("#rango").innerHTML = RANGOS.map(([v, t]) => `<button data-r="${v}" aria-pressed="${S.rango === v}">${t}</button>`).join("");
+  $("#dNombre").textContent = `${a.nombre} (${tk(a.ticker)}) · ${a.mercado} · ${a.moneda}`;
+  $("#rango").innerHTML = RANGOS.map(([v, t]) => `<button data-r="${v}" aria-pressed="${S.rango === v}" ${v === "hoy" && !vivo() ? "disabled" : ""}>${t}</button>`).join("");
   $$("#rango button").forEach(b => b.onclick = () => { S.rango = b.dataset.r; renderDetalle(); });
+  if (S.rango === "hoy" && !vivo()) S.rango = "0";
 
-  const k = sigK(a.veredicto);
-  $("#senal").innerHTML = `<div class="word ${k}">${(SIG[a.veredicto] || SIG.MANTENER)[2]}</div>
+  $("#senal").innerHTML = `<div class="word ${sigK(a.veredicto)}">${sigT(a.veredicto)}</div>
     <p class="meta">Puntaje <b class="num">${sg(a.score)}${Math.abs(a.score)}</b> de ±100 · confianza ${a.confianza.toLowerCase()} · tendencia ${a.tendencia.etiqueta}</p>
     <div class="gauge"><i style="left:${Math.max(0, Math.min(100, (a.score + 100) / 2))}%"></i></div>
     <div class="gauge-l"><span>Vender</span><span>Mantener</span><span>Comprar</span></div>
@@ -224,185 +356,408 @@ async function renderDetalle() {
 
   const s = a.stats, row = (l, v, c) => `<div><dt>${l}</dt><dd class="${c || ""}">${v}</dd></div>`;
   $("#stats").innerHTML = [
-    row("Rendimiento 5 sesiones", pct(a.ret5), cls(a.ret5)), row("Rendimiento 20 sesiones", pct(a.ret20), cls(a.ret20)),
-    row("Rendimiento del periodo", pct(a.ret_periodo), cls(a.ret_periodo)), row("RSI (14)", a.rsi == null ? "—" : a.rsi.toFixed(2)),
+    row("Rendimiento del periodo", pct(a.ret_periodo), cls(a.ret_periodo)), row("Rendimiento 20 sesiones", pct(a.ret20), cls(a.ret20)),
+    row("Rendimiento 5 sesiones", pct(a.ret5), cls(a.ret5)), row("RSI (14)", a.rsi == null ? "—" : a.rsi.toFixed(2)),
     row("Volatilidad anual", s.vol_anual == null ? "—" : s.vol_anual.toFixed(2) + "%"), row("Caída máxima (120 ses.)", pct(s.max_drawdown), "down"),
     row("Soporte (20 ses.)", fmt(s.soporte)), row("Resistencia (20 ses.)", fmt(s.resistencia)),
     row("Rendimiento / riesgo", s.ratio_rend_riesgo == null ? "—" : fmt(s.ratio_rend_riesgo), cls(s.ratio_rend_riesgo)), row("Z del precio vs. media 20", sg(s.z_precio) + Math.abs(s.z_precio).toFixed(2)),
     row("Tendencia 30 ses.", a.tendencia.pendiente == null ? "—" : pct(a.tendencia.pendiente, 2) + "/día", cls(a.tendencia.pendiente)), row("Volumen vs. promedio", s.vol_relativo == null ? "—" : s.vol_relativo.toFixed(2) + "×")].join("");
-  $("#texto").innerHTML = `<div class="decision ${sigK(a.veredicto)}">${esc(a.decision)}</div>
-    <p>${esc(a.texto)}</p><p class="que"><b>Por qué:</b></p><ul>${a.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
-    <p class="que"><b>Qué hacer:</b> ${esc(a.accion)}</p>` + (a.cambio ? `<p class="que"><b>Cambio de decisión:</b> ayer era ${esc((SIG[a.veredicto_ant] || SIG.MANTENER)[2].toLowerCase())}, hoy es ${esc(a.decision.toLowerCase())}.</p>` : "");
-  $("#descDia").innerHTML = ["pdf:PDF", "xlsx:Excel"].map(x => { const [f, t] = x.split(":");
-    return `<a class="btn" href="/api/dia?fecha=${a.fecha}&formato=${f}" download>${ICON("download")}Descargar análisis del ${flarga(a.fecha)} (${t})</a>`; }).join("") +
-    `<p class="note" style="flex-basis:100%">Incluye las 5 emisoras y la deuda: decisión, por qué y qué hacer, con lo que pasó después cuando ya hay datos.</p>`;
+  $("#texto").innerHTML = `<div class="decision ${sigK(a.veredicto)}" style="font:700 22px/1.2 var(--f-num);margin-bottom:8px">${esc(a.decision)}</div>
+    <p>${esc(a.texto)}</p><p><b>Por qué:</b></p><ul>${a.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+    <p><b>Qué hacer:</b> ${esc(a.accion)}</p>` + (a.cambio ? `<p><b>Cambio de decisión:</b> antes era ${esc(sigT(a.veredicto_ant).toLowerCase())}, ahora es ${esc(a.decision.toLowerCase())}.</p>` : "");
+  $("#descDia").innerHTML = dlBtn(`/api/dia?fecha=${a.fecha}&formato=pdf`, `PDF del ${flarga(a.fecha)}`) + dlBtn(`/api/dia?fecha=${a.fecha}&formato=xlsx`, "Excel del día") +
+    `<p class="note" style="flex-basis:100%">Incluye todas las emisoras y la deuda: decisión, por qué, qué hacer, lo que pasó después y el entorno del día.</p>`;
+  ligarDescargas($("#descDia"));
   const b = a.backtest, fila = (t, n, ac, r, ok, bueno) => `<tr><td>${t}</td><td>${n}</td><td class="${ok ? "up" : "down"}">${n < 8 ? "—" : fmt(ac) + "%"}</td><td class="${cls(r)}">${n < 8 ? "—" : pct(r)}</td><td>${n < 8 ? "pocos casos" : bueno}</td></tr>`;
   const okC = b.aciertos_compra >= 55 && b.rend_medio_compra > b.base_rend_medio, okV = b.aciertos_venta >= 55 && b.rend_medio_venta < b.base_rend_medio;
   $("#bt").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Señal</th><th>Casos</th><th>Aciertos</th><th>Rend. a ${b.horizonte} ses.</th><th>Lectura</th></tr></thead><tbody>` +
     fila("Compra", b.n_compra, b.aciertos_compra, b.rend_medio_compra, okC, okC ? "respaldada" : "sin respaldo") + fila("Venta", b.n_venta, b.aciertos_venta, b.rend_medio_venta, okV, okV ? "respaldada" : "sin respaldo") +
     `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Prueba dentro de la misma muestra (${b.muestra} sesiones): sirve para calibrar la confianza, no la garantiza.</p>`;
+  mxVista(a);
+  queEs(a);
+  cargarCambios();
   await graficaPrecio(a);
 }
-
+async function queEs(a) {
+  try {
+    const g = (await cargarGuia()).acciones.find(x => x.ticker === a.ticker);
+    if (!g || S.sel !== a.ticker && S.sel !== undefined && !S.data.acciones.find(x => x.ticker === S.sel)) return;
+    $("#queEs").innerHTML = `<div class="prose"><p>${esc(g.que_es)}</p><p><b>Qué la mueve.</b> ${esc(g.que_la_mueve)}</p></div>` +
+      (g.fuente ? `<p class="note" style="margin-top:8px">Fuente oficial: <a class="fuente" href="${esc(g.fuente.url)}" target="_blank" rel="noopener">${esc(g.fuente.nombre)}</a></p>` : "");
+  } catch { $("#queEs").innerHTML = '<p class="note">No se pudo cargar la descripción.</p>'; }
+}
+function mxVista(a) {
+  const el = $("#mxVista");
+  if (!S.ctx) { el.innerHTML = `<p class="cargando">${S.ctxError ? "No se pudo cargar el entorno: " + esc(S.ctxError) : "Calculando con datos de Banxico y de EE. UU."}</p>`; return; }
+  const s = S.ctx.sensibilidades.find(x => x.ticker === a.ticker), e = S.ctx.efecto_cambiario.find(x => x.ticker === a.ticker);
+  const row = (l, v, c) => `<div><dt>${l}</dt><dd class="${c || ""}">${v}</dd></div>`;
+  let h = "";
+  if (s) h += `<dl class="dl">${row("Correlación con el S&P 500", fmt(s.corr_sp500))}${row("Beta frente al S&P 500", fmt(s.beta_sp500))}${row("Correlación con el dólar", fmt(s.corr_dolar))}${s.corr_ipc != null ? row("Correlación con el IPC", fmt(s.corr_ipc)) : ""}</dl>`;
+  if (e) h += `<p class="h3" style="margin-top:14px">Visto desde México</p><dl class="dl">${row("Rendimiento en dólares", pct(e.ret_usd), cls(e.ret_usd))}${row("Variación del dólar", pct(e.ret_dolar), cls(e.ret_dolar))}${row("Rendimiento en pesos", pct(e.ret_pesos), cls(e.ret_pesos))}</dl>
+    <p class="note" style="margin-top:8px">El tipo de cambio es el de cierre de Banxico. Un peso más débil suma al rendimiento de una acción en dólares; uno más fuerte lo resta.</p>`;
+  h += `<p class="note" style="margin-top:10px">Correlación y beta de los rendimientos diarios del periodo (${s ? s.n : "—"} sesiones). Un valor alto indica que se mueven juntos; no prueba que uno cause al otro.</p>`;
+  el.innerHTML = h;
+}
 async function graficaPrecio(a) {
-  const ink = css("--ink"), medias = $("#chkMedias").checked, bandas = $("#chkBandas").checked, sr = a.serie;
+  const col = hexOf("--line"), medias = $("#chkMedias").checked, bandas = $("#chkBandas").checked, sr = a.serie, mn = a.moneda;
   if (S.rango === "hoy") {
     $("#chkMedias").disabled = $("#chkBandas").disabled = true;
-    try { S.intra = await api(`/api/intradia?ticker=${encodeURIComponent(a.ticker)}`); } catch (e) { S.intra = []; showErr("No se pudo traer la gráfica del día. Intenta de nuevo en unos segundos."); }
-    const L = S.intra.map(r => r.hora), v = S.intra.map(r => r.precio);
-    const o = opts({ fy: n => fmt(n), ftip: n => "$" + fmt(n), extra: { refLine: { valor: a.previo } } });
-    mk("chPrecio", { type: "line", data: { labels: L, datasets: [linea("Precio", v, ink, { w: 2 })] }, options: o });
-    $("#legPrecio").innerHTML = `<span style="--c:${ink}"><i></i>Precio cada 5 minutos</span><span style="--c:${css("--muted")}"><i class="d"></i>Cierre anterior ($${fmt(a.previo)})</span>`;
-  } else {
-    $("#chkMedias").disabled = $("#chkBandas").disabled = false;
-    const n = +S.rango, ini = n ? Math.max(0, sr.fechas.length - n) : 0, sl = arr => arr.slice(ini), L = sl(sr.fechas), ds = [];
-    if (bandas) {
-      ds.push({ label: "Banda sup.", data: sl(sr.bb_up), borderColor: alpha(hexOf("--ink-2"), .35), borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: alpha(hexOf("--ink"), .06), tip: false });
-      ds.push({ label: "Banda inf.", data: sl(sr.bb_low), borderColor: alpha(hexOf("--ink-2"), .35), borderWidth: 1, pointRadius: 0, fill: false, tip: false });
-    }
-    ds.push(linea("Cierre", sl(sr.cierre), ink, { w: 2.2, endLabel: "Cierre" }));
-    if (medias) { ds.push(linea("Media 20", sl(sr.sma20), css("--amber-ink"), { w: 1.6, borderDash: [6, 4], endLabel: "Media 20" }));
-      ds.push(linea("Media 50", sl(sr.sma50), css("--muted"), { w: 1.6, borderDash: [2, 3], endLabel: "Media 50" })); }
-    const o = opts({ ftip: v => "$" + fmt(v), right: 76, extra: { endLabels: { on: true } }, title: it => flarga(L[it[0].dataIndex]) });
-    mk("chPrecio", { type: "line", data: { labels: L.map(fcorta), datasets: ds }, options: o });
-    $("#legPrecio").innerHTML = `<span style="--c:${ink}"><i></i>Cierre</span>` + (medias ? `<span style="--c:${css("--amber-ink")}"><i class="d"></i>Media de 20 sesiones</span><span style="--c:${css("--muted")}"><i class="t"></i>Media de 50</span>` : "") + (bandas ? `<span style="--c:${ink}"><i class="f"></i>Bollinger (20, 2σ)</span>` : "");
-    const orsi = opts({ fy: v => fmt(v), ftip: v => v?.toFixed(2), min: 0, max: 100, step: 25, title: it => flarga(L[it[0].dataIndex]) });
-    mk("chRsi", { type: "line", data: { labels: L.map(fcorta), datasets: [linea("RSI", sl(sr.rsi), ink, { w: 1.8 }),
-      linea("70", L.map(() => 70), css("--down"), { w: 1, borderDash: [4, 4], tip: false }), linea("30", L.map(() => 30), css("--up"), { w: 1, borderDash: [4, 4], tip: false })] }, options: orsi });
-    const h = sl(sr.hist), om = opts({ fy: v => fmt(v, 1), ftip: v => fmt(v, 3), title: it => flarga(L[it[0].dataIndex]) });
-    mk("chMacd", { type: "bar", data: { labels: L.map(fcorta), datasets: [
-      { type: "bar", label: "Histograma", data: h, backgroundColor: h.map(v => alpha(v >= 0 ? hexOf("--up") : hexOf("--down"), .55)), borderWidth: 0, barPercentage: 1, categoryPercentage: 1 },
-      linea("MACD", sl(sr.macd), ink, { type: "line", w: 1.6 }), linea("Señal", sl(sr.macd_signal), css("--amber-ink"), { type: "line", w: 1.3, borderDash: [4, 3] })] }, options: om });
+    let intra = [];
+    try { intra = await api(`/api/intradia?ticker=${encodeURIComponent(a.ticker)}`); } catch { showErr("No se pudo traer la gráfica del día. Intenta de nuevo en unos segundos."); }
+    const L = intra.map(r => r.hora), v = intra.map(r => r.precio);
+    mk("chPrecio", { type: "line", data: { labels: L, datasets: [linea("Precio", v, col, { w: 2 })] }, options: opts({ fy: n => fmt(n), ftip: n => money(n, mn), extra: { refLine: { valor: a.previo } } }) });
+    $("#legPrecio").innerHTML = `<span style="--c:${col}"><i></i>Precio cada 5 minutos</span><span style="--c:${css("--muted")}"><i class="d"></i>Cierre anterior (${money(a.previo, mn)})</span>`;
+    return;
   }
+  $("#chkMedias").disabled = $("#chkBandas").disabled = false;
+  const n = +S.rango, ini = n ? Math.max(0, sr.fechas.length - n) : 0, sl = arr => arr.slice(ini), L = sl(sr.fechas), ds = [];
+  if (bandas) {
+    ds.push({ label: "Banda sup.", data: sl(sr.bb_up), borderColor: alpha(hexOf("--ink-2"), .35), borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: alpha(hexOf("--brand-text"), .07), tip: false });
+    ds.push({ label: "Banda inf.", data: sl(sr.bb_low), borderColor: alpha(hexOf("--ink-2"), .35), borderWidth: 1, pointRadius: 0, fill: false, tip: false });
+  }
+  ds.push(linea("Cierre", sl(sr.cierre), col, { w: 2.4, endLabel: "Cierre" }));
+  if (medias) { ds.push(linea("Media 20", sl(sr.sma20), css("--ink"), { w: 1.5, borderDash: [6, 4], endLabel: "Media 20" }));
+    ds.push(linea("Media 50", sl(sr.sma50), css("--muted"), { w: 1.6, borderDash: [2, 3], endLabel: "Media 50" })); }
+  mk("chPrecio", { type: "line", data: { labels: L.map(fcorta), datasets: ds }, options: opts({ ftip: v => money(v, mn), right: 76, extra: { endLabels: { on: true } }, title: it => flarga(L[it[0].dataIndex]) }) });
+  $("#legPrecio").innerHTML = `<span style="--c:${col}"><i></i>Cierre (${mn})</span>` + (medias ? `<span style="--c:${css("--ink")}"><i class="d"></i>Media de 20 sesiones</span><span style="--c:${css("--muted")}"><i class="t"></i>Media de 50</span>` : "") + (bandas ? `<span style="--c:${col}"><i class="f"></i>Bollinger (20, 2σ)</span>` : "");
+  mk("chRsi", { type: "line", data: { labels: L.map(fcorta), datasets: [linea("RSI", sl(sr.rsi), col, { w: 1.8 }),
+    linea("70", L.map(() => 70), css("--down"), { w: 1, borderDash: [4, 4], tip: false }), linea("30", L.map(() => 30), css("--up"), { w: 1, borderDash: [4, 4], tip: false })] },
+    options: opts({ fy: v => fmt(v), ftip: v => v?.toFixed(2), min: 0, max: 100, step: 25, title: it => flarga(L[it[0].dataIndex]) }) });
+  const h = sl(sr.hist);
+  mk("chMacd", { type: "bar", data: { labels: L.map(fcorta), datasets: [
+    { type: "bar", label: "Histograma", data: h, backgroundColor: h.map(v => alpha(v >= 0 ? hexOf("--up") : hexOf("--down"), .55)), borderWidth: 0, barPercentage: 1, categoryPercentage: 1 },
+    linea("MACD", sl(sr.macd), col, { type: "line", w: 1.6 }), linea("Señal", sl(sr.macd_signal), css("--ink"), { type: "line", w: 1.3, borderDash: [4, 3] })] },
+    options: opts({ fy: v => fmt(v, 1), ftip: v => fmt(v, 3), title: it => flarga(L[it[0].dataIndex]) }) });
 }
-/* --------------------------------------------------------------------- comparar */
-async function cargarComparar() {
-  const tks = [...S.selCmp], clave = tks.join(",") + desde();
-  if (S.cmp?.clave === clave || tks.length < 2) return;
-  S.cmp = { ...(await api(`/api/comparar?desde=${desde()}&tickers=${tks.join(",")}`)), clave };
+async function cargarCambios() {
+  try {
+    const A = await cargarArchivo();
+    $("#histCambios").innerHTML = A.cambios.length ? A.cambios.slice(0, 10).map(c => `<div class="cambio"><span class="f">${flarga(c.fecha)}</span><span class="t">${esc(c.ticker)}</span>
+      <span class="flecha">${esc(c.de ? sigT(c.de) : "Sin dato previo")} ${ICON("chevron")} ${sig(c.a)}</span></div>`).join("") : '<p class="note">No hubo cambios de decisión en el periodo.</p>';
+  } catch { $("#histCambios").innerHTML = '<p class="note">No se pudo cargar el historial de decisiones.</p>'; }
 }
-function renderComparar() {
-  const d = S.data;
-  $("#chips").innerHTML = d.acciones.map((x, i) => `<button class="chip" style="--c:${serie(i)}" data-t="${x.ticker}" aria-pressed="${S.selCmp.has(x.ticker)}"><i></i>${tk(x.ticker)}</button>`).join("");
-  $$("#chips .chip").forEach(b => b.onclick = () => {
-    const t = b.dataset.t;
-    if (S.selCmp.has(t)) { if (S.selCmp.size <= 2) return; S.selCmp.delete(t); } else S.selCmp.add(t);
-    render();
+async function cargarArchivo() {
+  if (!S.arch) { const clave = qsP(); const a = await api(`/api/archivo?${clave}`); if (clave !== qsP()) return a; S.arch = a; }
+  return S.arch;
+}
+
+/* ---------------------------------------------------- alertas de cambio de decisión */
+const VISTOS_INICIO = store.get("vistos", null);
+function renderAlertas() {
+  const cambios = S.data.acciones.filter(a => !a.error && a.cambio);
+  const vistos = VISTOS_INICIO;
+  const hoy = Object.fromEntries(S.data.acciones.filter(a => !a.error).map(a => [a.ticker, a.veredicto]));
+  const desdeVisita = vistos ? S.data.acciones.filter(a => !a.error && vistos[a.ticker] && vistos[a.ticker] !== a.veredicto) : [];
+  store.set("vistos", hoy);
+  let html = "";
+  if (cambios.length) html += `<div class="alerta">${ICON("wait")}<div><b>Cambió la decisión en la última sesión</b><p>${cambios.map(a => `<b>${tk(a.ticker)}</b>: de ${esc(sigT(a.veredicto_ant).toLowerCase())} a ${esc(a.decision.toLowerCase())}`).join("; ")}.</p></div></div>`;
+  if (desdeVisita.length) html += `<div class="alerta">${ICON("wait")}<div><b>Desde tu última visita</b><p>${desdeVisita.map(a => `<b>${tk(a.ticker)}</b>: de ${sigT(vistos[a.ticker]).toLowerCase()} a ${sigT(a.veredicto).toLowerCase()}`).join("; ")}.</p></div></div>`;
+  $("#alertas").innerHTML = html;
+}
+
+/* -------------------------------------------------------------------- entorno */
+const ENTORNO_HTML = `
+  <div class="head"><h1>Entorno global</h1><p class="sub" id="eSub"></p><p class="intro" style="margin-top:10px">Cómo se mueven el dólar, las tasas y las bolsas de EE. UU. y del mundo, y qué relación tienen con las acciones y la deuda que sigues aquí. Las cifras vienen de fuentes oficiales (Banco de México, Departamento del Tesoro de EE. UU., Reserva Federal de Nueva York, BLS y Cboe); los índices bursátiles son de referencia.</p></div>
+  <section class="sec"><h2>Lectura del periodo</h2><div class="prose" id="eLectura"><p class="cargando">Consultando fuentes oficiales…</p></div></section>
+  <section class="sec"><h2>Tipo de cambio: pesos por dólar (FIX de Banxico)</h2><div class="legend" id="legFx"></div><div class="chartbox md"><canvas id="chFx" role="img" aria-label="Tipo de cambio FIX"></canvas></div></section>
+  <section class="sec"><h2>Bolsas del mundo, base 100 al inicio del periodo</h2><div class="legend" id="legBolsas"></div><div class="chartbox"><canvas id="chBolsas" role="img" aria-label="Bolsas del mundo"></canvas></div></section>
+  <section class="sec"><h2>Tasas de interés: México y EE. UU.</h2><div class="legend" id="legTasas"></div><div class="chartbox md"><canvas id="chTasas" role="img" aria-label="Tasas de interés"></canvas></div></section>
+  <section class="sec"><h2>Indicadores del periodo y fuentes</h2><div class="scrollx" id="eTabla"></div><p class="note" style="margin-top:8px">«Oficial» significa que la publica la propia institución. «Referencia» son datos de mercado de Yahoo Finance, que no es una fuente oficial. Las tasas cambian en puntos base (pb): 100 pb = 1 punto porcentual.</p></section>
+  <section class="sec"><h2>Diferenciales de tasas</h2><div id="eDifs"></div></section>
+  <section class="sec"><h2>Qué tan ligados están tus instrumentos a EE. UU. y al dólar</h2><div class="scrollx" id="eSens"></div><div id="eEfecto"></div></section>
+  <section class="sec"><h2>Qué es cada cosa</h2><div id="eGuia"><p class="cargando">Cargando…</p></div></section>
+  <section class="sec"><h2>Fuentes oficiales</h2><div id="eFuentes"></div></section>`;
+
+function renderEntorno() {
+  armar("entorno", ENTORNO_HTML);
+  $("#eSub").textContent = `Periodo del ${flarga(S.periodo.desde)} al ${flarga(S.periodo.hasta)}`;
+  renderGuia();
+  if (!S.ctx) { if (S.ctxError) $("#eLectura").innerHTML = `<p class="err">No se pudo cargar el entorno global: ${esc(S.ctxError)}</p>`; cargarCtx(); return; }
+  const c = S.ctx, d = Object.fromEntries(c.indicadores.map(x => [x.id, x]));
+  $("#eLectura").innerHTML = c.lectura.map(p => `<p>${esc(p)}</p>`).join("");
+  if (Object.keys(c.errores || {}).length) $("#eLectura").innerHTML += `<p class="note">Algunas fuentes no respondieron y se omitieron: ${Object.entries(c.errores).map(([k, v]) => esc(k)).join(", ")}.</p>`;
+  // tipo de cambio
+  if (d.fx) {
+    mk("chFx", { type: "line", data: { labels: d.fx.serie.map(x => fcorta(x[0])), datasets: [linea("FIX", d.fx.serie.map(x => x[1]), hexOf("--line"), { w: 2.2, endLabel: `FIX ${fmt(d.fx.fin.valor)}` })] },
+      options: opts({ ftip: v => "$" + fmt(v), right: 84, extra: { endLabels: { on: true } }, title: it => flarga(d.fx.serie[it[0].dataIndex][0]) }) });
+    $("#legFx").innerHTML = `<span style="--c:${hexOf("--line")}"><i></i>Pesos por dólar. Si sube, el peso se deprecia</span>`;
+  }
+  // bolsas base 100
+  const bol = [["sp500", "S&P 500"], ["nasdaq", "Nasdaq"], ["ipc", "IPC México"], ["stoxx", "Euro Stoxx 50"], ["nikkei", "Nikkei 225"]].filter(([k]) => d[k]);
+  if (bol.length) {
+    const al = alinear(bol.map(([k]) => ({ datos: d[k].serie })), true);
+    mk("chBolsas", { type: "line", data: { labels: al.fechas.map(fcorta), datasets: bol.map(([k, n], i) => linea(n, al.valores[i], serie(i), { w: 2.1, endLabel: `${n} ${fmt(al.valores[i].at(-1))}` })) },
+      options: opts({ ftip: v => fmt(v), right: 128, extra: { endLabels: { on: true }, refLine: { valor: 100 } }, title: it => flarga(al.fechas[it[0].dataIndex]) }) });
+    $("#legBolsas").innerHTML = bol.map(([, n], i) => `<span style="--c:${serie(i)}"><i class="sq"></i>${esc(n)}</span>`).join("");
+  }
+  // tasas
+  const tas = [["tasa_obj", "Banxico (objetivo)"], ["effr", "Fed (EFFR)"], ["ust10y", "Tesoro 10 años"], ["ust2y", "Tesoro 2 años"]].filter(([k]) => d[k]);
+  if (tas.length) {
+    const al = alinear(tas.map(([k]) => ({ datos: d[k].serie })), false);
+    mk("chTasas", { type: "line", data: { labels: al.fechas.map(fcorta), datasets: tas.map(([k, n], i) => linea(n, al.valores[i], serie(i), { w: 2.1, endLabel: `${n} ${fmt(al.valores[i].at(-1))}%` })) },
+      options: opts({ fy: v => fmt(v) + "%", ftip: v => fmt(v) + "%", right: 150, extra: { endLabels: { on: true } }, title: it => flarga(al.fechas[it[0].dataIndex]) }) });
+    $("#legTasas").innerHTML = tas.map(([, n], i) => `<span style="--c:${serie(i)}"><i class="sq"></i>${esc(n)}</span>`).join("");
+  }
+  // tabla de indicadores agrupada
+  let h = `<table class="tbl"><thead><tr><th>Indicador</th><th>Inicio</th><th>Fin</th><th>Cambio</th><th class="l">Fuente</th></tr></thead><tbody>`;
+  let grupo = "";
+  c.indicadores.forEach(x => {
+    if (x.grupo !== grupo) { grupo = x.grupo; h += `<tr><td colspan="5" class="l" style="background:var(--brand-suave);font-weight:700;color:var(--brand-text)">${esc(grupo)}</td></tr>`; }
+    const f = x.fuente, u = x.cambio_unidad === "pb" ? " pb" : "%";
+    h += `<tr><td><b>${esc(x.nombre)}</b><small>${x.mensual ? "mensual · último dato " + fmes(x.fin.fecha) : "al " + flarga(x.fin.fecha)}</small></td><td>${fmt(x.ini.valor)}<small>${flarga(x.ini.fecha)}</small></td><td>${fmt(x.fin.valor)}</td>
+      <td class="${cls(x.cambio)}"><b>${sg(x.cambio)}${fmt(Math.abs(x.cambio))}${u}</b></td><td class="l"><span class="ofi ${f.oficial ? "si" : "no"}">${f.oficial ? "Oficial" : "Referencia"}</span> <a class="fuente" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.nombre.split(" · ")[0])}</a></td></tr>`;
   });
-  const c = S.cmp; if (!c || !c.fechas.length) return;
-  const nom = t => d.acciones.find(a => a.ticker === t)?.nombre || t, colr = t => serie(d.acciones.findIndex(a => a.ticker === t));
-  const L = c.fechas, tks = Object.keys(c.base100);
-  const o = opts({ fy: v => fmt(v), ftip: v => fmt(v), right: 128, extra: { endLabels: { on: true }, refLine: { valor: 100 } }, title: it => flarga(L[it[0].dataIndex]) });
-  mk("chComparar", { type: "line", data: { labels: L.map(fcorta), datasets: tks.map(t => linea(tk(t), c.base100[t], colr(t), { w: 2.2, endLabel: `${tk(t)} ${fmt(c.base100[t].at(-1))}` })) }, options: o });
-  $("#legComparar").innerHTML = tks.map(t => `<span style="--c:${colr(t)}"><i class="sq"></i>${esc(nom(t))}</span>`).join("");
-
-  const fa = $("#fechaA"), fb = $("#fechaB");
-  fa.min = fb.min = L[0]; fa.max = fb.max = L.at(-1);
-  if (!fa.value || fa.value < L[0] || fa.value > L.at(-1)) fa.value = L[0];
-  if (!fb.value || fb.value < L[0] || fb.value > L.at(-1)) fb.value = L.at(-1);
-  const pos = f => { let k = -1; L.forEach((x, i) => { if (x <= f) k = i; }); return k; };
-  const tabla = () => {
-    const ia = pos(fa.value), ib = pos(fb.value);
-    if (ia < 0 || ib < 0) { $("#tblConsulta").innerHTML = "<tbody><tr><td>Elige fechas dentro del periodo.</td></tr></tbody>"; return; }
-    const filas = tks.map(t => { const a = c.cierres[t][ia], b = c.cierres[t][ib]; return { t, a, b, dv: b - a, dp: (b / a - 1) * 100 }; });
-    const mejor = Math.max(...filas.map(f => f.dp));
-    $("#tblConsulta").innerHTML = `<thead><tr><th>Emisora</th><th>${fcorta(L[ia])}</th><th>${fcorta(L[ib])}</th><th>Cambio</th></tr></thead><tbody>` +
-      filas.map(f => `<tr><td><b>${tk(f.t)}</b>${f.dp === mejor ? ' <span class="note">mejor</span>' : ""}</td><td>$${fmt(f.a)}</td><td>$${fmt(f.b)}</td><td class="${cls(f.dp)}"><b>${pct(f.dp)}</b><small>${sg(f.dv)}${fmt(Math.abs(f.dv))}</small></td></tr>`).join("") + "</tbody>";
-  };
-  fa.onchange = fb.onchange = tabla; tabla();
-  $$("#atajos button").forEach(b => b.onclick = () => { const u = L.length - 1; fb.value = L[u]; fa.value = b.dataset.a === "ini" ? L[0] : L[Math.max(0, u - (b.dataset.a === "sem" ? 5 : 21))]; tabla(); });
-
-  $("#tblRanking").innerHTML = `<thead><tr><th>Emisora</th><th>Rend.</th><th>Vol.</th><th>R/R</th><th>Caída</th><th>Días al alza</th></tr></thead><tbody>` +
-    [...c.ranking].sort((a, b) => b.ret - a.ret).map(r => `<tr><td><b>${tk(r.ticker)}</b></td><td class="${cls(r.ret)}"><b>${pct(r.ret)}</b></td><td>${fmt(r.vol_anual)}%</td><td>${r.ratio == null ? "—" : fmt(r.ratio)}</td><td class="down">${pct(r.max_drawdown)}</td><td>${fmt(r.dias_alza)}%</td></tr>`).join("") + "</tbody>";
-  const m = c.corr.matriz, n = c.corr.tickers.length, g = $("#heat");
-  g.style.gridTemplateColumns = `auto repeat(${n},minmax(0,1fr))`;
-  g.innerHTML = `<div class="h"></div>` + c.corr.tickers.map(t => `<div class="h">${tk(t)}</div>`).join("") +
-    m.map((row, i) => `<div class="h" style="text-align:right">${tk(c.corr.tickers[i])}</div>` + row.map(v => { const w = Math.round(Math.abs(v) * 80), base = v >= 0 ? "--s1" : "--s8";
-      return `<div style="background:color-mix(in srgb,var(${base}) ${w}%,var(--surface));color:${w > 50 ? "#fff" : "var(--ink)"}">${fmt(v)}</div>`; }).join("")).join("");
-  $("#tblCierres").innerHTML = `<thead><tr><th>Fecha</th>${tks.map(t => `<th>${tk(t)}</th>`).join("")}</tr></thead><tbody>` +
-    L.map((f, i) => `<tr><td>${flarga(f)}</td>` + tks.map(t => { const v = c.cierres[t][i], p = i ? (v / c.cierres[t][i - 1] - 1) * 100 : null;
-      return `<td>${fmt(v)}${p == null ? "" : `<small class="${cls(p)}">${pct(p)}</small>`}</td>`; }).join("") + "</tr>").reverse().join("") + "</tbody>";
+  $("#eTabla").innerHTML = h + "</tbody></table>";
+  $("#eDifs").innerHTML = c.diferenciales.length ? c.diferenciales.map(x => `<div class="cambio" style="display:block"><b>${esc(x.nombre)}:</b> <span class="num ${cls(x.pb)}"><b>${sg(x.pb)}${fmt(Math.abs(x.pb))} pb</b></span> <span class="note">(${esc(x.detalle)})</span><p class="note" style="margin-top:2px">${esc(x.lectura)}</p></div>`).join("") : '<p class="note">No hay datos suficientes en el periodo.</p>';
+  $("#eSens").innerHTML = c.sensibilidades.length ? `<table class="tbl"><thead><tr><th>Emisora</th><th>País</th><th>Sesiones</th><th>Corr. S&amp;P 500</th><th>Beta S&amp;P 500</th><th>Corr. dólar</th><th>Corr. IPC</th></tr></thead><tbody>` +
+    c.sensibilidades.map(s => `<tr><td><b>${esc(s.nombre)}</b></td><td>${esc(s.pais)}</td><td>${s.n}</td><td>${fmt(s.corr_sp500)}</td><td>${fmt(s.beta_sp500)}</td><td>${fmt(s.corr_dolar)}</td><td>${s.corr_ipc == null ? "—" : fmt(s.corr_ipc)}</td></tr>`).join("") + "</tbody></table>" : "";
+  $("#eEfecto").innerHTML = (c.efecto_cambiario.length ? `<h3 class="h3">Acciones de EE. UU. vistas desde México</h3><div class="scrollx"><table class="tbl"><thead><tr><th>Acción</th><th>Rend. en dólares</th><th>Variación del dólar</th><th>Rend. en pesos</th></tr></thead><tbody>` +
+    c.efecto_cambiario.map(e => `<tr><td><b>${esc(e.nombre)}</b></td><td class="${cls(e.ret_usd)}">${pct(e.ret_usd)}</td><td class="${cls(e.ret_dolar)}">${pct(e.ret_dolar)}</td><td class="${cls(e.ret_pesos)}"><b>${pct(e.ret_pesos)}</b></td></tr>`).join("") + "</tbody></table></div>" : "") +
+    `<p class="note" style="margin-top:10px">La correlación (de −1 a +1) mide si los rendimientos diarios se mueven juntos; la beta, cuánto se mueve la acción por cada 1 % del S&amp;P 500. La correlación con el dólar usa el tipo de cambio de cierre de Banxico: si es negativa, la acción tiende a subir cuando el peso se aprecia. Ninguna prueba que un mercado cause al otro.</p>`;
+  $("#eFuentes").innerHTML = c.fuentes.map(f => `<p style="margin:6px 0"><span class="ofi ${f.oficial ? "si" : "no"}">${f.oficial ? "Oficial" : "Referencia"}</span> <a class="fuente" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.nombre)}</a></p>`).join("") +
+    `<p class="note" style="margin-top:8px">Para las empresas: reportes oficiales en SEC EDGAR (EE. UU.) y en la Bolsa Mexicana de Valores y la CNBV (México).</p>`;
+}
+async function renderGuia() {
+  const el = $("#eGuia"); if (!el) return;
+  try {
+    const g = await cargarGuia();
+    const ac = x => `<details class="acc"><summary>${ICON("chevron")}${esc(x.nombre)}<span class="sub">${esc(x.ticker ? tk(x.ticker) + " · " + x.mercado : x.codigo)}</span></summary><div class="cuerpo"><p>${esc(x.que_es)}</p><p><b>${x.que_la_mueve ? "Qué la mueve." : "Qué lo mueve."}</b> ${esc(x.que_la_mueve || x.que_lo_mueve)}</p>${x.fuente ? `<p class="note">Fuente oficial: <a class="fuente" href="${esc(x.fuente.url)}" target="_blank" rel="noopener">${esc(x.fuente.nombre)}</a></p>` : ""}</div></details>`;
+    const ind = x => `<details class="acc"><summary>${ICON("chevron")}${esc(x.nombre)}</summary><div class="cuerpo"><p>${esc(x.que_es)}</p><p><b>Cómo se relaciona con tus instrumentos.</b> ${esc(x.como_afecta)}</p></div></details>`;
+    el.innerHTML = `<h3 class="h3">Acciones</h3>${g.acciones.map(ac).join("")}<h3 class="h3" style="margin-top:22px">Deuda gubernamental y privada</h3>${g.deuda.map(ac).join("")}<h3 class="h3" style="margin-top:22px">Indicadores del entorno</h3>${g.indicadores.map(ind).join("")}`;
+  } catch { el.innerHTML = '<p class="note">No se pudo cargar la guía.</p>'; }
 }
 
 /* ------------------------------------------------------------------------ deuda */
-const valDeuda = x => x.valor == null ? "—" : x.tipo === "precio" ? "$" + fmt(x.valor, 5) : fmt(x.valor) + (x.unidad.startsWith("%") ? "%" : " pp");
+const DEUDA_HTML = `
+  <div class="head"><h1>Deuda</h1><p class="sub" id="dSub"></p><p class="intro" style="margin-top:10px">Instrumentos del Gobierno Federal (CETES, Bonos M, Udibonos, Bondes F), del IPAB (BPAG28) y del mercado privado (papel comercial y certificados bursátiles). Cada cifra es la de la última subasta o colocación semanal que publica Banxico; el rendimiento se compara con el promedio de las últimas 12.</p></div>
+  <div class="board"><table id="boardDeuda" aria-label="Instrumentos de deuda"></table><div class="board-foot" id="footDeuda"></div></div>
+  <div class="detail" id="detalleDeuda" hidden>
+    <div class="detail-head"><h2 id="deuNombre"></h2></div>
+    <div class="cols"><div><div class="legend" id="legDeuda"></div><div class="chartbox md"><canvas id="chDeuda" role="img" aria-label="Rendimiento por semana o subasta"></canvas></div></div><aside class="verdict" id="deuLectura"></aside></div>
+    <div class="split"><section class="sec"><h2>Qué es</h2><div id="deuQue"></div></section><section class="sec"><h2>Resultados semana a semana</h2><div class="scroll"><table class="tbl" id="tblDeuda"></table></div></section></div>
+    <section class="sec" id="deuPriv" hidden><h2>Papel comercial y certificados bursátiles por mes</h2><div class="scrollx" id="deuPrivT"></div></section>
+  </div>
+  <p class="aviso">Si las tasas suben, el precio de los bonos ya emitidos baja. La decisión es un apoyo educativo y no constituye asesoría financiera.</p>`;
+const valDeuda = x => x.valor == null ? "—" : x.tipo === "precio" ? "$" + fmt(x.valor, 5) : x.tipo === "monto" ? "$" + fmt(x.valor / 1000) + " mdp" : fmt(x.valor) + (x.unidad.startsWith("%") ? "%" : " pp");
 function renderDeuda() {
+  armar("deuda", DEUDA_HTML);
   const d = S.data, ok = d.deuda.find(x => x.fecha);
-  $("#boardDeuda").innerHTML = `<thead><tr><th>Instrumento</th><th>Último</th><th class="c-chg">Cambio</th><th class="c-z">Z</th><th class="c-trend">Tendencia</th><th class="c-sig">Señal</th></tr></thead><tbody class="${entra("deuda")}">` +
+  $("#dSub").textContent = `Periodo del ${flarga(S.periodo.desde)} al ${flarga(S.periodo.hasta)}`;
+  $("#boardDeuda").innerHTML = `<thead><tr><th>Instrumento</th><th>Última cifra</th><th class="c-chg">Cambio</th><th class="c-z">Z</th><th class="c-trend">Tendencia</th><th class="c-sig">Decisión</th></tr></thead><tbody class="${entra("deuda")}">` +
     d.deuda.map((x, i) => `<tr tabindex="0" data-d="${i}" aria-selected="${i === S.selD}" style="--i:${i}">
-      <td><div class="who"><span class="sw" style="--c:${serie(i)}"></span><div><div class="tk">${esc(x.nombre)}</div><div class="nm">${esc(x.emisor)}</div><div class="m-only">${sig(x.senal)}</div></div></div></td>
+      <td><div><div class="tk">${esc(x.codigo)}</div><div class="nm">${esc(x.emisor)}</div><div class="m-only">${sig(x.senal)}</div></div></td>
       <td><span class="px num">${valDeuda(x)}</span></td>
       <td class="c-chg"><span class="chg num ${cls(x.var_pb ?? x.var)}">${x.var_pb != null ? sg(x.var_pb) + Math.abs(x.var_pb).toFixed(2) + " pb" : x.var != null ? sg(x.var) + Math.abs(x.var).toFixed(5) : "—"}</span></td>
       <td class="c-z"><span class="chg num flat">${x.z != null ? sg(x.z) + Math.abs(x.z).toFixed(2) : "—"}</span></td>
       <td class="c-trend"><span class="flat">${esc(x.tendencia)}</span></td>
       <td class="c-sig">${sig(x.senal)}</td></tr>`).join("") + "</tbody>";
-  $("#footDeuda").innerHTML = `<span>Banco de México · subastas semanales (cuadros CF107 y CF115)</span><span>${ok ? "Última subasta " + fhumana(ok.fecha) : ""}</span>`;
+  $("#footDeuda").innerHTML = `<span>Banco de México · cuadros CF107, CF115 y CF133 del SIE</span><span>${ok ? "Última cifra del " + flarga(ok.fecha) : ""}</span>`;
   $$("#boardDeuda tbody tr").forEach(tr => {
     const go = () => { S.selD = +tr.dataset.d; renderDeuda(); if (innerWidth < 980) $("#detalleDeuda").scrollIntoView({ behavior: "smooth" }); };
     tr.onclick = go; tr.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
   });
   const x = d.deuda[S.selD]; if (!x) return;
   $("#detalleDeuda").hidden = false;
-  const es = x.tipo === "tasa", col = css("--ink"), v = x.datos.map(r => r.valor);
+  const tipo = x.tipo, col = hexOf("--line"), v = x.datos.map(r => tipo === "monto" ? r.valor / 1000 : r.valor);
   const ma = v.map((_, i) => i >= 3 ? v.slice(i - 3, i + 1).reduce((p, q) => p + q, 0) / 4 : null);
+  const etq = tipo === "tasa" ? "Rendimiento" : tipo === "precio" ? "Precio" : "Colocado (millones de pesos)";
+  const fy = n => tipo === "precio" ? n.toFixed(3) : fmt(n), ft = n => tipo === "tasa" ? fmt(n) + (x.unidad.startsWith("%") ? "%" : " pp") : tipo === "precio" ? "$" + n.toFixed(5) : "$" + fmt(n) + " mdp";
   $("#deuNombre").textContent = `${x.nombre} · ${x.emisor}`;
-  $("#legDeuda").innerHTML = `<span style="--c:${col}"><i></i>${es ? "Rendimiento" : "Precio"} en cada subasta (${esc(x.unidad)})</span><span style="--c:${css("--amber-ink")}"><i class="d"></i>Promedio móvil de 4 subastas</span>`;
-  const o = opts({ fy: n => es ? n.toFixed(2) : n.toFixed(3), ftip: n => es ? n.toFixed(2) + (x.unidad.startsWith("%") ? "%" : " pp") : "$" + n.toFixed(5), right: 78, extra: { endLabels: { on: true } }, title: it => flarga(x.datos[it[0].dataIndex].fecha) });
-  mk("chDeuda", { type: "line", data: { labels: x.datos.map(r => fcorta(r.fecha)), datasets: [
-    linea(es ? "Rendimiento" : "Precio", v, col, { w: 2.2, pr: 3, endLabel: valDeuda(x) }), linea("Promedio móvil", ma, css("--amber-ink"), { w: 1.6, borderDash: [6, 4] })] }, options: o });
-  $("#deuLectura").innerHTML = `<div class="word ${sigK(x.senal)}">${(SIG[x.senal] || SIG.MANTENER)[2]}</div>
+  $("#legDeuda").innerHTML = `<span style="--c:${col}"><i></i>${etq} cada semana (${esc(x.unidad)})</span><span style="--c:${css("--ink")}"><i class="d"></i>Promedio móvil de 4 semanas</span>`;
+  mk("chDeuda", { type: tipo === "monto" ? "bar" : "line", data: { labels: x.datos.map(r => fcorta(r.fecha)), datasets: tipo === "monto"
+      ? [{ type: "bar", label: etq, data: v, backgroundColor: alpha(hexOf("--line"), .75), borderWidth: 0 }]
+      : [linea(etq, v, col, { w: 2.2, pr: 3, endLabel: valDeuda(x) }), linea("Promedio móvil", ma, css("--ink"), { w: 1.5, borderDash: [6, 4] })] },
+    options: opts({ fy, ftip: ft, right: tipo === "monto" ? 8 : 78, extra: tipo === "monto" ? {} : { endLabels: { on: true } }, title: it => flarga(x.datos[it[0].dataIndex].fecha) }) });
+  $("#deuLectura").innerHTML = `<div class="word ${sigK(x.senal)}">${esc(x.decision)}</div>
     <p class="meta">${esc(x.texto)}</p>
-    <p class="note" style="margin-top:14px">Z: desviaciones estándar frente al promedio de las últimas 12 subastas. Pendiente: regresión de las últimas 8 subastas (${x.pendiente != null ? sg(x.pendiente) + Math.abs(x.pendiente).toFixed(2) + (es ? " pb" : " $") + " por subasta" : "sin datos"}).</p>`;
-  $("#tblDeuda").innerHTML = `<thead><tr><th>Subasta</th><th>${es ? "Tasa" : "Precio"}</th><th>${es ? "Cambio (pb)" : "Cambio"}</th></tr></thead><tbody>` +
-    [...x.datos].reverse().map(r => `<tr><td>${flarga(r.fecha)}</td><td><b>${es ? fmt(r.valor) : fmt(r.valor, 5)}</b></td><td class="${cls(es ? r.var_pb : r.var)}">${es ? (r.var_pb == null ? "—" : sg(r.var_pb) + Math.abs(r.var_pb).toFixed(2)) : (r.var == null ? "—" : sg(r.var) + Math.abs(r.var).toFixed(5))}</td></tr>`).join("") + "</tbody>";
+    <p class="note" style="margin-top:14px">${tipo === "monto" ? "Este instrumento se sigue por volumen colocado, no por rendimiento." : `Z: desviaciones estándar frente al promedio de las últimas 12 subastas. Pendiente: regresión de las últimas 8 (${x.pendiente != null ? sg(x.pendiente) + Math.abs(x.pendiente).toFixed(2) + (tipo === "tasa" ? " pb" : " $") + " por subasta" : "sin datos"}).`}</p>
+    <ul class="prose" style="margin-top:10px;padding-left:18px">${(x.por_que || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>`;
+  const ex = x.extras || [], tasa = tipo === "tasa";
+  $("#tblDeuda").innerHTML = `<thead><tr><th>Fecha</th><th>${tasa ? "Tasa" : tipo === "precio" ? "Precio" : "Colocado (miles de pesos)"}</th>${tasa ? "<th>Cambio (pb)</th>" : ""}${ex.map(e => `<th>${esc(e)}</th>`).join("")}</tr></thead><tbody>` +
+    [...x.datos].reverse().map(r => `<tr><td>${flarga(r.fecha)}</td><td><b>${tipo === "precio" ? fmt(r.valor, 5) : fmt(r.valor)}</b></td>${tasa ? `<td class="${cls(r.var_pb)}">${r.var_pb == null ? "—" : sg(r.var_pb) + Math.abs(r.var_pb).toFixed(2)}</td>` : ""}${ex.map(e => `<td>${r.extra?.[e] == null ? "—" : fmt(r.extra[e])}</td>`).join("")}</tr>`).join("") + "</tbody>";
+  cargarGuia().then(g => { const q = g.deuda.find(z => z.nombre === x.nombre); if (q && S.data.deuda[S.selD]?.nombre === x.nombre)
+    $("#deuQue").innerHTML = `<div class="prose"><p>${esc(q.que_es)}</p><p><b>Qué lo mueve.</b> ${esc(q.que_lo_mueve)}</p></div>` + (q.fuente ? `<p class="note" style="margin-top:8px">Fuente oficial: <a class="fuente" href="${esc(q.fuente.url)}" target="_blank" rel="noopener">${esc(q.fuente.nombre)}</a></p>` : ""); }).catch(() => {});
+  const priv = x.nombre === "PAPEL COMERCIAL" || x.nombre === "CERTIFICADOS BURSÁTILES";
+  $("#deuPriv").hidden = !priv;
+  if (priv) {
+    if (!S.ctx) { $("#deuPrivT").innerHTML = '<p class="cargando">Consultando a Banxico…</p>'; }
+    else $("#deuPrivT").innerHTML = S.ctx.privados.length ? `<table class="tbl"><thead><tr><th>Mes</th><th>Tasa CB corto plazo</th><th>Tasa CB mediano plazo</th><th>Colocado corto plazo (mdp)</th><th>Colocado papel comercial (mdp)</th><th>Colocado mediano y largo (mdp)</th></tr></thead><tbody>` +
+      S.ctx.privados.map(m => `<tr><td>${fmes(m.mes)}</td><td>${fmt(m.tasa_cb_cp)}%</td><td>${fmt(m.tasa_cb_mp)}%</td><td>${fmt((m.col_cp || 0) / 1e6)}</td><td>${fmt((m.col_pc || 0) / 1e6)}</td><td>${fmt((m.col_mlp || 0) / 1e6)}</td></tr>`).join("") +
+      `</tbody></table><p class="note" style="margin-top:8px">Banxico, cuadros CF302 y CF304. mdp = millones de pesos. Una tasa de 0.00 significa que no hubo colocaciones de ese instrumento en el mes.</p>` : '<p class="note">Sin datos mensuales en el periodo.</p>';
+  }
 }
 
-/* ---------------------------------------------------------------------- archivo */
-async function cargarHistorial() {
-  if (S.hist) return;
-  const r = await fetch("/static/data/analisis_diario.json", { cache: "no-cache" });
-  if (!r.ok) throw new Error("Aún no hay análisis guardados");
-  S.hist = await r.json();
-  S.fechaDia = S.hist.registros.at(-1)?.fecha;
+/* --------------------------------------------------------------------- comparar */
+const COMPARAR_HTML = `
+  <div class="head"><h1>Comparar</h1><p class="sub" id="cSub"></p></div>
+  <div class="sub-nav"><div class="seg" id="cModo" role="group" aria-label="Qué mostrar"><button data-m="comparar">Comparación de cierres</button><button data-m="simular">Simulación</button></div>
+    <div class="seg" id="cMoneda" role="group" aria-label="Moneda de las acciones de EE. UU."><button data-c="mxn">En pesos</button><button data-c="original">Moneda original</button></div>
+    <span class="note" id="cNota"></span></div>
+  <div id="cComparar">
+    <div class="chips" id="chips" role="group" aria-label="Emisoras a comparar (de 2 a 5)"></div>
+    <div class="legend" id="legComparar"></div>
+    <div class="chartbox"><canvas id="chComparar" role="img" aria-label="Comparación de rendimiento acumulado"></canvas></div>
+    <div class="split"><section class="sec"><h2>Cierres en dos fechas</h2>
+        <div class="consulta"><label>De <input type="date" id="fechaA"></label><label>A <input type="date" id="fechaB"></label>
+          <div class="seg" id="atajos"><button data-a="ini">Periodo</button><button data-a="sem">1 semana</button><button data-a="mes">1 mes</button></div></div>
+        <div class="scrollx"><table class="tbl" id="tblConsulta"></table></div><p class="note" style="margin-top:8px">Si la fecha no fue día hábil se usa el cierre anterior. Los cierres se muestran en la moneda elegida arriba.</p></section>
+      <section class="sec"><h2>Ranking del periodo</h2><div class="scrollx"><table class="tbl" id="tblRanking"></table></div></section></div>
+    <div class="split"><section class="sec"><h2>Correlación de rendimientos diarios</h2><div class="heat" id="heat"></div><p class="note" style="margin-top:10px">+1.00 se mueven igual, 0.00 sin relación, −1.00 en sentido contrario. Valores bajos diversifican.</p></section>
+      <section class="sec"><h2>Cierres diarios</h2><details class="acc"><summary>${ICON("chevron")}Ver tabla completa</summary><div class="scroll"><table class="tbl" id="tblCierres"></table></div></details></section></div>
+  </div>
+  <div id="cSim" hidden>
+    <p class="intro" id="simTexto">Qué habría pasado si hubieras seguido las decisiones contra comprar y mantener.</p>
+    <div class="legend" id="legSim" style="margin-top:12px"></div><div class="chartbox"><canvas id="chSim" role="img" aria-label="Valor del portafolio simulado"></canvas></div>
+    <div class="split"><section class="sec"><h2>Resultado del periodo</h2><div class="scrollx"><table class="tbl" id="tblSim"></table></div></section><section class="sec"><h2>Por emisora</h2><div class="scrollx"><table class="tbl" id="tblSimEm"></table></div></section></div>
+    <p class="aviso" id="simAviso"></p></div>`;
+async function renderComparar() {
+  armar("comparar", COMPARAR_HTML);
+  $("#cSub").textContent = `Periodo del ${flarga(S.periodo.desde)} al ${flarga(S.periodo.hasta)}`;
+  $$("#cModo button").forEach(b => { b.setAttribute("aria-pressed", b.dataset.m === S.modoC); b.onclick = () => { S.modoC = b.dataset.m; renderComparar(); }; });
+  $$("#cMoneda button").forEach(b => { b.setAttribute("aria-pressed", b.dataset.c === S.moneda); b.onclick = () => { S.moneda = b.dataset.c; S.cmp = S.sim = null; renderComparar(); }; });
+  $("#cNota").textContent = S.moneda === "mxn" ? "Las acciones de EE. UU. se convierten a pesos con el tipo de cambio de cierre de Banxico." : "Cada acción en su moneda: el efecto del dólar no se incluye.";
+  $("#cComparar").hidden = S.modoC !== "comparar"; $("#cSim").hidden = S.modoC !== "simular";
+  try { if (S.modoC === "comparar") { await cargarComparar(); renderChips(); drawComparar(); } else { await cargarSim(); renderChips(true); drawSim(); } }
+  catch (e) { showErr(e.message); }
 }
-const VCLS = { "COMPRA FUERTE": "v-buy2", COMPRAR: "v-buy", MANTENER: "", VENDER: "v-sell", "VENTA FUERTE": "v-sell2" };
-function renderArchivo() {
-  const h = S.hist; if (!h) return;
-  const R = h.registros, a = R[0], z = R.at(-1);
-  $("#archResumen").textContent = `${R.length} análisis diarios guardados, del ${fhumana(a.fecha)} al ${fhumana(z.fecha)}.`;
+function renderChips(oculto) {
+  const el = $("#chips"); if (!el) return;
+  if (oculto) return;
+  const full = S.selCmp.size >= 5;
+  el.innerHTML = S.data.acciones.filter(a => !a.error).map(a => `<button class="chip" data-t="${a.ticker}" aria-pressed="${S.selCmp.has(a.ticker)}" ${full && !S.selCmp.has(a.ticker) ? "disabled" : ""} style="--c:${serieDe(a.ticker)}"><i></i>${tk(a.ticker)}</button>`).join("");
+  $$("#chips .chip").forEach(b => b.onclick = () => { const t = b.dataset.t;
+    if (S.selCmp.has(t)) { if (S.selCmp.size <= 2) return; S.selCmp.delete(t); } else if (S.selCmp.size < 5) S.selCmp.add(t);
+    S.cmp = null; renderComparar(); });
+}
+const serieDe = t => { const i = [...S.selCmp].indexOf(t); return i < 0 ? "var(--rule-strong)" : serie(i); };
+async function cargarComparar() {
+  if (S.cmp) return;
+  const tks = [...S.selCmp], clave = qsP();
+  S.cmp = await api(`/api/comparar?${clave}&tickers=${tks.join(",")}&moneda=${S.moneda}`);
+}
+function drawComparar() {
+  const c = S.cmp, d = S.data; if (!c || !c.fechas.length) return;
+  const nom = t => d.acciones.find(a => a.ticker === t)?.nombre || t, tks = Object.keys(c.base100), L = c.fechas;
+  mk("chComparar", { type: "line", data: { labels: L.map(fcorta), datasets: tks.map((t, i) => linea(tk(t), c.base100[t], serie(i), { w: 2.2, endLabel: `${tk(t)} ${fmt(c.base100[t].at(-1))}` })) },
+    options: opts({ fy: v => fmt(v), ftip: v => fmt(v), right: 128, extra: { endLabels: { on: true }, refLine: { valor: 100 } }, title: it => flarga(L[it[0].dataIndex]) }) });
+  $("#legComparar").innerHTML = tks.map((t, i) => `<span style="--c:${serie(i)}"><i class="sq"></i>${esc(nom(t))}</span>`).join("") + `<span class="note">Base 100.00 al inicio del periodo.</span>`;
+  const fa = $("#fechaA"), fb = $("#fechaB");
+  fa.min = fb.min = L[0]; fa.max = fb.max = L.at(-1);
+  if (!fa.value || fa.value < L[0] || fa.value > L.at(-1)) fa.value = L[0];
+  if (!fb.value || fb.value < L[0] || fb.value > L.at(-1)) fb.value = L.at(-1);
+  const pos = f => { let k = -1; L.forEach((x, i) => { if (x <= f) k = i; }); return k; };
+  const mon = t => (c.moneda === "pesos" || d.acciones.find(a => a.ticker === t)?.moneda !== "USD") ? "$" : "US$";
+  const tabla = () => {
+    const ia = pos(fa.value), ib = pos(fb.value);
+    if (ia < 0 || ib < 0) { $("#tblConsulta").innerHTML = "<tbody><tr><td>Elige fechas dentro del periodo.</td></tr></tbody>"; return; }
+    const filas = tks.map(t => { const a = c.cierres[t][ia], b = c.cierres[t][ib]; return { t, a, b, dv: b - a, dp: (b / a - 1) * 100 }; }), mejor = Math.max(...filas.map(f => f.dp));
+    $("#tblConsulta").innerHTML = `<thead><tr><th>Emisora</th><th>${fcorta(L[ia])}</th><th>${fcorta(L[ib])}</th><th>Cambio</th></tr></thead><tbody>` +
+      filas.map(f => `<tr><td><b>${tk(f.t)}</b>${f.dp === mejor ? ' <span class="note">mejor</span>' : ""}</td><td>${mon(f.t)}${fmt(f.a)}</td><td>${mon(f.t)}${fmt(f.b)}</td><td class="${cls(f.dp)}"><b>${pct(f.dp)}</b><small>${sg(f.dv)}${fmt(Math.abs(f.dv))}</small></td></tr>`).join("") + "</tbody>";
+  };
+  fa.onchange = fb.onchange = tabla; tabla();
+  $$("#atajos button").forEach(b => b.onclick = () => { const u = L.length - 1; fb.value = L[u]; fa.value = b.dataset.a === "ini" ? L[0] : L[Math.max(0, u - (b.dataset.a === "sem" ? 5 : 21))]; tabla(); });
+  $("#tblRanking").innerHTML = `<thead><tr><th>Emisora</th><th>Rend.</th><th>Vol.</th><th>R/R</th><th>Caída</th><th>Días al alza</th></tr></thead><tbody>` +
+    [...c.ranking].sort((a, b) => b.ret - a.ret).map(r => `<tr><td><b>${tk(r.ticker)}</b></td><td class="${cls(r.ret)}"><b>${pct(r.ret)}</b></td><td>${fmt(r.vol_anual)}%</td><td>${r.ratio == null ? "—" : fmt(r.ratio)}</td><td class="down">${pct(r.max_drawdown)}</td><td>${fmt(r.dias_alza)}%</td></tr>`).join("") + "</tbody>";
+  const m = c.corr.matriz, n = c.corr.tickers.length, g = $("#heat");
+  g.style.gridTemplateColumns = `auto repeat(${n},minmax(0,1fr))`;
+  g.innerHTML = `<div class="h"></div>` + c.corr.tickers.map(t => `<div class="h">${tk(t)}</div>`).join("") +
+    m.map((row, i) => `<div class="h" style="text-align:right">${tk(c.corr.tickers[i])}</div>` + row.map(v => { const w = Math.round(Math.abs(v) * 80), base = v >= 0 ? "--brand" : "--down";
+      return `<div style="background:color-mix(in srgb,var(${base}) ${w}%,var(--surface));color:${w > 50 ? "#fff" : "var(--ink)"}">${fmt(v)}</div>`; }).join("")).join("");
+  $("#tblCierres").innerHTML = `<thead><tr><th>Fecha</th>${tks.map(t => `<th>${tk(t)}</th>`).join("")}</tr></thead><tbody>` +
+    L.map((f, i) => `<tr><td>${flarga(f)}</td>` + tks.map(t => { const v = c.cierres[t][i], p = i ? (v / c.cierres[t][i - 1] - 1) * 100 : null;
+      return `<td>${fmt(v)}${p == null ? "" : `<small class="${cls(p)}">${pct(p)}</small>`}</td>`; }).join("") + "</tr>").reverse().join("") + "</tbody>";
+}
+async function cargarSim() {
+  if (S.sim) return;
+  $("#simTexto").textContent = "Calculando la simulación…";
+  S.sim = await api(`/api/simulacion?${qsP()}&moneda=${S.moneda}`);
+}
+function drawSim() {
+  const s = S.sim, m = s.metricas;
+  if (!s.fechas.length) { $("#simTexto").textContent = s.error || "No hay datos suficientes."; return; }
+  const peso = n => "$" + fmt(n), ink = hexOf("--line"), acc = css("--s2");
+  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las ${s.por_emisora.length} emisoras${s.moneda === "pesos" ? " (las acciones de EE. UU. medidas en pesos)" : " (cada una en su moneda)"}, desde ${fhumana(s.fechas[0])}: seguir las decisiones de Alzea terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
+  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones de Alzea</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
+  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Alzea", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] },
+    options: opts({ fy: v => fmt(v), ftip: v => peso(v), right: 8, title: it => flarga(s.fechas[it[0].dataIndex]) }) });
+  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Alzea</th><th>Comprar y mantener</th></tr></thead><tbody>
+    <tr><td>Rendimiento del periodo</td><td class="${cls(m.ret_estrategia)}"><b>${pct(m.ret_estrategia)}</b></td><td class="${cls(m.ret_comprar_mantener)}"><b>${pct(m.ret_comprar_mantener)}</b></td></tr>
+    <tr><td>Valor final</td><td>${peso(s.estrategia.at(-1))}</td><td>${peso(s.comprar_mantener.at(-1))}</td></tr>
+    <tr><td>Caída máxima</td><td class="down">${pct(m.caida_estrategia)}</td><td class="down">${pct(m.caida_comprar_mantener)}</td></tr>
+    <tr><td>Operaciones</td><td>${m.operaciones}</td><td>1 por emisora</td></tr></tbody>`;
+  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Alzea</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
+    s.por_emisora.map(p => `<tr><td><b>${tk(p.ticker)}</b></td><td class="${cls(p.ret_estrategia)}">${pct(p.ret_estrategia)}</td><td class="${cls(p.ret_comprar_mantener)}">${pct(p.ret_comprar_mantener)}</td><td>${p.operaciones}</td><td>${fmt(p.tiempo_en_mercado)}%</td></tr>`).join("") + "</tbody>";
+  $("#simAviso").textContent = `Reglas: se compra cuando el puntaje llega a +20 o más y se sale a efectivo cuando baja a −20 o menos; la decisión de un día se ejecuta al cierre del día siguiente y cada operación paga ${fmt(s.costo_pct)}% de comisión. Es una prueba dentro de la misma muestra, sin impuestos ni deslizamiento, con fines educativos; no constituye asesoría financiera y el resultado pasado no garantiza resultados futuros.`;
+}
+
+/* ------------------------------------------------------------------------ informe */
+const INFORME_HTML = `
+  <div class="head"><h1>Informe</h1><p class="sub" id="iSub"></p><p class="intro" style="margin-top:10px">Descarga el informe del periodo que elegiste arriba o el análisis de un día. Todo lleva el formato institucional del IPN e incluye qué es cada instrumento, el entorno global con fuentes oficiales, la decisión de comprar, mantener o vender y por qué.</p></div>
+  <section class="sec"><h2>Informe del periodo</h2><div class="prose" id="iResumen"></div><div class="dl-grupo" id="iDl"></div></section>
+  <section class="sec"><h2>Análisis de un día</h2><div class="daybar"><button class="icon-btn" id="diaPrev" aria-label="Día anterior" style="color:var(--brand-text)"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chevron"/></svg></button><input type="date" id="diaSel" aria-label="Elegir día"><button class="icon-btn" id="diaNext" aria-label="Día siguiente" style="color:var(--brand-text)"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button><span class="dl-grupo" id="diaDl" style="margin:0 0 0 8px"></span></div></section>
+  <section class="sec"><h2>¿Acertaron las decisiones?</h2><div id="aciertos"><p class="cargando">Calculando…</p></div></section>
+  <section class="sec"><h2>Mapa de decisiones por día</h2><div class="legend" id="legTl"></div><div class="tl" id="timeline"></div></section>
+  <section class="sec"><h2 id="diaTitulo">Detalle del día</h2><div id="diaDetalle"><p class="note">Elige un día en el mapa o en el calendario.</p></div></section>
+  <section class="sec"><h2>Archivo guardado</h2><p class="intro">Análisis diario de todas las sesiones desde el 1 de marzo de 2026 en archivos que puedes abrir en Excel o con cualquier programa.</p><div class="dl-grupo" id="descargas"></div></section>`;
+async function renderInforme() {
+  armar("informe", INFORME_HTML);
+  const p = S.periodo;
+  $("#iSub").textContent = `Periodo del ${flarga(p.desde)} al ${flarga(p.hasta)}`;
+  const ctx = S.ctx, an = S.data;
+  $("#iResumen").innerHTML = `<p>${esc(an.mercado.texto_periodo || an.mercado.texto)}</p>` + (ctx ? `<p>${esc(ctx.lectura[0] || "")}</p>` : "");
+  $("#iDl").innerHTML = dlBtn(`/api/informe?${qsP()}&formato=pdf`, "Informe en PDF", true) + dlBtn(`/api/informe?${qsP()}&formato=xlsx`, "Informe en Excel") +
+    `<p class="note" style="flex-basis:100%">Se genera al momento con los datos más recientes; puede tardar unos segundos.</p>`;
+  ligarDescargas($("#iDl"));
   $("#descargas").innerHTML = [["analisis_diario.xlsx", "Excel"], ["analisis_acciones.csv", "CSV de acciones"], ["analisis_deuda.csv", "CSV de deuda"], ["analisis_diario.json", "JSON"]]
     .map(([f, t]) => `<a class="btn" href="/static/data/${f}" download>${ICON("download")}${t}</a>`).join("");
+  try {
+    const A = await cargarArchivo();
+    if (!S.fechaDia || S.fechaDia < p.desde || S.fechaDia > p.hasta) S.fechaDia = A.dias.at(-1)?.fecha;
+    pintarArchivo(A);
+  } catch (e) { $("#aciertos").innerHTML = `<p class="note">No se pudo calcular: ${esc(e.message)}</p>`; }
+}
+const VCLS = { "COMPRA FUERTE": "v-buy2", COMPRAR: "v-buy", MANTENER: "", VENDER: "v-sell", "VENTA FUERTE": "v-sell2" };
+function pintarArchivo(A) {
+  $("#aciertos").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Decisión</th><th>Casos evaluados</th><th>Aciertos a 5 sesiones</th><th>% de aciertos</th><th>Rend. medio a 5 ses.</th></tr></thead><tbody>` +
+    A.aciertos.map(a => `<tr><td><b>${a.decision}</b></td><td>${a.casos}</td><td>${a.aciertos}</td><td>${a.pct == null ? "—" : fmt(a.pct) + "%"}</td><td class="${cls(a.ret5_medio)}">${a.ret5_medio == null ? "—" : pct(a.ret5_medio)}</td></tr>`).join("") +
+    `</tbody></table></div><p class="note" style="margin-top:10px">Comprar acierta si el precio subió a 5 sesiones; vender, si bajó; mantener, si se movió 2.00 % o menos. Un porcentaje cercano a 50.00 % significa que la decisión no superó al azar en este periodo. Las decisiones de los últimos 5 días aún no se pueden evaluar.</p>`;
   $("#legTl").innerHTML = [["v-buy2", "Compra fuerte"], ["v-buy", "Comprar"], ["", "Mantener"], ["v-sell", "Vender"], ["v-sell2", "Venta fuerte"]]
-    .map(([c, t]) => `<span><i class="sq ${c}" style="${c ? "" : "background:var(--rule)"}"></i>${t}</span>`).join("");
-  const tks = [...new Set(R.flatMap(r => r.emisoras.map(e => e.ticker)))];
-  $("#timeline").innerHTML = tks.map(t => `<div class="tl-row"><b>${t}</b><div class="tl-cells">` + R.map(r => { const e = r.emisoras.find(x => x.ticker === t);
-    return e ? `<button class="${VCLS[e.veredicto]}" data-f="${r.fecha}" title="${flarga(r.fecha)}: ${e.veredicto.toLowerCase()} (${e.score})" aria-label="${t} ${flarga(r.fecha)} ${e.veredicto.toLowerCase()}" aria-current="${r.fecha === S.fechaDia}"></button>` : `<button disabled></button>`; }).join("") + "</div></div>").join("");
+    .map(([c, t]) => `<span><i class="sq ${c}" style="${c ? "" : "background:var(--rule-2)"}"></i>${t}</span>`).join("");
+  const tks = [...new Set(A.dias.flatMap(d => d.e.map(e => e.t)))];
+  $("#timeline").innerHTML = tks.map(t => `<div class="tl-row"><b>${t}</b><div class="tl-cells">` + A.dias.map(d => { const e = d.e.find(x => x.t === t);
+    return e ? `<button class="${VCLS[e.v]}" data-f="${d.fecha}" title="${flarga(d.fecha)}: ${sigT(e.v).toLowerCase()} (${e.s})" aria-label="${t} ${flarga(d.fecha)} ${sigT(e.v).toLowerCase()}" aria-current="${d.fecha === S.fechaDia}"></button>` : `<button disabled></button>`; }).join("") + "</div></div>").join("");
   $("#timeline").scrollLeft = 1e6;
-  $$("#timeline button[data-f]").forEach(b => b.onclick = () => { S.fechaDia = b.dataset.f; renderArchivo(); });
-  const sel = $("#diaSel"); sel.min = a.fecha; sel.max = z.fecha; sel.value = S.fechaDia;
-  sel.onchange = () => { const f = [...R].reverse().find(r => r.fecha <= sel.value); S.fechaDia = (f || a).fecha; renderArchivo(); };
-  const ix = R.findIndex(r => r.fecha === S.fechaDia);
-  $("#diaPrev").onclick = () => { if (ix > 0) { S.fechaDia = R[ix - 1].fecha; renderArchivo(); } };
-  $("#diaNext").onclick = () => { if (ix < R.length - 1) { S.fechaDia = R[ix + 1].fecha; renderArchivo(); } };
-  const r = R[ix]; $("#diaTitulo").textContent = fhumana(r.fecha).replace(/^./, c => c.toUpperCase());
-  $("#diaDl").innerHTML = ["pdf:PDF", "xlsx:Excel"].map(x => { const [f, t] = x.split(":");
-    return `<a class="btn sm" href="/api/dia?fecha=${r.fecha}&formato=${f}" download>${ICON("download")}${t} de este día</a>`; }).join("");
-  const ev = R.flatMap(q => q.emisoras).filter(e => e.acierto !== null && e.acierto !== undefined), grupo = k => ev.filter(e => k(e.veredicto));
-  const fila = (t, xs) => { const n = xs.length, ok = xs.filter(e => e.acierto).length, med = n ? xs.reduce((s, e) => s + e.ret_5, 0) / n : null;
-    return `<tr><td><b>${t}</b></td><td>${n}</td><td>${n ? fmt(100 * ok / n) + "%" : "—"}</td><td class="${cls(med)}">${med == null ? "—" : pct(med)}</td></tr>`; };
-  $("#aciertos").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Decisión</th><th>Casos evaluados</th><th>Aciertos a 5 sesiones</th><th>Rend. medio a 5 ses.</th></tr></thead><tbody>` +
-    fila("Comprar", grupo(v => v.startsWith("COMPR"))) + fila("Mantener", grupo(v => v === "MANTENER")) + fila("Vender", grupo(v => v.startsWith("VEN"))) + fila("Todas", ev) +
-    `</tbody></table></div><p class="note" style="margin-top:10px">Comprar acierta si el precio subió a 5 sesiones; vender, si bajó; mantener, si se movió 2.00 % o menos. Un acierto cercano a 50.00 % significa que la decisión no superó al azar en este periodo.</p>`;
-  $("#diaDetalle").innerHTML = `<p class="prose">${esc(r.mercado.texto)}</p>
-    <div class="scrollx" style="margin-top:14px"><table class="tbl"><thead><tr><th>Emisora</th><th>Cierre</th><th>Var.</th><th>RSI</th><th>Puntaje</th><th>Decisión</th><th>5 ses.</th><th>¿Acertó?</th></tr></thead><tbody>` +
-    r.emisoras.map(e => `<tr><td><b>${e.ticker}</b></td><td>$${fmt(e.cierre)}</td><td class="${cls(e.var_pct)}">${pct(e.var_pct)}</td><td>${e.rsi == null ? "—" : fmt(e.rsi)}</td><td>${sg(e.score)}${Math.abs(e.score)}</td><td>${sig(e.veredicto)}</td><td class="${cls(e.ret_5)}">${e.ret_5 == null ? "—" : pct(e.ret_5)}</td><td class="${e.acierto ? "ok" : e.acierto === false ? "no" : ""}">${e.acierto == null ? "por evaluar" : e.acierto ? "Sí" : "No"}</td></tr>`).join("") + `</tbody></table></div>
-    <div style="margin-top:18px">` + r.emisoras.map(e => `<div class="day-item"><b>${esc(e.nombre)}</b> ${sig(e.veredicto)}<div class="prose" style="margin-top:6px"><ul>${e.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul><p class="que"><b>Qué hacer:</b> ${esc(e.accion)}</p></div></div>`).join("") +
-    r.deuda.map(x => `<div class="day-item"><b>${esc(x.nombre)}</b> ${sig(x.senal)}<div class="prose" style="margin-top:6px"><ul>${x.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul></div></div>`).join("") + `</div>`;
+  $$("#timeline button[data-f]").forEach(b => b.onclick = () => { S.fechaDia = b.dataset.f; pintarArchivo(A); cargarDia(true); });
+  const sel = $("#diaSel"), fechas = A.dias.map(d => d.fecha);
+  sel.min = fechas[0]; sel.max = fechas.at(-1); sel.value = S.fechaDia || "";
+  sel.onchange = () => { const f = [...fechas].reverse().find(x => x <= sel.value); S.fechaDia = f || fechas[0]; pintarArchivo(A); cargarDia(true); };
+  const ix = fechas.indexOf(S.fechaDia);
+  $("#diaPrev").onclick = () => { if (ix > 0) { S.fechaDia = fechas[ix - 1]; pintarArchivo(A); cargarDia(true); } };
+  $("#diaNext").onclick = () => { if (ix < fechas.length - 1) { S.fechaDia = fechas[ix + 1]; pintarArchivo(A); cargarDia(true); } };
+  $("#diaDl").innerHTML = S.fechaDia ? dlBtn(`/api/dia?fecha=${S.fechaDia}&formato=pdf`, `PDF del ${flarga(S.fechaDia)}`) + dlBtn(`/api/dia?fecha=${S.fechaDia}&formato=xlsx`, "Excel del día") : "";
+  ligarDescargas($("#diaDl"));
+  $("#diaTitulo").textContent = S.fechaDia ? fhumana(S.fechaDia).replace(/^./, c => c.toUpperCase()) : "Detalle del día";
+}
+async function cargarDia(forzar) {
+  const f = S.fechaDia; if (!f) return;
+  if (S.dia?.fecha === f && !forzar) return pintarDia(S.dia);
+  $("#diaDetalle").innerHTML = '<p class="cargando">Preparando el análisis del día (consulta fuentes oficiales)…</p>';
+  try { const r = await api(`/api/dia?fecha=${f}`); if (f !== S.fechaDia) return; S.dia = r; pintarDia(r); }
+  catch (e) { $("#diaDetalle").innerHTML = `<p class="note">No se pudo cargar el día: ${esc(e.message)}</p>`; }
+}
+function pintarDia(r) {
+  const ent = (r.entorno?.indicadores || []);
+  $("#diaDetalle").innerHTML = `<div class="prose"><p>${esc(r.mercado.texto)}</p></div>` +
+    (ent.length ? `<h3 class="h3">Entorno del día</h3><div class="scrollx"><table class="tbl"><thead><tr><th>Indicador</th><th>Valor</th><th>Cambio contra la sesión previa</th><th>Fuente</th></tr></thead><tbody>${ent.map(x => `<tr><td><b>${esc(x.nombre)}</b></td><td>${fmt(x.valor)}</td><td class="${cls(x.cambio)}">${sg(x.cambio)}${fmt(Math.abs(x.cambio))}${x.cambio_unidad === "pb" ? " pb" : "%"}</td><td><span class="ofi ${x.oficial ? "si" : "no"}">${x.oficial ? "Oficial" : "Referencia"}</span></td></tr>`).join("")}</tbody></table></div>` : "") +
+    `<h3 class="h3">Decisiones</h3><div class="scrollx"><table class="tbl"><thead><tr><th>Emisora</th><th>Cierre</th><th>Var.</th><th>Puntaje</th><th>Decisión</th><th>5 ses.</th><th>¿Acertó?</th></tr></thead><tbody>` +
+    r.emisoras.map(e => `<tr><td><b>${esc(e.ticker)}</b></td><td>${money(e.cierre, e.moneda)}</td><td class="${cls(e.var_pct)}">${pct(e.var_pct)}</td><td>${sg(e.score)}${Math.abs(e.score)}</td><td>${sig(e.veredicto)}</td><td class="${cls(e.ret_5)}">${e.ret_5 == null ? "—" : pct(e.ret_5)}</td><td class="${e.acierto ? "up" : e.acierto === false ? "down" : ""}">${e.acierto == null ? "por evaluar" : e.acierto ? "Sí" : "No"}</td></tr>`).join("") + `</tbody></table></div>` +
+    r.emisoras.map(e => `<div class="day-item"><b>${esc(e.nombre)}</b> ${sig(e.veredicto)}<div class="prose" style="margin-top:6px"><ul>${e.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul><p><b>Qué hacer:</b> ${esc(e.accion)}</p></div></div>`).join("") +
+    r.deuda.map(x => `<div class="day-item"><b>${esc(x.nombre)}</b> ${sig(x.senal)}<div class="prose" style="margin-top:6px"><ul>${x.por_que.map(p => `<li>${esc(p)}</li>`).join("")}</ul></div></div>`).join("");
 }
 
 /* ---------------------------------------------------------- actualización automática */
-async function pollQuotes(force) {
-  if (!S.data) return;
+async function pollQuotes() {
+  if (!S.data || !vivo()) return;
   const q = await api(`/api/cotizaciones?tickers=${S.data.acciones.map(a => a.ticker).join(",")}`);
   S.quotes = Object.fromEntries(q.map(x => [x.ticker, x])); S.tQuote = Date.now();
   if (S.vista !== "mercado") return;
@@ -418,51 +773,31 @@ async function pollQuotes(force) {
   if (S.rango === "hoy") { const a = S.data.acciones.find(x => x.ticker === S.sel); if (a && !a.error) await graficaPrecio(a); }
 }
 function estadoLive() {
-  // El estado de la bolsa depende SOLO del reloj (horario real de la BMV): ningún botón lo modifica.
+  // El estado de la bolsa depende SOLO del reloj (horario real de la BMV, el Nasdaq y la NYSE): ningún botón lo modifica.
   const ab = abierto(), m = $("#mkt");
   m.dataset.open = ab;
-  $("#mktTxt").innerHTML = `<span class="long">Bolsa </span>${ab ? "abierta" : "cerrada"}`;
-  m.title = ab ? "La BMV está operando (lunes a viernes, hora de Nueva York 9:30 a 16:00)" : "La BMV no está operando; se muestra el último cierre";
-  const a = $("#auto");
-  a.setAttribute("aria-pressed", S.auto);
-  a.innerHTML = `${ICON(S.auto ? "pause" : "play")}<span class="t">${S.auto ? "Auto" : "Pausado"}</span>`;
-  a.title = S.auto ? "Actualización automática activa. Toca para pausar." : "Actualización en pausa. Toca para reanudar.";
-  const u = $("#updTxt"); if (u) u.textContent = textoActualizado() + (S.auto ? "" : " · actualización en pausa");
+  $("#mktTxt").innerHTML = `<span class="largo">Bolsa </span>${ab ? "abierta" : "cerrada"}`;
+  m.title = ab ? "Los mercados operan (lunes a viernes, hora de Nueva York 9:30 a 16:00)" : "Los mercados no están operando; se muestra el último cierre";
+  const a = $("#auto"), hist = S.data && !vivo();
+  a.setAttribute("aria-pressed", S.auto && !hist); a.disabled = !!hist;
+  a.innerHTML = `${ICON(S.auto && !hist ? "pause" : "play")}<span class="t">${hist ? "Histórico" : S.auto ? "Auto" : "Pausado"}</span>`;
+  a.title = hist ? "Consulta de un periodo pasado: no se actualiza en vivo" : S.auto ? "Actualización automática activa. Toca para pausar." : "Actualización en pausa. Toca para reanudar.";
+  const u = $("#updTxt"); if (u) u.textContent = textoActualizado() + (S.auto || hist ? "" : " · actualización en pausa");
 }
 let abiertoAntes = abierto();
 async function ciclo() {
   estadoLive();
-  if (!S.auto || document.hidden || S.busy || !S.data) return;
+  if (!S.auto || document.hidden || S.busy || !S.data || !vivo()) return;
   const ab = abierto(), now = Date.now();
   try {
-    if (abiertoAntes && !ab) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(true); render(); }       // cierre de sesión: toma el cierre final
-    else if (ab && now - S.tData > 120000) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(true); render(); } // señales cada 2 min
-    else if (ab && now - S.tQuote > 20000) { await pollQuotes(); }                                                           // precios cada 20 s
-    else if (!ab && now - S.tData > 900000) { S.busy = true; await cargar(true); S.busy = false; render(); }                  // cerrado: cada 15 min
+    if (abiertoAntes && !ab) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(); render(); }
+    else if (ab && now - S.tData > 120000) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(); render(); }
+    else if (ab && now - S.tQuote > 20000) { await pollQuotes(); }
+    else if (!ab && now - S.tData > 900000) { S.busy = true; await cargar(true); S.busy = false; render(); }
     showErr("");
   } catch (e) { S.busy = false; showErr(`No se pudo actualizar automáticamente (${e.message}). Se reintentará en unos segundos.`); }
   abiertoAntes = ab;
 }
-
-/* -------------------------------------------------------------------- arranque */
-function init() {
-  renderNav();
-  $("#refresh").onclick = () => actualizar(true);
-  $("#auto").onclick = () => { S.auto = !S.auto; store.set("auto", S.auto); estadoLive(); if (S.auto) ciclo(); };
-  iniciarTema();
-  $("#desde").max = new Date().toLocaleDateString("en-CA");
-  $("#desde").onchange = () => actualizar(false);
-  $("#chkMedias").onchange = $("#chkBandas").onchange = () => S.data && renderDetalle();
-  addEventListener("hashchange", () => setVista(location.hash.slice(1)));
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && S.auto && S.data) { S.tQuote = 0; ciclo(); } });
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => S.data && render());
-  $("#board").innerHTML = `<tbody>${Array(5).fill('<tr class="skel"><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td></tr>').join("")}</tbody>`;
-  setVista(location.hash.slice(1));
-  cargar(false).then(() => pollQuotes()).then(() => { render(); estadoLive(); })
-    .catch(e => showErr(`No se pudo cargar el mercado. Revisa tu conexión y toca actualizar (${e.message}).`));
-  setInterval(ciclo, 1000);
-}
-init();
 
 /* -------------------------------------------------------------------------- tema */
 const TEMAS = ["claro", "mixto", "oscuro"];
@@ -474,54 +809,25 @@ function iniciarTema() {
     const t = TEMAS.includes(b.dataset.t) ? b.dataset.t : "claro";
     document.documentElement.dataset.theme = t; store.set("tema", t); marcar();
     $("#menuTema").open = false;
-    const mc = document.querySelector('meta[name="theme-color"]'); if (mc) mc.content = t === "oscuro" ? "#0B0F13" : "#F4F6F8";
     if (S.data) render();
   });
   document.addEventListener("click", e => { const m = $("#menuTema"); if (m.open && !m.contains(e.target)) m.open = false; });
   document.addEventListener("keydown", e => { if (e.key === "Escape") $("#menuTema").open = false; });
 }
 
-/* ---------------------------------------------------- alertas y cambios de decisión */
-const VISTOS_INICIO = store.get("vistos", null);
-function renderAlertas() {
-  const cambios = S.data.acciones.filter(a => !a.error && a.cambio);
-  const vistos = VISTOS_INICIO;
-  const hoy = Object.fromEntries(S.data.acciones.filter(a => !a.error).map(a => [a.ticker, a.veredicto]));
-  const desdeVisita = vistos ? S.data.acciones.filter(a => !a.error && vistos[a.ticker] && vistos[a.ticker] !== a.veredicto) : [];
-  store.set("vistos", hoy);
-  const lin = a => `<b>${tk(a.ticker)}</b>: de ${esc((SIG[a.veredicto_ant] || SIG.MANTENER)[2].toLowerCase())} a ${esc(a.decision.toLowerCase())}`;
-  const nombre = (a, v) => (SIG[v] || SIG.MANTENER)[2].toLowerCase();
-  let html = "";
-  if (cambios.length) html += `<div class="alerta">${ICON("wait")}<div><b>Cambió la decisión en la última sesión</b><p>${cambios.map(lin).join("; ")}.</p></div></div>`;
-  if (desdeVisita.length) html += `<div class="alerta">${ICON("wait")}<div><b>Desde tu última visita</b><p>${desdeVisita.map(a => `<b>${tk(a.ticker)}</b>: de ${nombre(a, vistos[a.ticker])} a ${nombre(a, a.veredicto)}`).join("; ")}.</p></div></div>`;
-  $("#alertas").innerHTML = html;
+/* -------------------------------------------------------------------- arranque */
+function init() {
+  S.periodo = periodoGuardado();
+  S.tickers = [];
+  renderNav(); renderPeriodo(); renderCinta(); iniciarTema();
+  $("#refresh").onclick = () => actualizar(true);
+  $("#auto").onclick = () => { S.auto = !S.auto; store.set("auto", S.auto); estadoLive(); if (S.auto) ciclo(); };
+  addEventListener("hashchange", () => setVista(location.hash.slice(1)));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && S.auto && S.data) { S.tQuote = 0; ciclo(); } });
+  setVista(location.hash.slice(1));
+  armar("mercado", MERCADO_HTML);
+  $("#board").innerHTML = `<tbody>${Array(6).fill('<tr class="skel"><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td><td><div></div></td></tr>').join("")}</tbody>`;
+  api("/api/estado").then(e => { S.tickers = Object.keys(e.acciones); }).catch(() => {}).finally(() => actualizar(false));
+  setInterval(ciclo, 1000);
 }
-async function cargarCambios() {
-  try {
-    const r = await fetch("/static/data/cambios.json", { cache: "no-cache" });
-    if (!r.ok) throw new Error("sin archivo");
-    const lista = await r.json();
-    $("#histCambios").innerHTML = lista.length ? lista.slice(0, 10).map(c => `<div class="cambio"><span class="f">${flarga(c.fecha)}</span><span class="t">${esc(c.ticker)}</span>
-      <span class="flecha">${esc((SIG[c.de] || SIG.MANTENER)[2])} ${ICON("chevron")} ${sig(c.a)}</span></div>`).join("") : '<p class="note">Aún no hay cambios de decisión registrados.</p>';
-  } catch { $("#histCambios").innerHTML = '<p class="note">El archivo de decisiones aún no está disponible.</p>'; }
-}
-
-/* ------------------------------------------------------------------- simulación */
-async function renderSimulacion() {
-  if (!S.sim) { $("#simTexto").textContent = "Calculando la simulación…"; S.sim = await api(`/api/simulacion?desde=${desde()}`); }
-  const s = S.sim, m = s.metricas;
-  if (!s.fechas.length) { $("#simTexto").textContent = s.error || "No hay datos suficientes."; return; }
-  const peso = n => "$" + fmt(n), ink = css("--ink"), acc = css("--s2");
-  $("#simTexto").textContent = `Con ${peso(s.capital)} repartidos en partes iguales entre las 5 emisoras, desde ${fhumana(s.fechas[0])}: seguir las decisiones de Alzea terminó en ${pct(m.ret_estrategia)} y comprar y mantener en ${pct(m.ret_comprar_mantener)}.`;
-  $("#legSim").innerHTML = `<span style="--c:${ink}"><i></i>Siguiendo las decisiones de Alzea</span><span style="--c:${acc}"><i class="d"></i>Comprar y mantener</span>`;
-  const o = opts({ fy: v => fmt(v, 2), ftip: v => peso(v), right: 8, title: it => flarga(s.fechas[it[0].dataIndex]) });
-  mk("chSim", { type: "line", data: { labels: s.fechas.map(fcorta), datasets: [linea("Alzea", s.estrategia, ink, { w: 2.4 }), linea("Comprar y mantener", s.comprar_mantener, acc, { w: 2, borderDash: [6, 4] })] }, options: o });
-  $("#tblSim").innerHTML = `<thead><tr><th>Medida</th><th>Alzea</th><th>Comprar y mantener</th></tr></thead><tbody>
-    <tr><td>Rendimiento del periodo</td><td class="${cls(m.ret_estrategia)}"><b>${pct(m.ret_estrategia)}</b></td><td class="${cls(m.ret_comprar_mantener)}"><b>${pct(m.ret_comprar_mantener)}</b></td></tr>
-    <tr><td>Valor final</td><td>${peso(s.estrategia.at(-1))}</td><td>${peso(s.comprar_mantener.at(-1))}</td></tr>
-    <tr><td>Caída máxima</td><td class="down">${pct(m.caida_estrategia)}</td><td class="down">${pct(m.caida_comprar_mantener)}</td></tr>
-    <tr><td>Operaciones</td><td>${m.operaciones}</td><td>1 por emisora</td></tr></tbody>`;
-  $("#tblSimEm").innerHTML = `<thead><tr><th>Emisora</th><th>Alzea</th><th>Comprar y mantener</th><th>Operaciones</th><th>Tiempo invertido</th></tr></thead><tbody>` +
-    s.por_emisora.map(p => `<tr><td><b>${tk(p.ticker)}</b></td><td class="${cls(p.ret_estrategia)}">${pct(p.ret_estrategia)}</td><td class="${cls(p.ret_comprar_mantener)}">${pct(p.ret_comprar_mantener)}</td><td>${p.operaciones}</td><td>${fmt(p.tiempo_en_mercado)}%</td></tr>`).join("") + "</tbody>";
-  $("#simAviso").textContent = `Reglas: se compra cuando el puntaje llega a +20 o más y se sale a efectivo cuando baja a -20 o menos; la decisión de un día se ejecuta al cierre del día siguiente y cada operación paga ${fmt(s.costo_pct)}% de comisión. Es una prueba dentro de la misma muestra, sin impuestos ni deslizamiento, con fines educativos; no constituye asesoría financiera y el resultado pasado no garantiza resultados futuros.`;
-}
+init();
