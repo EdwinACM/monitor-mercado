@@ -214,8 +214,8 @@ def _escudo(ws):
 
 
 SIGNIFICADOS = [
-    ("Decisión", "Recomendación educativa que resume seis criterios técnicos: comprar, mantener o vender. No es asesoría financiera."),
-    ("Puntaje", "Suma de los seis criterios, de −100 a +100. Desde +20 se sugiere comprar; desde −20, vender; entre ambos, mantener."),
+    ("Decisión", "Recomendación educativa que resume nueve señales técnicas con pesos recalculados cada día: comprar, mantener o vender. No es asesoría financiera."),
+    ("Puntaje", "Suma de las nueve señales, de −100 a +100. Desde +20 se sugiere comprar; desde −20, vender; entre ambos, mantener."),
     ("Rendimiento", "Cambio porcentual del precio entre dos fechas, en la moneda de la emisora. Se muestra con signo: positivo es ganancia."),
     ("Puntos base (pb)", "Centésimas de punto porcentual: 100 pb equivalen a 1 punto porcentual. Se usan para cambios en tasas."),
     ("Millones de pesos (mdp)", "Unidad de los montos de deuda. 1,000 mdp equivalen a mil millones de pesos."),
@@ -416,7 +416,7 @@ def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
     s = x["stats"]
     h.bloque("Decisión del día")
     h.medidas([
-        ("Decisión", x["decision"], None, "Recomendación educativa según seis criterios técnicos. No es asesoría financiera."),
+        ("Decisión", x["decision"], None, "Recomendación educativa según nueve señales técnicas con pesos recalculados cada día. No es asesoría financiera."),
         ("Puntaje", (x["score"]), ENT, "De −100 (venta fuerte) a +100 (compra fuerte). Desde +20 se sugiere comprar; desde −20, vender; entre ambos, mantener."),
         ("Confianza", x["confianza"], None, "Qué tan coherentes son entre sí los criterios que respaldan la decisión."),
         ("Cierre", x["cierre"], mon, f"Precio de cierre de la última sesión ({R.fecha_corta(x['fecha'])})."),
@@ -468,8 +468,13 @@ def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
         for t in fac:
             h.parrafo("• " + t)
     h.bloque(f"Por qué la decisión es {x['decision'].lower()}")
-    h.tabla(["Criterio", "Puntos", "Máximo", "Qué se observó"], [[c["criterio"], (c["puntos"], ENT), (c["max"], "0"), c["detalle"]] for c in x["componentes"]], fusion=[(4, NCOL)])
+    h.tabla(["Señal", "Puntos", "Correlación reciente", "Qué se observó"], [[c["criterio"], (c["puntos"], ENT), (c.get("correlacion"), '+0.00;-0.00;0.00') if c.get("correlacion") is not None else "—", c["detalle"]] for c in x["componentes"]], fusion=[(4, NCOL)])
+    h.nota("Correlación reciente: qué tanto anticipó esa señal el rendimiento a 5 sesiones en las últimas 250 sesiones de las 10 emisoras. Con valor absoluto menor a 0.03 la señal no suma; si es negativa, se interpreta al revés.")
     h.parrafo(x["accion"])
+    h.bloque("Respaldo estadístico y riesgos")
+    h.parrafo(x["respaldo"])
+    for t_ in x["riesgos"]:
+        h.parrafo("• " + t_)
     h.bloque("Sugerencia")
     h.parrafo(R._sugerencia(x, e))
     b = x["backtest"]
@@ -582,7 +587,7 @@ def libro_dia(reg):
         mon = moneda_fmt(e.get("moneda"))
         s = Hoja(wb, hojas[e["ticker"]], f"{e['nombre']} ({e['ticker']})", f"{e.get('mercado')} · {e.get('moneda')} · {sub}")
         s.bloque("Decisión")
-        s.medidas([("Decisión", e["decision"], None, "Recomendación educativa según seis criterios técnicos. No es asesoría financiera."),
+        s.medidas([("Decisión", e["decision"], None, "Recomendación educativa según nueve señales técnicas con pesos recalculados cada día. No es asesoría financiera."),
                    ("Puntaje", e["score"], ENT, "De −100 a +100. Desde +20 comprar; desde −20 vender; entre ambos, mantener."),
                    ("Confianza", e["confianza"], None, "Qué tan coherentes son entre sí los criterios."),
                    ("Cierre", e["cierre"], mon, "Precio de cierre de la sesión."),
@@ -597,6 +602,11 @@ def libro_dia(reg):
             s.parrafo("• " + q)
         s.bloque("Qué hacer")
         s.parrafo(e["accion"])
+        if e.get("respaldo"):
+            s.bloque("Respaldo estadístico y riesgos")
+            s.parrafo(e["respaldo"])
+            for t_ in e.get("riesgos", []):
+                s.parrafo("• " + t_)
         s.bloque("Qué pasó después")
         s.parrafo(R.posterior(e))
     for x in reg["deuda"]:

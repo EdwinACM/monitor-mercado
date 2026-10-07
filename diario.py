@@ -1,17 +1,19 @@
 """Registro de un día: decisión, porqué y qué pasó después; y resumen rápido de un periodo."""
 import analisis
+import modelo
 
 
 def registro_dia(fecha, hist, deu, nombres, meta=None):
     """Análisis de una sesión con los datos disponibles hasta esa fecha (sin ver el futuro)."""
     meta = meta or {}
+    mod = modelo.obtener(hist)
     emisoras = []
     for t, rows in hist.items():
         k = next((i for i, r in enumerate(rows) if r["fecha"] == fecha), None)
         if k is None or k < 30:
             continue
         nombre = nombres.get(t, t)
-        d = analisis.analizar_serie(nombre, rows[:k + 1], None, con_serie=False, con_backtest=False)
+        d = analisis.analizar_serie(nombre, rows[:k + 1], None, con_serie=False, con_backtest=False, modelo=mod, ticker=t)
         m = meta.get(t, {})
         emisoras.append({
             "ticker": t.replace(".MX", ""), "yahoo": t, "nombre": nombre, "mercado": m.get("mercado"), "moneda": m.get("moneda"),
@@ -22,6 +24,7 @@ def registro_dia(fecha, hist, deu, nombres, meta=None):
             "score": d["score"], "veredicto": d["veredicto"], "decision": d["decision"], "confianza": d["confianza"],
             "veredicto_ant": d["veredicto_ant"], "cambio": d["cambio"], "por_que": d["por_que"], "accion": d["accion"],
             "componentes": [[c["criterio"], c["puntos"]] for c in d["componentes"]], "texto": d["texto"],
+            "respaldo": d["respaldo"], "riesgos": d["riesgos"],
             "ret_5": None, "ret_10": None, "acierto": None,
         })
     if not emisoras:
@@ -66,20 +69,19 @@ def completar(registros, hist):
 def resumen_periodo(hist, desde, hasta, meta=None):
     """Decisiones día por día dentro del periodo y su tasa de acierto (cálculo directo, rápido)."""
     meta = meta or {}
-    pre = {}
-    for t, rows in hist.items():
-        c = [r["cierre"] for r in rows]
-        pre[t] = (c, analisis.indicadores(c))
+    mod = modelo.obtener(hist)
     fechas = sorted({r["fecha"] for rows in hist.values() for r in rows if desde <= r["fecha"] <= hasta})
+    cierres = {t: [r["cierre"] for r in rows] for t, rows in hist.items()}
+    posiciones = {t: {r["fecha"]: i for i, r in enumerate(rows)} for t, rows in hist.items()}
     dias, prev = [], {}
     for f in fechas:
         es = []
         for t, rows in hist.items():
-            k = next((i for i, r in enumerate(rows) if r["fecha"] == f), None)
+            k = posiciones[t].get(f)
             if k is None or k < 30:
                 continue
-            c, ind = pre[t]
-            sc, _ = analisis.evaluar(k, c, ind)
+            c = cierres[t]
+            sc, _ = mod.evaluar(t, f)
             v = analisis.veredicto(sc)
             r5 = round((c[k + 5] / c[k] - 1) * 100, 2) if k + 5 < len(c) else None
             es.append({"t": t.replace(".MX", ""), "y": t, "v": v, "s": sc, "c": 1 if prev.get(t) not in (None, v) else 0,
@@ -90,11 +92,12 @@ def resumen_periodo(hist, desde, hasta, meta=None):
     ev = [e for d in dias for e in d["e"] if e["a"] is not None]
     grupos = {"Comprar": lambda v: "COMPRA" in v, "Mantener": lambda v: v == "MANTENER", "Vender": lambda v: v in ("VENDER", "VENTA FUERTE")}
     aciertos = []
+    grupos["Señales fuertes"] = lambda v: v in ("COMPRA FUERTE", "VENTA FUERTE")
     for nombre, fn in list(grupos.items()) + [("Todas", lambda v: True)]:
         xs = [e for e in ev if fn(e["v"])]
         aciertos.append({"decision": nombre, "casos": len(xs), "aciertos": sum(1 for e in xs if e["a"]),
                          "pct": round(100 * sum(1 for e in xs if e["a"]) / len(xs), 2) if xs else None,
-                         "ret5_medio": round(sum(e["r5"] for e in xs) / len(xs), 2) if xs else None})
+                         "ret5_medio": round(sum(e["r5"] for e in xs) / len(xs), 2) if xs and nombre != "Señales fuertes" else None})
     cambios = [{"fecha": d["fecha"], "ticker": e["t"], "de": None, "a": e["v"]} for d in dias for e in d["e"] if e["c"]]
     # veredicto anterior para mostrar «de X a Y»
     ult = {}

@@ -1,7 +1,7 @@
 """Estadística, indicadores técnicos y señales (solo biblioteca estándar).
 
-Todo es determinista y explicable: cada señal se compone de seis criterios con
-puntos (máx. ±100) y se describe en español. Es una herramienta educativa; no
+Todo es determinista y explicable: la decisión se compone de nueve señales técnicas cuyos pesos se recalculan cada día
+(ver modelo.py) y se describe en español. Es una herramienta educativa; no
 constituye asesoría financiera.
 """
 import bisect
@@ -9,7 +9,7 @@ import math
 from statistics import mean, pstdev, stdev
 
 DIAS_ANIO = 252
-HORIZONTE = 10  # sesiones hacia adelante para evaluar la señal (backtest)
+HORIZONTE = 5  # sesiones hacia adelante para evaluar la señal
 
 
 # ---------------------------------------------------------------- indicadores
@@ -90,76 +90,6 @@ def _tope(x, m):
     return max(-m, min(m, x))
 
 
-def evaluar(i, c, ind):
-    """Puntaje (−100..+100) y desglose por criterio en el índice i."""
-    comp = []
-
-    s20, s50 = ind["sma20"][i], ind["sma50"][i]
-    if s50 is not None:
-        pts = (10 if c[i] > s50 else -10) + (10 if s20 > s50 else -10)
-        txt = (f"Precio {'sobre' if c[i] > s50 else 'bajo'} su media de 50 sesiones y media de 20 "
-               f"{'sobre' if s20 > s50 else 'bajo'} la de 50")
-    elif s20 is not None:
-        pts, txt = (10 if c[i] > s20 else -10), f"Precio {'sobre' if c[i] > s20 else 'bajo'} su media de 20 sesiones"
-    else:
-        pts, txt = 0, "Historial insuficiente"
-    comp.append({"criterio": "Tendencia (medias móviles)", "puntos": pts, "max": 20, "detalle": txt})
-
-    h = ind["hist"][i]
-    if h is not None:
-        pts = 8 if h > 0 else -8
-        cruce = ""
-        hp = ind["hist"][i - 3] if i >= 3 else None
-        if hp is not None and hp <= 0 < h:
-            pts, cruce = pts + 7, "; cruce alcista reciente"
-        elif hp is not None and hp >= 0 > h:
-            pts, cruce = pts - 7, "; cruce bajista reciente"
-        txt = f"Histograma MACD {'positivo' if h > 0 else 'negativo'}{cruce}"
-    else:
-        pts, txt = 0, "Historial insuficiente"
-    comp.append({"criterio": "Impulso (MACD)", "puntos": pts, "max": 15, "detalle": txt})
-
-    r = ind["rsi"][i]
-    if r is not None:
-        pts = 20 if r < 30 else 8 if r < 40 else -20 if r > 70 else -8 if r > 60 else 0
-        zona = ("sobreventa (posible rebote)" if r < 30 else "cerca de sobreventa" if r < 40
-                else "sobrecompra (posible corrección)" if r > 70 else "cerca de sobrecompra" if r > 60 else "zona neutral")
-        txt = f"RSI {r:.2f}: {zona}"
-    else:
-        pts, txt = 0, "Historial insuficiente"
-    comp.append({"criterio": "Sobrecompra / sobreventa (RSI)", "puntos": pts, "max": 20, "detalle": txt})
-
-    b = ind["pctb"][i]
-    if b is not None:
-        pts = 15 if b < 0 else 6 if b < 0.2 else -15 if b > 1 else -6 if b > 0.8 else 0
-        txt = ("Precio fuera de la banda inferior" if b < 0 else "Precio cerca de la banda inferior" if b < 0.2
-               else "Precio fuera de la banda superior" if b > 1 else "Precio cerca de la banda superior" if b > 0.8
-               else "Precio dentro de las bandas de Bollinger")
-    else:
-        pts, txt = 0, "Historial insuficiente"
-    comp.append({"criterio": "Volatilidad (Bollinger)", "puntos": pts, "max": 15, "detalle": txt})
-
-    if i >= 20:
-        r20 = c[i] / c[i - 20] - 1
-        pts, txt = round(_tope(r20 / 0.05 * 10, 10)), f"Rendimiento a 20 sesiones: {r20 * 100:+.2f}%"
-    else:
-        pts, txt = 0, "Historial insuficiente"
-    comp.append({"criterio": "Momentum (20 sesiones)", "puntos": pts, "max": 10, "detalle": txt})
-
-    if i >= 29:
-        sl, r2 = _linreg([math.log(x) for x in c[i - 29:i + 1]])
-        if r2 >= 0.5:
-            pts = round(15 * _tope(sl / 0.004, 1))
-            txt = f"Tendencia estadística {'alcista' if sl > 0 else 'bajista'}: {sl * 100:+.2f}%/día (R² {r2:.2f})"
-        else:
-            pts, txt = 0, f"Sin tendencia estadística clara (R² {r2:.2f})"
-    else:
-        pts, txt = 0, "Historial insuficiente"
-    comp.append({"criterio": "Regresión lineal (30 sesiones)", "puntos": pts, "max": 15, "detalle": txt})
-
-    return sum(x["puntos"] for x in comp), comp
-
-
 def veredicto(score):
     return ("COMPRA FUERTE" if score >= 45 else "COMPRAR" if score >= 20
             else "VENTA FUERTE" if score <= -45 else "VENDER" if score <= -20 else "MANTENER")
@@ -196,30 +126,13 @@ def razonar(veredicto_, score, comp, anterior=None):
     return por_que
 
 
-def confianza(score, comp, i):
+def confianza(score, comp):
+    """Qué tan de acuerdo están entre sí las señales que sí aportaron puntos."""
     activos = [x["puntos"] for x in comp if x["puntos"]]
-    if i < 59 or not activos:
+    if len(activos) < 3:
         return "Baja"
     acuerdo = sum(1 for p in activos if (p > 0) == (score > 0)) / len(activos)
     return "Alta" if acuerdo >= 0.8 else "Media" if acuerdo >= 0.6 else "Baja"
-
-
-def backtest(c, ind, h=HORIZONTE):
-    """¿Qué pasó, en este mismo historial, después de cada señal? (dentro de muestra)."""
-    compras, ventas, todos = [], [], []
-    for i in range(50, len(c) - h):
-        s, _ = evaluar(i, c, ind)
-        fr = c[i + h] / c[i] - 1
-        todos.append(fr)
-        if s >= 20:
-            compras.append(fr)
-        elif s <= -20:
-            ventas.append(fr)
-    pct = lambda xs, f: round(100 * sum(1 for x in xs if f(x)) / len(xs), 2) if xs else None
-    med = lambda xs: round(mean(xs) * 100, 2) if xs else None
-    return {"horizonte": h, "muestra": len(todos), "base_rend_medio": med(todos),
-            "n_compra": len(compras), "aciertos_compra": pct(compras, lambda x: x > 0), "rend_medio_compra": med(compras),
-            "n_venta": len(ventas), "aciertos_venta": pct(ventas, lambda x: x < 0), "rend_medio_venta": med(ventas)}
 
 
 # ------------------------------------------------------------------ estadística
@@ -271,13 +184,54 @@ def _texto(nombre, d):
     return " ".join(partes)
 
 
-def analizar_serie(nombre, rows, desde_vista=None, con_serie=True, con_backtest=True):
-    """Analiza la última sesión de `rows` (lista de dicts con fecha/cierre/volumen)."""
+def _respaldo_texto(v, r):
+    """Evidencia estadística de la decisión: qué pasó a 5 sesiones tras señales del mismo tipo (dentro de la muestra de calibración)."""
+    if not r or not r["n"]:
+        return "Aún no hay sesiones suficientes para respaldar estadísticamente esta decisión."
+    marco = f"entre el {r['desde'][8:]}/{r['desde'][5:7]}/{r['desde'][:4]} y el {r['hasta'][8:]}/{r['hasta'][5:7]}/{r['hasta'][:4]} ({r['n']:,} observaciones de las 10 emisoras)"
+    if "COMPRA" in v and r["compra"]["n"]:
+        c = r["compra"]
+        return (f"{marco.capitalize()[:1] + marco[1:]}, cuando el puntaje era de comprar el precio subió a 5 sesiones el {c['sube']:.2f}% de las veces "
+                f"(frente a {r['base_sube']:.2f}% en cualquier sesión) con un rendimiento medio de {c['media']:+.2f}%.")
+    if v in ("VENDER", "VENTA FUERTE") and r["venta"]["n"]:
+        c = r["venta"]
+        return (f"{marco.capitalize()[:1] + marco[1:]}, cuando el puntaje era de vender el precio bajó a 5 sesiones el {c['baja']:.2f}% de las veces "
+                f"(frente a {100 - r['base_sube']:.2f}% en cualquier sesión) con un rendimiento medio de {c['media']:+.2f}%.")
+    c = r["mantener"]
+    return (f"{marco.capitalize()[:1] + marco[1:]}, cuando no había señal clara el precio se movió 2% o menos en solo {c['quieto']:.2f}% de los casos: "
+            "mantener significa que no hay ventaja estadística, no que se espere que el precio quede quieto.")
+
+
+def _riesgos(d, r):
+    """Qué podría hacer fallar la decisión."""
+    out = []
+    s = d["stats"]
+    sem = (s["vol_anual"] or 0) / math.sqrt(DIAS_ANIO / 5)
+    if "COMPRA" in d["veredicto"]:
+        out.append(f"Si el precio cierra por debajo del soporte de 20 sesiones ({s['soporte']:.2f}), la señal de compra pierde validez.")
+    elif d["veredicto"] in ("VENDER", "VENTA FUERTE"):
+        out.append(f"Si el precio cierra por encima de la resistencia de 20 sesiones ({s['resistencia']:.2f}), la señal de venta pierde validez.")
+    if sem:
+        out.append(f"La oscilación típica de una semana es de ±{sem:.2f}%, normalmente mayor que la ventaja estadística de la señal: es normal que se equivoque con frecuencia.")
+    if r and r["compra"]["sube"] and "COMPRA" in d["veredicto"] and r["compra"]["sube"] < 60:
+        out.append(f"Aun en el respaldo histórico la compra acertó {r['compra']['sube']:.2f}% de las veces: no es una señal segura.")
+    out.append("Noticias, resultados de la empresa o cambios de tasas pueden cambiar el precio sin que lo anticipen los indicadores técnicos.")
+    return out
+
+
+def analizar_serie(nombre, rows, desde_vista=None, con_serie=True, con_backtest=True, modelo=None, ticker=None):
+    """Analiza la última sesión de `rows` (lista de dicts con fecha/cierre/volumen).
+
+    `modelo` (modelo.Modelo) reúne a todas las emisoras para calibrar los pesos; si no se da, se calibra solo con esta serie."""
+    import modelo as _m
+    ticker = ticker or nombre
+    modelo = modelo or _m.Modelo({ticker: rows})
     c = [r["cierre"] for r in rows]
     vol = [r.get("volumen") or 0 for r in rows]
     i = len(c) - 1
     ind = indicadores(c)
-    score, comp = evaluar(i, c, ind)
+    fecha = rows[i]["fecha"]
+    score, comp = modelo.evaluar(ticker, fecha)
     var_pct = (c[i] / c[i - 1] - 1) * 100 if i else 0.0
     ini = next((k for k, r in enumerate(rows) if desde_vista and r["fecha"] >= desde_vista), 0)
     d = {
@@ -289,21 +243,29 @@ def analizar_serie(nombre, rows, desde_vista=None, con_serie=True, con_backtest=
         "rsi": round(ind["rsi"][i], 2) if ind["rsi"][i] is not None else None,
         "macd_hist": round(ind["hist"][i], 3) if ind["hist"][i] is not None else None,
         "pctb": round(ind["pctb"][i], 2) if ind["pctb"][i] is not None else None,
-        "score": score, "veredicto": veredicto(score), "confianza": confianza(score, comp, i),
+        "score": score, "veredicto": veredicto(score), "confianza": confianza(score, comp),
         "componentes": comp, "tendencia": _tendencia(c, i), "stats": estadisticas(i, c, vol),
     }
     if i >= 1:
-        sc_ant, _ = evaluar(i - 1, c, ind)
+        sc_ant, _ = modelo.evaluar(ticker, rows[i - 1]["fecha"])
         d["veredicto_ant"] = veredicto(sc_ant)
     else:
         d["veredicto_ant"] = None
     d["cambio"] = d["veredicto_ant"] is not None and d["veredicto_ant"] != d["veredicto"]
     d["decision"] = DECISION[d["veredicto"]]
+    d["calibracion"] = modelo.calibracion(fecha)
+    resp = modelo.respaldo(fecha)
+    d["respaldo"] = _respaldo_texto(d["veredicto"], resp)
+    d["riesgos"] = _riesgos(d, resp)
     d["por_que"] = razonar(d["veredicto"], score, comp, d["veredicto_ant"])
+    cal = d["calibracion"]
+    if cal:
+        d["por_que"].insert(1, f"Cómo se calcula: nueve señales técnicas se combinan con pesos recalculados hoy según cuánto anticiparon el rendimiento a 5 sesiones de las 10 emisoras en las últimas {cal['sesiones']} sesiones; el puntaje se escala para que +20 y −20 marquen las señales poco habituales.")
     d["accion"] = ACCION[d["veredicto"]]
     d["texto"] = _texto(nombre, d)
     if con_backtest:
-        d["backtest"] = backtest(c, ind)
+        d["backtest"] = modelo.backtest(ticker, fecha) or {"horizonte": 5, "muestra": 0, "base_rend_medio": None, "n_compra": 0, "aciertos_compra": None,
+                                                           "rend_medio_compra": None, "n_venta": 0, "aciertos_venta": None, "rend_medio_venta": None}
     if con_serie:
         r = lambda arr, k=4: [None if x is None else round(x, k) for x in arr[ini:]]
         d["serie"] = {"fechas": [x["fecha"] for x in rows[ini:]], "cierre": r(c, 2), "volumen": vol[ini:],
@@ -473,6 +435,8 @@ def simular(hist, desde, hasta, capital=100000.0, costo=0.002, fx=None, meta=Non
     La señal calculada al cierre del día j se ejecuta al cierre del día j+1 (sin ver el futuro) y cada
     operación paga `costo` (0.20 % por defecto). Se compara contra comprar y mantener en partes iguales.
     Con `fx`, las acciones de EE. UU. generan su señal con su precio en dólares pero ganan o pierden en pesos."""
+    import modelo as _m
+    mod = _m.obtener(hist)
     tks = list(hist)
     conj = [{r["fecha"] for r in rows if desde <= r["fecha"] <= hasta} for rows in hist.values()]
     fechas = sorted(set.intersection(*conj)) if conj else []
@@ -487,7 +451,6 @@ def simular(hist, desde, hasta, capital=100000.0, costo=0.002, fx=None, meta=Non
         c = [r["cierre"] for r in rows]
         usd = bool(fx and meta and meta.get(t, {}).get("moneda") == "USD")
         cp = _cierres_en_pesos(rows, fx) if usd else c  # precios con los que se gana o se pierde
-        ind = indicadores(c)
         pos_idx = {r["fecha"]: k for k, r in enumerate(rows)}
         valor, pos, pend, ops, dias_pos = parte, 0, 0, 0, 0
         serie_v = [valor]
@@ -499,7 +462,7 @@ def simular(hist, desde, hasta, capital=100000.0, costo=0.002, fx=None, meta=Non
             if pend != pos:                      # ejecución de la decisión del día anterior
                 valor *= (1 - costo)
                 pos, ops = pend, ops + 1
-            sc, _ = evaluar(k, c, ind)          # decisión de hoy, se ejecuta al cierre de mañana
+            sc, _ = mod.evaluar(t, fechas[j])    # decisión de hoy, se ejecuta al cierre de mañana
             pend = 1 if sc >= 20 else 0 if sc <= -20 else pend
             serie_v.append(valor)
         k0, kn = pos_idx[fechas[0]], pos_idx[fechas[-1]]
