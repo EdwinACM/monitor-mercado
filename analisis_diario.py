@@ -8,7 +8,6 @@ Archivos generados:
     analisis_diario.json    lo lee la sección «Archivo» de la app
     analisis_acciones.csv   una fila por fecha y emisora, con la decisión y sus razones
     analisis_deuda.csv      una fila por fecha e instrumento
-    analisis_diario.xlsx    las mismas tablas en Excel
     diario/AAAA-MM-DD.md    reporte legible de cada día: decisión, por qué y qué pasó después
 Criterio de acierto (a 5 sesiones): comprar acierta si el precio subió; vender, si bajó; mantener, si se movió 2 % o menos.
 """
@@ -49,11 +48,24 @@ def filas(registros):
     return acc, deu
 
 
+ROTULOS = {"fecha": "Fecha", "ticker": "Clave", "nombre": "Nombre", "mercado": "Mercado", "moneda": "Moneda", "cierre": "Cierre", "var": "Cambio del día",
+           "var_pct": "Cambio del día (%)", "ret5": "Rendimiento previo a 5 sesiones (%)", "ret20": "Rendimiento previo a 20 sesiones (%)", "rsi": "Fuerza relativa (RSI)",
+           "macd_hist": "Histograma MACD", "pctb": "Posición en las bandas de Bollinger", "tendencia": "Tendencia", "pendiente": "Pendiente de la tendencia",
+           "r2": "Ajuste de la tendencia (R²)", "vol_anual": "Volatilidad anual (%)", "max_drawdown": "Caída máxima (%)", "score": "Puntaje", "veredicto": "Señal",
+           "decision": "Decisión", "confianza": "Confianza", "veredicto_ant": "Señal anterior", "cambio": "¿Cambió la decisión?", "razones": "Por qué",
+           "accion": "Qué hacer", "ret_5": "Rendimiento posterior a 5 sesiones (%)", "ret_10": "Rendimiento posterior a 10 sesiones (%)", "acierto": "¿Acertó?",
+           "emisor": "Emisor", "fecha_subasta": "Fecha de la cifra", "valor": "Cifra", "var_pb": "Cambio (puntos base)", "z": "Puntaje z", "senal": "Señal"}
+
+
 def escribir_csv(nombre, cols, filas_):
+    """Tabla plana con encabezados legibles y números con dos decimales."""
+    def v(x):
+        return f"{x:.2f}" if isinstance(x, float) else x
     with open(OUT / nombre, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=cols)
-        w.writeheader()
-        w.writerows(filas_)
+        w = csv.writer(f)
+        w.writerow([ROTULOS.get(c, c) for c in cols])
+        for r in filas_:
+            w.writerow([v(r.get(c)) for c in cols])
 
 
 def escribir_xlsx(registros, acc, deu):
@@ -133,7 +145,6 @@ def main():
     acc, deud = filas(registros)
     escribir_csv("analisis_acciones.csv", COLS_ACC, acc)
     escribir_csv("analisis_deuda.csv", COLS_DEU, deud)
-    escribir_xlsx(registros, acc, deud)
     print(f"[OK] {nuevos} día(s) procesados; {len(registros)} en total ({registros[0]['fecha']} -> {registros[-1]['fecha']}).")
 
 
