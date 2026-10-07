@@ -98,144 +98,14 @@ def md_dia(reg):
 
 
 # ======================================================================== Excel
-_fino = Side(style="thin", color=HEX(GRIS_SUAVE))
-
-
-def _hoja(wb, nombre, cols, filas, anchos, titulo=None, formatos=None, envolver=()):
-    ws = wb.create_sheet(nombre[:31])
-    r0 = 1
-    if titulo:
-        ws.cell(1, 1, titulo).font = Font(bold=True, size=13, color=HEX(GUINDA))
-        r0 = 3
-    for j, c in enumerate(cols, 1):
-        x = ws.cell(r0, j, c)
-        x.fill, x.font = PatternFill("solid", fgColor=HEX(GUINDA)), Font(bold=True, color="FFFFFF")
-        x.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    for i, f in enumerate(filas, r0 + 1):
-        for j, v in enumerate(f, 1):
-            c = ws.cell(i, j, v)
-            c.border = Border(bottom=_fino)
-            if j - 1 in envolver:
-                c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="justify")
-            if formatos and j - 1 in formatos and isinstance(v, (int, float)):
-                c.number_format = formatos[j - 1]
-        if i % 2 == 0:
-            for j in range(1, len(cols) + 1):
-                ws.cell(i, j).fill = PatternFill("solid", fgColor=HEX(GUINDA_SUAVE))
-    for j, w in enumerate(anchos, 1):
-        ws.column_dimensions[get_column_letter(j)].width = w
-    ws.freeze_panes = ws.cell(r0 + 1, 1)
-    return ws
-
-
-def _portada_xlsx(wb, titulo, subtitulo, parrafos):
-    ws = wb.active
-    ws.title = "Resumen"
-    ws.sheet_view.showGridLines = False
-    for r in range(1, 6):
-        for c in range(1, 12):
-            ws.cell(r, c).fill = PatternFill("solid", fgColor=HEX(GUINDA))
-    try:
-        img = XLImage(str(MARCA / "ipn-escudo-blanco.png"))
-        img.width, img.height = 52, 76
-        ws.add_image(img, "A1")
-    except Exception:
-        pass
-    ws["C1"], ws["C2"], ws["C3"] = INSTITUCION
-    ws["C1"].font, ws["C2"].font, ws["C3"].font = Font(bold=True, size=14, color="FFFFFF"), Font(bold=True, size=12, color="FFFFFF"), Font(size=11, color="FFFFFF")
-    ws["A7"], ws["A8"] = titulo, subtitulo
-    ws["A7"].font, ws["A8"].font = Font(bold=True, size=18, color=HEX(GUINDA)), Font(size=11, color=HEX(GRIS))
-    r = 10
-    for p in parrafos:
-        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=10)
-        c = ws.cell(r, 1, p)
-        c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="justify")
-        ws.row_dimensions[r].height = max(30, 15 * (len(p) // 120 + 1))
-        r += 1
-    ws.cell(r + 1, 1, AVISO).font = Font(italic=True, size=9, color=HEX(GRIS))
-    for j in range(1, 12):
-        ws.column_dimensions[get_column_letter(j)].width = 14
-    ws.column_dimensions["A"].width = 12
-    return ws
-
-
-def _bytes(wb):
-    b = io.BytesIO()
-    wb.save(b)
-    return b.getvalue()
-
-
 def xlsx_dia(reg):
-    wb = Workbook()
-    _portada_xlsx(wb, f"Análisis del {fecha_larga(reg['fecha'])}", "Decisión, por qué, qué hacer y qué pasó después", [reg["mercado"]["texto"]])
-    ent = (reg.get("entorno") or {}).get("indicadores") or []
-    if ent:
-        _hoja(wb, "Entorno del día", ["Indicador", "Fecha", "Valor", "Cambio", "Unidad del cambio", "Fuente"],
-              [[x["nombre"], x["fecha"], x["valor"], x["cambio"], x["cambio_unidad"], "Oficial" if x["oficial"] else "Referencia (no oficial)"] for x in ent],
-              [44, 12, 12, 12, 16, 30], formatos={2: "#,##0.00", 3: "0.00"})
-    filas = [[reg["fecha"], e["nombre"], e.get("mercado"), e.get("moneda"), e["cierre"], e["var_pct"], e["decision"], e["score"], e["confianza"],
-              "Sí" if e.get("cambio") else "No", "\n".join(e["por_que"]), e["accion"], e.get("ret_5"), e.get("ret_10"),
-              {True: "Sí", False: "No", None: "Por evaluar"}[e.get("acierto")]] for e in reg["emisoras"]]
-    ws = _hoja(wb, "Decisiones", ["Fecha", "Emisora", "Mercado", "Moneda", "Cierre", "Var. %", "Decisión", "Puntaje", "Confianza", "¿Cambió?",
-                                  "Por qué", "Qué hacer", "Rend. 5 ses. %", "Rend. 10 ses. %", "¿Acertó?"], filas,
-               [12, 30, 10, 9, 11, 9, 24, 9, 11, 10, 80, 50, 12, 12, 12], formatos={4: "#,##0.00", 5: "0.00", 12: "0.00", 13: "0.00"}, envolver=(10, 11))
-    verde, rojo = PatternFill("solid", fgColor="CFEBDD"), PatternFill("solid", fgColor="F6D3CF")
-    for fila in ws.iter_rows(min_row=2):
-        d = fila[6]
-        d.fill = verde if "Comprar" in str(d.value) else rojo if "Vender" in str(d.value) else PatternFill()
-        d.font = Font(bold=True)
-    _hoja(wb, "Criterios", ["Emisora", "Criterio", "Puntos"], [[e["nombre"], c[0], c[1]] for e in reg["emisoras"] for c in e["componentes"]], [30, 40, 10])
-    _hoja(wb, "Deuda", ["Instrumento", "Emisor", "Última cifra", "Valor", "Cambio (pb)", "Z", "Tendencia", "Decisión", "Por qué"],
-          [[x["nombre"], x["emisor"], x["fecha"], x["valor"], x["var_pb"], x["z"], x["tendencia"], x["decision"], "\n".join(x["por_que"])] for x in reg["deuda"]],
-          [28, 24, 14, 12, 12, 8, 16, 24, 90], formatos={3: "0.00", 4: "0.00", 5: "0.00"}, envolver=(8,))
-    return _bytes(wb)
+    import excel
+    return excel.libro_dia(reg)
 
 
 def xlsx_periodo(inf):
-    an, ctx, arc, sim = inf["analisis"], inf["contexto"], inf["archivo"], inf["simulacion"]
-    p = inf["periodo"]
-    wb = Workbook()
-    _portada_xlsx(wb, "Informe de mercados", f"Periodo del {fecha_corta(p['desde'])} al {fecha_corta(p['hasta'])} · último cierre {fecha_corta(p['ultimo_cierre'] or p['hasta'])}",
-                  [an["mercado"]["texto"], *ctx["lectura"]])
-    _hoja(wb, "Entorno", ["Indicador", "Grupo", "Inicio", "Fecha inicio", "Fin", "Fecha fin", "Cambio", "Unidad del cambio", "Fuente", "Tipo de fuente", "Qué es"],
-          [[x["nombre"], x["grupo"], x["ini"]["valor"], x["ini"]["fecha"], x["fin"]["valor"], x["fin"]["fecha"], x["cambio"], x["cambio_unidad"],
-            x["fuente"]["nombre"], "Oficial" if x["fuente"]["oficial"] else "Referencia (no oficial)", x["que_es"]] for x in ctx["indicadores"]],
-          [40, 18, 12, 12, 12, 12, 11, 12, 52, 22, 90], formatos={2: "#,##0.00", 4: "#,##0.00", 6: "0.00"}, envolver=(10,))
-    _hoja(wb, "Sensibilidad EE. UU.", ["Emisora", "País", "Moneda", "Sesiones", "Correlación con S&P 500", "Beta frente a S&P 500", "Correlación con el dólar", "Correlación con el IPC"],
-          [[s["nombre"], s["pais"], s["moneda"], s["n"], s["corr_sp500"], s["beta_sp500"], s["corr_dolar"], s["corr_ipc"]] for s in ctx["sensibilidades"]],
-          [34, 10, 9, 10, 18, 18, 18, 16], formatos={4: "0.00", 5: "0.00", 6: "0.00", 7: "0.00"})
-    _hoja(wb, "Efecto cambiario", ["Acción de EE. UU.", "Desde", "Hasta", "Rend. en dólares %", "Variación del dólar %", "Rend. en pesos %"],
-          [[e["nombre"], e["desde"], e["hasta"], e["ret_usd"], e["ret_dolar"], e["ret_pesos"]] for e in ctx["efecto_cambiario"]], [30, 12, 12, 18, 20, 18], formatos={3: "0.00", 4: "0.00", 5: "0.00"})
-    acc = [x for x in an["acciones"] if "error" not in x]
-    _hoja(wb, "Acciones", ["Emisora", "Mercado", "Moneda", "Cierre inicial", "Cierre final", "Rend. periodo %", "Volatilidad anual %", "Caída máxima %", "Decisión al cierre", "Puntaje",
-                           "Confianza", "Tendencia", "RSI", "Por qué"],
-          [[x["nombre"], x["mercado"], x["moneda"], x["serie"]["cierre"][0], x["cierre"], x["ret_periodo"], x["stats"]["vol_anual"], x["stats"]["max_drawdown"], x["decision"], x["score"],
-            x["confianza"], x["tendencia"]["etiqueta"], x["rsi"], "\n".join(x["por_que"])] for x in acc],
-          [32, 9, 8, 13, 13, 14, 15, 14, 24, 9, 11, 12, 8, 90], formatos={3: "#,##0.00", 4: "#,##0.00", 5: "0.00", 6: "0.00", 7: "0.00", 12: "0.00"}, envolver=(13,))
-    _hoja(wb, "Deuda", ["Instrumento", "Emisor", "Unidad", "Última cifra", "Valor", "Cambio (pb)", "Z", "Tendencia", "Decisión", "Por qué"],
-          [[x["nombre"], x["emisor"], x["unidad"], x["fecha"], x["valor"], x["var_pb"], x["z"], x["tendencia"], x["decision"], "\n".join(x["por_que"])] for x in an["deuda"]],
-          [28, 24, 30, 13, 14, 12, 8, 16, 24, 90], formatos={4: "#,##0.00", 5: "0.00", 6: "0.00"}, envolver=(9,))
-    if ctx["privados"]:
-        _hoja(wb, "Papel comercial y CB", ["Mes", "Tasa papel comercial %", "Tasa CB corto plazo %", "Tasa CB mediano plazo en pesos %", "Colocado corto plazo (miles de pesos)",
-                                           "Colocado papel comercial", "Colocado CB corto plazo", "Colocado mediano y largo plazo"],
-              [[m["mes"][:7], m["tasa_pc"], m["tasa_cb_cp"], m["tasa_cb_mp"], m["col_cp"], m["col_pc"], m["col_cb_cp"], m["col_mlp"]] for m in ctx["privados"]],
-              [10, 18, 18, 22, 26, 22, 22, 24], formatos={1: "0.00", 2: "0.00", 3: "0.00", 4: "#,##0", 5: "#,##0", 6: "#,##0", 7: "#,##0"})
-    filas = sorted(([e["t"], d["fecha"], e["cierre"], e["v"], e["s"], "Sí" if e["c"] else "No", e["r5"], {True: "Sí", False: "No", None: "Por evaluar"}[e["a"]]] for d in arc["dias"] for e in d["e"]), key=lambda r: (r[0], r[1]))
-    _hoja(wb, "Cierres y decisiones", ["Emisora", "Fecha", "Cierre", "Decisión", "Puntaje", "¿Cambió?", "Rend. a 5 sesiones %", "¿Acertó?"], filas, [12, 12, 12, 20, 9, 10, 18, 12], formatos={2: "#,##0.00", 6: "0.00"})
-    _hoja(wb, "Aciertos", ["Decisión", "Casos evaluados", "Aciertos", "% de aciertos", "Rend. medio a 5 sesiones %"],
-          [[a["decision"], a["casos"], a["aciertos"], a["pct"], a["ret5_medio"]] for a in arc["aciertos"]], [16, 16, 12, 14, 24], formatos={3: "0.00", 4: "0.00"})
-    if sim.get("fechas"):
-        m = sim["metricas"]
-        _hoja(wb, "Simulación", ["Medida", "Siguiendo las decisiones", "Comprar y mantener"],
-              [["Rendimiento del periodo %", m["ret_estrategia"], m["ret_comprar_mantener"]], ["Valor final (pesos)", sim["estrategia"][-1], sim["comprar_mantener"][-1]],
-               ["Caída máxima %", m["caida_estrategia"], m["caida_comprar_mantener"]], ["Operaciones", m["operaciones"], None]], [30, 26, 22],
-              formatos={1: "#,##0.00", 2: "#,##0.00"})
-    g = glosario.guia(an and {x["ticker"]: x["nombre"] for x in an["acciones"] if "nombre" in x}, __import__("server").META, {n: {"codigo": d["codigo"], "emisor": d["emisor"]} for n, d in __import__("server").DEUDA.items() if not d.get("oculto")})
-    filas = [[a["nombre"], "Acción", a.get("mercado"), a["que_es"], a["que_la_mueve"], (a["fuente"] or {}).get("nombre"), (a["fuente"] or {}).get("url")] for a in g["acciones"]]
-    filas += [[d["nombre"], "Deuda", d["emisor"], d["que_es"], d["que_lo_mueve"], (d["fuente"] or {}).get("nombre"), (d["fuente"] or {}).get("url")] for d in g["deuda"]]
-    _hoja(wb, "Qué es cada cosa", ["Instrumento", "Tipo", "Mercado o emisor", "Qué es", "Qué lo mueve", "Fuente oficial", "Enlace"], filas, [28, 9, 24, 80, 60, 40, 60], envolver=(3, 4))
-    _hoja(wb, "Fuentes", ["Fuente", "Tipo", "Enlace"], [[f["nombre"], "Oficial" if f["oficial"] else "Referencia (no oficial)", f["url"]] for f in ctx["fuentes"]], [80, 24, 90])
-    return _bytes(wb)
+    import excel
+    return excel.libro_periodo(inf)
 
 
 # ========================================================================== PDF
@@ -399,6 +269,18 @@ def estadisticas(x):
             "rango_1d": desv}
 
 
+def historial(arc):
+    """{ticker de Yahoo: [{fecha, cierre, var_pct, decision, s, r5, a, cambio}]} a partir del archivo de decisiones."""
+    hist = {}
+    for d in arc["dias"]:
+        for en in d["e"]:
+            hist.setdefault(en["y"], []).append({"fecha": d["fecha"], "cierre": en["cierre"], "decision": en["v"].capitalize(), "s": en["s"], "r5": en["r5"], "a": en["a"], "cambio": en["c"]})
+    for h in hist.values():
+        for i, r in enumerate(h):
+            r["var_pct"] = (r["cierre"] / h[i - 1]["cierre"] - 1) * 100 if i and h[i - 1]["cierre"] else None
+    return hist
+
+
 def _factores(x, ctx):
     """Lo que hoy podría mover el precio, con cifras reales del entorno y de la sensibilidad de la emisora."""
     ind = {i["id"]: i for i in ctx["indicadores"]}
@@ -425,6 +307,21 @@ def _factores(x, ctx):
     if not us and "ipc" in ind and sens and sens.get("corr_ipc") is not None:
         out.append(f"Mercado mexicano. El S&P/BMV IPC cambió {pct(ind['ipc']['cambio'])} en el periodo; la correlación de esta emisora con el IPC es {n2(sens['corr_ipc'])}.")
     return out
+
+
+def factores_deuda(ctx):
+    """Lo que hoy podría mover el rendimiento de la deuda, con cifras del entorno."""
+    ind = {i["id"]: i for i in ctx["indicadores"]}
+    fac = []
+    if "tasa_obj" in ind:
+        fac.append(f"Banxico. La tasa objetivo es {n2(ind['tasa_obj']['fin']['valor'])} % ({cambio(ind['tasa_obj']['cambio'], 'pb')} en el periodo). Las tasas de los CETES y los bonos siguen de cerca esa referencia.")
+    for d in ctx["diferenciales"]:
+        fac.append(f"{d['nombre']}: {n2(d['pb'], True)} pb. {d['lectura']}")
+    if "infl_mx" in ind:
+        fac.append(f"Inflación en México: {n2(ind['infl_mx']['fin']['valor'])} % anual. Si sube, el mercado exige más rendimiento y los precios de los bonos bajan; en Udibonos el capital se ajusta con la inflación.")
+    if "fx" in ind:
+        fac.append(f"Tipo de cambio: {n2(ind['fx']['fin']['valor'])} pesos por dólar ({pct(ind['fx']['cambio'])} en el periodo). Un peso débil presiona a Banxico a mantener tasas altas y afecta el apetito de extranjeros por bonos mexicanos.")
+    return fac
 
 
 def _sugerencia(x, e):
@@ -625,16 +522,7 @@ def _ficha_deuda(pdf, x, ctx, g):
     _h3(pdf, "Qué es", GUINDA)
     _p(pdf, g.get("que_es", ""), size=9.2)
     _p(pdf, "Qué lo mueve. " + g.get("que_lo_mueve", ""), size=9.2)
-    ind = {i["id"]: i for i in ctx["indicadores"]}
-    fac = []
-    if "tasa_obj" in ind:
-        fac.append(f"Banxico. La tasa objetivo es {n2(ind['tasa_obj']['fin']['valor'])} % ({cambio(ind['tasa_obj']['cambio'], 'pb')} en el periodo). Las tasas de los CETES y los bonos siguen de cerca esa referencia.")
-    for d in ctx["diferenciales"]:
-        fac.append(f"{d['nombre']}: {n2(d['pb'], True)} pb. {d['lectura']}")
-    if "infl_mx" in ind:
-        fac.append(f"Inflación en México: {n2(ind['infl_mx']['fin']['valor'])} % anual. Si sube, el mercado exige más rendimiento y los precios de los bonos bajan; en Udibonos el capital se ajusta con la inflación.")
-    if "fx" in ind:
-        fac.append(f"Tipo de cambio: {n2(ind['fx']['fin']['valor'])} pesos por dólar ({pct(ind['fx']['cambio'])} en el periodo). Un peso débil presiona a Banxico a mantener tasas altas y afecta el apetito de extranjeros por bonos mexicanos.")
+    fac = factores_deuda(ctx)
     if fac:
         _h3(pdf, "Qué podría mover su rendimiento ahora", GUINDA)
         for t in fac[:5]:
@@ -743,13 +631,7 @@ def pdf_periodo(inf):
     _tabla(pdf, ["Instrumento", "Última cifra", "Cambio (pb)", "Z", "Tendencia", "Decisión"], filas, (48, 28, 24, 14, 26, 38), None, size=8.2)
     _p(pdf, "Las fichas siguientes siguen el mismo orden: primero las acciones de México, luego las de Estados Unidos y al final la deuda. Cada ficha trae el cierre, la gráfica del periodo, la estadística de riesgo, qué es, qué podría mover su precio, por qué la decisión y una sugerencia.", size=9, italic=True)
 
-    hist = {}
-    for d in arc["dias"]:
-        for en in d["e"]:
-            hist.setdefault(en["y"], []).append({"fecha": d["fecha"], "cierre": en["cierre"], "decision": en["v"].capitalize(), "s": en["s"], "r5": en["r5"], "a": en["a"]})
-    for h in hist.values():
-        for i, r in enumerate(h):
-            r["var_pct"] = (r["cierre"] / h[i - 1]["cierre"] - 1) * 100 if i and h[i - 1]["cierre"] else None
+    hist = historial(arc)
     gl = {a_["ticker"]: a_ for a_ in glosario.guia({x["ticker"]: x["nombre"] for x in acc}, __import__("server").META, {})["acciones"]}
     gd = {d["nombre"]: d for d in glosario.guia({}, {}, {n: {"codigo": "", "emisor": ""} for n in glosario.DEUDA})["deuda"]}
     _h2(pdf, "5. Fichas por emisora e instrumento")
@@ -761,7 +643,7 @@ def pdf_periodo(inf):
     if ctx["privados"]:
         pdf.add_page()
         _h3(pdf, "Papel comercial y certificados bursátiles por mes (Banxico, cuadros CF302 y CF304)", GUINDA)
-        filas = [[m["mes"][:7], n2(m["tasa_cb_cp"]), n2(m["tasa_cb_mp"]), n2((m["col_cp"] or 0) / 1e6), n2((m["col_pc"] or 0) / 1e6), n2((m["col_mlp"] or 0) / 1e6)] for m in ctx["privados"]]
+        filas = [[m["mes"][:7], n2(m["tasa_cb_cp"]), n2(m["tasa_cb_mp"]), n2((m["col_cp"] or 0) / 1e3), n2((m["col_pc"] or 0) / 1e3), n2((m["col_mlp"] or 0) / 1e3)] for m in ctx["privados"]]
         _tabla(pdf, ["Mes", "Tasa CB corto plazo %", "Tasa CB mediano plazo %", "Colocado corto plazo (mdp)", "Colocado papel comercial (mdp)", "Colocado mediano y largo (mdp)"], filas, (18, 28, 30, 36, 36, 30), None, size=8)
         _p(pdf, "mdp = millones de pesos. Una tasa de 0.00 significa que no hubo colocaciones de ese instrumento en el mes.", size=8.6, italic=True)
     pdf.pie = f"Informe de mercados · {fecha_corta(p['desde'])} al {fecha_corta(p['hasta'])}"

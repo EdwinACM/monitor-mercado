@@ -582,7 +582,7 @@ function renderDeuda() {
   if (priv) {
     if (!S.ctx) { $("#deuPrivT").innerHTML = '<p class="cargando">Consultando a Banxico…</p>'; }
     else $("#deuPrivT").innerHTML = S.ctx.privados.length ? `<table class="tbl"><thead><tr><th>Mes</th><th>Tasa CB corto plazo</th><th>Tasa CB mediano plazo</th><th>Colocado corto plazo (mdp)</th><th>Colocado papel comercial (mdp)</th><th>Colocado mediano y largo (mdp)</th></tr></thead><tbody>` +
-      S.ctx.privados.map(m => `<tr><td>${fmes(m.mes)}</td><td>${fmt(m.tasa_cb_cp)}%</td><td>${fmt(m.tasa_cb_mp)}%</td><td>${fmt((m.col_cp || 0) / 1e6)}</td><td>${fmt((m.col_pc || 0) / 1e6)}</td><td>${fmt((m.col_mlp || 0) / 1e6)}</td></tr>`).join("") +
+      S.ctx.privados.map(m => `<tr><td>${fmes(m.mes)}</td><td>${fmt(m.tasa_cb_cp)}%</td><td>${fmt(m.tasa_cb_mp)}%</td><td>${fmt((m.col_cp || 0) / 1e3)}</td><td>${fmt((m.col_pc || 0) / 1e3)}</td><td>${fmt((m.col_mlp || 0) / 1e3)}</td></tr>`).join("") +
       `</tbody></table><p class="note" style="margin-top:8px">Banxico, cuadros CF302 y CF304. mdp = millones de pesos. Una tasa de 0.00 significa que no hubo colocaciones de ese instrumento en el mes.</p>` : '<p class="note">Sin datos mensuales en el periodo.</p>';
   }
 }
@@ -699,7 +699,7 @@ const INFORME_HTML = `
   <section class="sec"><h2>¿Acertaron las decisiones?</h2><div id="aciertos"><p class="cargando">Calculando…</p></div></section>
   <section class="sec"><h2>Mapa de decisiones por día</h2><div class="legend" id="legTl"></div><div class="tl" id="timeline"></div></section>
   <section class="sec"><h2 id="diaTitulo">Detalle del día</h2><div id="diaDetalle"><p class="note">Elige un día en el mapa o en el calendario.</p></div></section>
-  <section class="sec"><h2>Archivo guardado</h2><p class="intro">Análisis diario de todas las sesiones desde el 1 de marzo de 2026 en archivos que puedes abrir en Excel o con cualquier programa.</p><div class="dl-grupo" id="descargas"></div></section>`;
+  <section class="sec"><h2>Archivo guardado</h2><p class="intro">El Excel trae una hoja por emisora e instrumento con todas las sesiones desde el 1 de marzo de 2026 y se genera al momento. Los CSV son tablas planas para otros programas.</p><div class="dl-grupo" id="descargas"></div></section>`;
 async function renderInforme() {
   armar("informe", INFORME_HTML);
   const p = S.periodo;
@@ -710,8 +710,9 @@ async function renderInforme() {
   $("#iDl").innerHTML = dlBtn(`/api/informe?${qsP()}&formato=pdf`, "Informe en PDF", true) + dlBtn(`/api/informe?${qsP()}&formato=xlsx`, "Informe en Excel") +
     `<p class="note" style="flex-basis:100%">Se genera al momento con los datos más recientes; puede tardar unos segundos.</p>`;
   ligarDescargas($("#iDl"));
-  $("#descargas").innerHTML = [["analisis_diario.xlsx", "Excel"], ["analisis_acciones.csv", "CSV de acciones"], ["analisis_deuda.csv", "CSV de deuda"], ["analisis_diario.json", "JSON"]]
-    .map(([f, t]) => `<a class="btn" href="/static/data/${f}" download>${ICON("download")}${t}</a>`).join("");
+  $("#descargas").innerHTML = dlBtn(`/api/informe?desde=${INICIO}&hasta=${hoyMX()}&formato=xlsx`, "Excel completo desde el 1 de marzo", true) +
+    [["analisis_acciones.csv", "CSV de acciones"], ["analisis_deuda.csv", "CSV de deuda"]].map(([f, t]) => `<a class="btn" href="/static/data/${f}" download>${ICON("download")}${t}</a>`).join("");
+  ligarDescargas($("#descargas"));
   try {
     const A = await cargarArchivo();
     if (!S.fechaDia || S.fechaDia < p.desde || S.fechaDia > p.hasta) S.fechaDia = A.dias.at(-1)?.fecha;
@@ -807,11 +808,14 @@ async function ciclo() {
   const ab = abierto(), now = Date.now();
   try {
     if (abiertoAntes && !ab) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(); render(); }
-    else if (ab && now - S.tData > 120000) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(); render(); }
+    else if (ab && now - S.tData > 300000) { S.busy = true; await cargar(true); S.busy = false; await pollQuotes(); render(); }
     else if (ab && now - S.tQuote > 20000) { await pollQuotes(); }
     else if (!ab && now - S.tData > 900000) { S.busy = true; await cargar(true); S.busy = false; render(); }
-    showErr("");
-  } catch (e) { S.busy = false; showErr(`No se pudo actualizar automáticamente (${e.message}). Se reintentará en unos segundos.`); }
+    S.fallos = 0; showErr("");
+  } catch (e) {
+    S.busy = false; S.fallos = (S.fallos || 0) + 1; S.tQuote = Date.now(); S.tData = Date.now() - 60000;
+    if (S.fallos >= 3) showErr("La actualización automática no pudo conectarse con el servidor. Se sigue reintentando; revisa tu conexión.");
+  }
   abiertoAntes = ab;
 }
 
