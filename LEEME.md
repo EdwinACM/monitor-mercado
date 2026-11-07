@@ -22,8 +22,8 @@ App web con 10 acciones (BMV, Nasdaq y NYSE) y 7 instrumentos de deuda: precio, 
 
 ## Informes
 En **Informe** hay PDF y Excel del periodo elegido y de cualquier día. Se generan al momento con los datos más recientes y llevan formato IPN.
-- **PDF:** resumen, entorno global, tablero de cierres y decisiones, una ficha por emisora e instrumento (cierre, gráfica, estadística, proyección, justificación), portafolio, aciertos, simulación, anexo y fuentes.
-- **Excel:** una hoja por emisora e instrumento, columna «Qué significa» en cada medida, hoja «Léeme» con índice y cifras con dos decimales.
+- **PDF:** resumen, entorno global, tablero de cierres y decisiones, una ficha por emisora e instrumento (cierre, gráfica, estadística, proyección, justificación y datos del título o del instrumento con su fuente), portafolio, aciertos, simulación, anexo y fuentes.
+- **Excel:** una hoja por emisora e instrumento (con valor de mercado y los datos del título: constitución, domicilio, capital, series, derechos; y las características de cada instrumento de deuda), columna «Qué significa» en cada medida, hoja «Léeme» con índice y cifras con dos decimales.
 - Nombres: `Informe_de_mercados_AAAA-MM-DD_a_AAAA-MM-DD.pdf` y `Analisis_del_dia_AAAA-MM-DD.xlsx`.
 
 ## Sin internet
@@ -61,6 +61,7 @@ La app solo muestra datos públicos y no tiene cuentas. Todo parámetro se valid
 - `analisis.py`: indicadores, estadística, decisiones, comparación, deuda y simulación.
 - `modelo.py`: modelo de decisión con pesos diarios (validación hacia adelante).
 - `proyeccion.py`: proyecciones, Sharpe, Sortino, CAPM, portafolio y duración.
+- `fichas.py`: datos del título de cada emisora e instrumento con su fuente (SEC, BMV, Banxico).
 - `contexto.py` y `fuentes.py`: entorno global con fuentes oficiales; `glosario.py`: qué es cada cosa.
 - `diario.py`, `reportes.py` y `excel.py`: registro diario, PDF y Excel.
 - `analisis_diario.py`: archivos de análisis diario.
