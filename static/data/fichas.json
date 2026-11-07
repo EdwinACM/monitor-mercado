@@ -1,10 +1,11 @@
 {
- "actualizado": "2026-11-06T22:12:40.221205-06:00",
+ "actualizado": "2026-11-07T16:57:22.167304-06:00",
  "fuente": "SEC EDGAR (data.sec.gov)",
  "errores": {},
  "empresas": {
   "AAPL": {
    "nombre": "Apple Inc.",
+   "sic": "Electronic Computers",
    "cik": "0000320193",
    "estado_constitucion": "CA",
    "ejercicio_fiscal_termina": "0926",
@@ -235,6 +236,7 @@
   },
   "MSFT": {
    "nombre": "MICROSOFT CORP",
+   "sic": "Services-Prepackaged Software",
    "cik": "0000789019",
    "estado_constitucion": "WA",
    "ejercicio_fiscal_termina": "0630",
@@ -459,6 +461,7 @@
   },
   "NVDA": {
    "nombre": "NVIDIA CORP",
+   "sic": "Semiconductors & Related Devices",
    "cik": "0001045810",
    "estado_constitucion": "DE",
    "ejercicio_fiscal_termina": "0131",
@@ -683,6 +686,7 @@
   },
   "TSLA": {
    "nombre": "Tesla, Inc.",
+   "sic": "Motor Vehicles & Passenger Car Bodies",
    "cik": "0001318605",
    "estado_constitucion": "TX",
    "ejercicio_fiscal_termina": "1231",
@@ -890,6 +894,7 @@
   },
   "KO": {
    "nombre": "COCA COLA CO",
+   "sic": "Beverages",
    "cik": "0000021344",
    "estado_constitucion": "DE",
    "ejercicio_fiscal_termina": "1231",
@@ -1091,6 +1096,7 @@
   },
   "AMXB.MX": {
    "nombre": "AMERICA MOVIL SAB DE CV/",
+   "sic": "Telephone Communications (No Radiotelephone)",
    "cik": "0001129137",
    "estado_constitucion": "O5",
    "ejercicio_fiscal_termina": "1231",
@@ -1257,6 +1263,7 @@
   },
   "KOFUBL.MX": {
    "nombre": "COCA COLA FEMSA SAB DE CV",
+   "sic": "Bottled & Canned Soft Drinks & Carbonated Waters",
    "cik": "0000910631",
    "estado_constitucion": "",
    "ejercicio_fiscal_termina": "1231",
@@ -1416,6 +1423,7 @@
   },
   "OMAB.MX": {
    "nombre": "Central North Airport Group",
+   "sic": "Airports, Flying Fields & Airport Terminal Services",
    "cik": "0001378239",
    "estado_constitucion": "O5",
    "ejercicio_fiscal_termina": "1231",
