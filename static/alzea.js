@@ -400,7 +400,7 @@ async function renderDetalle() {
   const okC = b.aciertos_compra >= 55 && b.rend_medio_compra > b.base_rend_medio, okV = b.aciertos_venta >= 55 && b.rend_medio_venta < b.base_rend_medio;
   $("#bt").innerHTML = `<div class="scrollx"><table class="tbl"><thead><tr><th>Señal</th><th>Casos</th><th>Aciertos</th><th>Rend. a ${b.horizonte} ses.</th><th>Lectura</th></tr></thead><tbody>` +
     fila("Compra", b.n_compra, b.aciertos_compra, b.rend_medio_compra, okC, okC ? "respaldada" : "sin respaldo") + fila("Venta", b.n_venta, b.aciertos_venta, b.rend_medio_venta, okV, okV ? "respaldada" : "sin respaldo") +
-    `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Es una prueba dentro de la muestra de calibración (${b.muestra} sesiones de esta emisora): sirve para dimensionar la confianza, no la garantiza.</p>`;
+    `</tbody></table></div><p class="note" style="margin-top:10px">Rendimiento medio de todas las sesiones: ${pct(b.base_rend_medio)}. Es una prueba dentro de la muestra de calibración (${b.muestra} sesiones de esta emisora): usa los mismos datos con los que se calibró el modelo, así que tiende a verse mejor de lo que será hacia adelante.</p>`;
   mxVista(a);
   proyeccion(a);
   queEs(a);
@@ -429,7 +429,7 @@ function proyeccion(a) {
   $("#proyTexto").textContent = p.texto;
   $("#tblProy").innerHTML = `<thead><tr><th>Horizonte</th><th>Rango con 68 %</th><th>Rango con 95 %</th><th>Si continúa la tendencia</th><th>Acierto histórico del rango de 95 %</th></tr></thead><tbody>` +
     p.horizontes.map(h => `<tr><td>${h.h} sesiones</td><td>${money(h.b68[0], mn)} a ${money(h.b68[1], mn)}</td><td>${money(h.b95[0], mn)} a ${money(h.b95[1], mn)}</td><td>${money(h.tendencia, mn)}</td><td>${h.cobertura ? fmt(h.cobertura.p95) + " % de " + h.cobertura.n + " sesiones" : "—"}</td></tr>`).join("") + "</tbody>";
-  $("#proyNota").textContent = `Volatilidad diaria reciente: ${fmt(p.sigma_diaria)} % (${fmt(p.sigma_anual)} % anual), estimada con un promedio móvil exponencial que pesa más lo reciente. El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. La línea de tendencia extiende la recta de las últimas 30 sesiones, ponderada por su ajuste (R² ${fmt(p.r2_tendencia)}). Son rangos de probabilidad, no un pronóstico.`;
+  $("#proyNota").textContent = `Volatilidad diaria reciente: ${fmt(p.sigma_diaria)} % (${fmt(p.sigma_anual)} % anual), estimada con un promedio móvil exponencial que pesa más lo reciente. El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. La línea de tendencia extiende la recta de las últimas 30 sesiones, ponderada por su ajuste (R² ${fmt(p.r2_tendencia)}). Son rangos estadísticos: el precio real puede quedar fuera de ellos.`;
 }
 async function queEs(a) {
   try {
@@ -451,7 +451,7 @@ function mxVista(a) {
   const rm = S.ctx.riesgo_mercado?.find(x => x.ticker === a.ticker);
   if (rm) h += `<p class="h3" style="margin-top:14px">Rendimiento ajustado por riesgo</p><dl class="dl">${row("Razón de Sharpe", fmt(rm.sharpe))}${row("Razón de Sortino", fmt(rm.sortino))}${row("Alfa anual frente al " + rm.indice, pct(rm.alfa_anual), cls(rm.alfa_anual))}${row("Beta frente al " + rm.indice, fmt(rm.beta))}${row("R² del modelo", fmt(rm.r2))}${row("Asimetría", fmt(rm.asimetria))}${row("Pérdida probable a 20 sesiones (VaR 95 %)", fmt(rm.var20) + " %")}</dl>
     <p class="note" style="margin-top:8px">Sharpe: rendimiento por encima de la ${esc(rm.tasa_libre_nombre)} (${fmt(rm.tasa_libre)} % anual) por unidad de riesgo; Sortino solo penaliza las caídas. Alfa: rendimiento anual que no explica el índice (modelo CAPM). R²: qué parte de los movimientos explica el índice. Asimetría negativa: las caídas fuertes pesan más que las alzas. Calculado con ${rm.n} sesiones del periodo.</p>`;
-  h += `<p class="note" style="margin-top:10px">Correlación y beta de los rendimientos diarios del periodo (${s ? s.n : "—"} sesiones). Un valor alto indica que se mueven juntos; no prueba que uno cause al otro.</p>`;
+  h += `<p class="note" style="margin-top:10px">Correlación y beta de los rendimientos diarios del periodo (${s ? s.n : "—"} sesiones). Un valor alto indica que se mueven juntos, y eso no significa que uno cause al otro.</p>`;
   el.innerHTML = h;
 }
 async function graficaPrecio(a) {

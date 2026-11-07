@@ -314,7 +314,7 @@ def _lectura(ind, difs, sens, efecto, rango):
                 a = max(ok, key=lambda s: s["corr_sp500"])
                 b = min(ok, key=lambda s: s["corr_sp500"])
                 t = (f"Qué tan ligadas están tus acciones a EE. UU. En el periodo, la más ligada al S&P 500 fue {a['nombre']} (correlación {_f(a['corr_sp500'])}) "
-                     f"y la menos ligada {b['nombre']} ({_f(b['corr_sp500'])}). La correlación mide si dos precios se mueven juntos; no prueba que uno cause al otro.")
+                     f"y la menos ligada {b['nombre']} ({_f(b['corr_sp500'])}). La correlación mide si dos precios se mueven juntos, y eso no significa que uno cause al otro.")
                 ps.append(t)
         if efecto:
             ps.append("Acciones de EE. UU. vistas desde México. " + "; ".join(

@@ -332,7 +332,7 @@ def libro_periodo(inf):
 
     # --- Relación con EE. UU.
     h = Hoja(wb, "Relación con EE. UU.", "Relación con EE. UU. y el dólar", sub)
-    h.nota("Se calcula con los rendimientos diarios del periodo. Ninguna cifra prueba que un mercado cause el movimiento del otro; solo mide si se mueven juntos.")
+    h.nota("Se calcula con los rendimientos diarios del periodo. Estas cifras miden si dos precios se mueven juntos; no indican que uno cause el movimiento del otro.")
     h.bloque("Sensibilidad de cada acción")
     h.tabla(["Emisora", "País", "Moneda", "Sesiones usadas", "Correlación con el S&P 500", "Beta frente al S&P 500", "Correlación con el dólar", "Correlación con el índice IPC"],
             [[s["nombre"], s["pais"], s["moneda"], (s["n"], "0"), (s["corr_sp500"], N2), (s["beta_sp500"], N2), (s["corr_dolar"], N2), (s["corr_ipc"], N2) if s["corr_ipc"] is not None else "No aplica"] for s in ctx["sensibilidades"]])
@@ -542,7 +542,7 @@ def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
         h.parrafo(pr["texto"])
         h.tabla(["Horizonte", "Rango con 68 %: mínimo", "Rango con 68 %: máximo", "Rango con 95 %: mínimo", "Rango con 95 %: máximo", "Si continúa la tendencia", "Acierto histórico del rango de 95 %"],
                 [[f"{q['h']} sesiones", (q["b68"][0], mon), (q["b68"][1], mon), (q["b95"][0], mon), (q["b95"][1], mon), (q["tendencia"], mon), (q["cobertura"]["p95"], PCT_S) if q.get("cobertura") else "—"] for q in pr["horizontes"]])
-        h.nota(f"Volatilidad diaria reciente {pr['sigma_diaria']:.2f} % (promedio móvil exponencial, λ = 0.94). El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. Son rangos de probabilidad, no un pronóstico.")
+        h.nota(f"Volatilidad diaria reciente {pr['sigma_diaria']:.2f} % (promedio móvil exponencial, λ = 0.94). El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. Son rangos estadísticos: el precio real puede quedar fuera de ellos.")
     _bloque_titulo(h, x, mon)
     h.bloque("Qué es y qué la mueve")
     h.parrafo(g.get("que_es", ""))
@@ -565,7 +565,7 @@ def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
     b = x["backtest"]
     if b["n_compra"] >= 8 or b["n_venta"] >= 8:
         h.nota(f"Prueba histórica a {b['horizonte']} sesiones con {b['muestra']} sesiones: comprar acertó {b['aciertos_compra']:.2f} % en {b['n_compra']} casos y vender {b['aciertos_venta']:.2f} % en {b['n_venta']}. "
-               f"Rendimiento medio de cualquier sesión: {b['base_rend_medio']:+.2f} %. Es una prueba dentro de la misma muestra: calibra la confianza, no la garantiza.")
+               f"Rendimiento medio de cualquier sesión: {b['base_rend_medio']:+.2f} %. La prueba usa los mismos datos con los que se calibró el modelo, así que tiende a verse mejor de lo que será hacia adelante.")
     if (g.get("fuente") or {}).get("nombre"):
         h.enlace(f"Fuente oficial: {g['fuente']['nombre']}", g["fuente"]["url"])
     h.nota("Precios: Yahoo Finance (referencia, no oficial).")
