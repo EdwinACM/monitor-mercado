@@ -16,6 +16,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.properties import PageSetupProperties
 
+import fichas
 import glosario
 import reportes as R
 
@@ -460,6 +461,44 @@ def _grafica(h, cat_col, val_col, fila_ini, fila_fin, ancla_fila, titulo, valore
     h.ws.add_chart(ch, f"A{ancla_fila}")
 
 
+def _fuentes(h, fuentes):
+    h.nota(f"Datos consultados el {R.fecha_corta(fichas.CONSULTA)}. Fuentes:")
+    for nombre, url in fuentes:
+        h.enlace(nombre, url)
+
+
+def _bloque_titulo(h, x, mon):
+    """Valor de mercado y datos del título de la acción (constitución, domicilio, capital, series, derechos...), con su fuente."""
+    F = fichas.ACCIONES.get(x["ticker"])
+    h.bloque("Valor de mercado y datos del título")
+    filas = [("Valor de mercado de la acción", x["cierre"], mon, f"Precio de cierre del {R.fecha_corta(x['fecha'])}, determinado por la oferta y la demanda en {'la Bolsa Mexicana de Valores' if x['pais'] == 'México' else x['mercado']}.")]
+    if F and F.get("capitalizacion", True) and F.get("acciones"):
+        filas.append(("Valor de mercado de la empresa, aproximado (millones)", x["cierre"] * F["acciones"] / 1e6, mon,
+                      f"Precio de cierre por {F['acciones']:,} acciones en circulación (dato del {F['acciones_fecha']}), en millones de {"dólares" if x["moneda"] == "USD" else "pesos"}; si el número de acciones cambió desde entonces, la cifra es una aproximación."))
+    h.medidas(filas)
+    if not F:
+        h.nota("No hay datos del título de esta emisora.")
+        return
+    h.nota("Elementos que contiene el título de una acción, con los datos de esta emisora.")
+    h.tabla(["Elemento del título", "Dato de la emisora"], [
+        ["Denominación de la sociedad", F["denominacion"]], ["Clave de pizarra y mercado", F["clave"]], ["Fecha y lugar de constitución", F["constitucion"]],
+        ["Duración de la sociedad", F["duracion"]], ["Domicilio", F["domicilio"]], ["Inscripción en el Registro Público de Comercio", F["registro"]],
+        ["Serie y folio del título", F["serie_folio"]], ["Objeto social y actividad", F["objeto"]], ["Capital social, número de acciones y valor nominal", F["capital"]],
+        ["Tipo de acción", F["tipo"]], ["Derechos (patrimoniales o corporativos)", F["derechos"]], ["Firma de los administradores", F["firma"]]], fusion=[(2, NCOL)])
+    _fuentes(h, F["fuentes"])
+
+
+def _bloque_instrumento(h, nombre):
+    F = fichas.DEUDA.get(nombre)
+    if not F:
+        return
+    h.bloque("Datos del instrumento")
+    h.tabla(["Elemento", "Dato del instrumento"], [
+        ["Denominación", F["denominacion"]], ["Emisor", F["emisor"]], ["Clave", F["clave"]], ["Primera emisión", F["primera"]], ["Valor nominal", F["nominal"]], ["Plazo", F["plazo"]],
+        ["Intereses y amortización", F["intereses"]], ["Tasa", F["tasa"]], ["Colocación", F["colocacion"]], ["Respaldo o garantía", F["garantia"]]], fusion=[(2, NCOL)])
+    _fuentes(h, F["fuentes"])
+
+
 def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
     mon = moneda_fmt(x["moneda"])
     h = Hoja(wb, nombre, f"{x['nombre']} ({x['ticker'].replace('.MX', '')})", f"{x['mercado']} · {'dólares estadounidenses' if x['moneda'] == 'USD' else 'pesos mexicanos'} · cierre del {R.fecha_corta(x['fecha'])}")
@@ -525,10 +564,7 @@ def _hoja_accion(wb, nombre, x, ctx, e, g, hist, sub):
         h.tabla(["Horizonte", "Rango con 68 %: mínimo", "Rango con 68 %: máximo", "Rango con 95 %: mínimo", "Rango con 95 %: máximo", "Si continúa la tendencia", "Acierto histórico del rango de 95 %"],
                 [[f"{q['h']} sesiones", (q["b68"][0], mon), (q["b68"][1], mon), (q["b95"][0], mon), (q["b95"][1], mon), (q["tendencia"], mon), (q["cobertura"]["p95"], PCT_S) if q.get("cobertura") else "—"] for q in pr["horizontes"]])
         h.nota(f"Volatilidad diaria reciente {pr['sigma_diaria']:.2f} % (promedio móvil exponencial, λ = 0.94). El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. Son rangos de probabilidad, no un pronóstico.")
-    h.bloque("Valor de mercado y datos del título")
-    h.medidas([("Valor de mercado de la acción", x["cierre"], mon, f"Precio de cierre del {R.fecha_corta(x['fecha'])}, determinado por la oferta y la demanda en {'la Bolsa Mexicana de Valores' if x['pais'] == 'México' else x['mercado']}."),
-               ("Tipo o serie de la acción", TITULO.get(x["ticker"], "Acciones comunes (common stock)"), None, "Define los derechos que otorga al accionista: patrimoniales (dividendos) y corporativos (voto). Ver la hoja «Qué es una acción»."),
-               ("Moneda de cotización", "Pesos mexicanos" if x["moneda"] == "MXN" else "Dólares estadounidenses", None, "Moneda en que se expresa el valor de mercado.")])
+    _bloque_titulo(h, x, mon)
     h.bloque("Qué es y qué la mueve")
     h.parrafo(g.get("que_es", ""))
     h.parrafo("Qué la mueve. " + g.get("que_la_mueve", ""))
@@ -597,6 +633,7 @@ def _hoja_deuda(wb, nombre, x, ctx, g, sub):
             h.nota(f"Recta ajustada a las últimas {pr['n']} cifras (error típico {pr['error_tipico']:.2f} puntos), válida si la tendencia reciente continúa. No es un pronóstico: las decisiones de Banxico y la inflación pueden cambiarla.")
         if x.get("sensibilidad"):
             h.parrafo(x["sensibilidad"]["texto"])
+    _bloque_instrumento(h, x["nombre"])
     h.bloque("Qué es y qué lo mueve")
     h.parrafo(g.get("que_es", ""))
     h.parrafo("Qué lo mueve. " + g.get("que_lo_mueve", ""))
@@ -675,6 +712,7 @@ def libro_dia(reg):
                    ("Rendimiento a 20 sesiones previas", e["ret20"], PCT, "Cambio del precio en el último mes."),
                    ("Fuerza relativa (RSI de 14 sesiones)", e["rsi"], N2, "De 0 a 100. Arriba de 70, posible sobrecompra; debajo de 30, posible sobreventa."),
                    ("¿Cambió la decisión?", "Sí" if e.get("cambio") else "No", None, f"La sesión anterior era: {(e.get('veredicto_ant') or 'sin dato').capitalize()}.")])
+        _bloque_titulo(s, {"ticker": e["yahoo"], "cierre": e["cierre"], "fecha": reg["fecha"], "pais": "México" if e.get("moneda") == "MXN" else "EE. UU.", "mercado": e.get("mercado"), "moneda": e["moneda"]}, mon)
         s.bloque("Por qué")
         s.tabla(["Criterio", "Puntos"], [[c[0], (c[1], ENT)] for c in e["componentes"]])
         for q in e["por_que"]:
@@ -695,6 +733,7 @@ def libro_dia(reg):
                    (f"Cifra del {R.fecha_corta(x['fecha'])}", x["valor"] if x["valor"] is not None else "Sin dato", N2, "Última tasa, precio o monto publicado hasta esa fecha."),
                    ("Cambio frente a la anterior", x.get("var_pb") if x.get("var_pb") is not None else "—", PB, "Diferencia con la cifra previa, en puntos base."),
                    ("Puntaje z", x["z"] if x.get("z") is not None else "—", '+0.00;-0.00;0.00', "Distancia al promedio de las últimas 12, en desviaciones estándar.")])
+        _bloque_instrumento(s, x["nombre"])
         s.bloque("Por qué")
         for q in x["por_que"]:
             s.parrafo("• " + q)
