@@ -159,11 +159,11 @@ class Modelo:
             else:
                 pts = 0
             if not p["w"][k]:
-                nota = f"sin poder predictivo reciente (correlación {p['ic'][k]:+.2f}), no suma"
+                nota = f"últimamente no ha anticipado nada (correlación {p['ic'][k]:+.2f}), por eso no suma"
             elif p["w"][k] > 0:
-                nota = f"lectura habitual vigente (correlación reciente {p['ic'][k]:+.2f})"
+                nota = f"funciona como se espera (correlación reciente {p['ic'][k]:+.2f})"
             else:
-                nota = f"lectura invertida: en las últimas sesiones anticipó lo contrario (correlación {p['ic'][k]:+.2f})"
+                nota = f"recientemente funcionó al revés (correlación {p['ic'][k]:+.2f}), por eso se invierte"
             comp.append({"criterio": nombre, "puntos": int(pts), "max": 40, "detalle": f"{_detalle(clave, raw)}; {nota}",
                          "correlacion": round(p["ic"][k], 3)})
         score = max(-100, min(100, sum(c["puntos"] for c in comp)))

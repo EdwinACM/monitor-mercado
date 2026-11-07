@@ -517,7 +517,7 @@ def _ficha_accion(pdf, x, ctx, e, g, hist):
                   precio(h["tendencia"], x["moneda"]), f"{n2(h['cobertura']['p95'])} %" if h.get("cobertura") else "-"] for h in pr["horizontes"]]
         _tabla(pdf, ["Horizonte", "Rango con 68 %", "Rango con 95 %", "Si sigue la tendencia", "Acierto histórico del rango de 95 %"], filas, (24, 44, 44, 32, 34), ["LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT"], size=8.2)
         _p(pdf, f"Volatilidad diaria reciente {n2(pr['sigma_diaria'])} % (EWMA, factor de decaimiento 0.94). El rango de 95 % debería contener el precio real 95 de cada 100 veces; la última columna muestra cuántas veces lo hizo en las últimas 250 sesiones. "
-                "Son rangos de probabilidad, no un pronóstico.", size=8.2, italic=True, color=GRIS)
+                "Son rangos estadísticos: el precio real puede quedar fuera de ellos.", size=8.2, italic=True, color=GRIS)
     rm = next((z for z in ctx.get("riesgo_mercado", []) if z["ticker"] == x["ticker"]), None)
     if rm:
         _h3(pdf, f"Rendimiento ajustado por riesgo (frente al {rm['indice']})", GUINDA)
@@ -562,7 +562,7 @@ def _ficha_accion(pdf, x, ctx, e, g, hist):
     b = x["backtest"]
     if b["n_compra"] >= 8 or b["n_venta"] >= 8:
         _p(pdf, f"Prueba histórica (a {b['horizonte']} sesiones, {b['muestra']} sesiones): comprar acertó {n2(b['aciertos_compra'])} % en {b['n_compra']} casos y vender {n2(b['aciertos_venta'])} % en {b['n_venta']}. "
-                f"Rendimiento medio de cualquier sesión: {pct(b['base_rend_medio'])}. Es una prueba dentro de la misma muestra: calibra la confianza, no la garantiza.", size=8.6, italic=True, color=GRIS)
+                f"Rendimiento medio de cualquier sesión: {pct(b['base_rend_medio'])}. La prueba usa los mismos datos con los que se calibró el modelo, así que tiende a verse mejor de lo que será hacia adelante.", size=8.6, italic=True, color=GRIS)
     if (g.get("fuente") or {}).get("nombre"):
         _p(pdf, f"Fuente oficial: {g['fuente']['nombre']} ({g['fuente']['url']}). Precios: Yahoo Finance (referencia).", size=8.2, color=GRIS, align="L")
 

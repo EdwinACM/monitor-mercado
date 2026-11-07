@@ -81,7 +81,7 @@ def proyectar(c, maximo=60):
             "pendiente_tendencia": round(slope * 100, 3), "r2_tendencia": round(r2, 2), "horizontes": hs, "abanico": ab,
             "texto": (f"Con la volatilidad reciente ({sd * math.sqrt(DIAS_ANIO) * 100:.2f}% anual), el precio de {c0:,.2f} podría estar entre "
                       f"{hs[0]['b95'][0]:,.2f} y {hs[0]['b95'][1]:,.2f} dentro de 5 sesiones, y entre {hs[1]['b95'][0]:,.2f} y {hs[1]['b95'][1]:,.2f} dentro de 20, "
-                      f"con 95% de probabilidad. Es un rango de probabilidad, no un pronóstico del precio.")}
+                      f"con 95% de probabilidad. Es un rango estadístico: el precio real puede quedar fuera de él el 5% de las veces.")}
 
 
 # ------------------------------------------------------------ riesgo y rendimiento

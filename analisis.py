@@ -98,22 +98,22 @@ def veredicto(score):
 DECISION = {"COMPRA FUERTE": "Comprar (señal fuerte)", "COMPRAR": "Comprar", "MANTENER": "Mantener",
             "VENDER": "Vender", "VENTA FUERTE": "Vender (señal fuerte)"}
 ACCION = {
-    "COMPRA FUERTE": "Si no tenías la acción, era un buen momento para entrar; si ya la tenías, mantener o aumentar la posición.",
-    "COMPRAR": "Si no tenías la acción, considerar entrar; si ya la tenías, mantenerla.",
-    "MANTENER": "No operar: no hay ventaja clara. Si tenías la acción, conservarla; si no, esperar una señal más definida.",
-    "VENDER": "Si tenías la acción, considerar salir o reducir; si no la tenías, no entrar todavía.",
-    "VENTA FUERTE": "Si tenías la acción, era momento de salir; si no la tenías, no entrar.",
+    "COMPRA FUERTE": "Si no tenías la acción, era buen momento para entrar. Si ya la tenías, podías mantenerla o aumentar la posición.",
+    "COMPRAR": "Si no la tenías, podías considerar entrar; si ya la tenías, mantenerla.",
+    "MANTENER": "No hay ventaja clara. Si tenías la acción, conservarla; si no, esperar una señal más definida.",
+    "VENDER": "Si tenías la acción, podías considerar salir o reducir; si no, todavía no entrar.",
+    "VENTA FUERTE": "Si tenías la acción, era momento de salir; si no, no entrar.",
 }
 
 
 def razonar(veredicto_, score, comp, anterior=None):
     """Explica en español por qué se tomó la decisión: criterios que empujan a favor o en contra."""
     if score >= 20:
-        por_que = [f"El puntaje total fue {score:+d} de ±100: supera el umbral de +20, por eso la decisión es comprar."]
+        por_que = [f"El puntaje total fue {score:+d} de ±100. Supera el umbral de +20, así que la decisión es comprar."]
     elif score <= -20:
-        por_que = [f"El puntaje total fue {score:+d} de ±100: cae por debajo del umbral de -20, por eso la decisión es vender."]
+        por_que = [f"El puntaje total fue {score:+d} de ±100. Cae por debajo del umbral de -20, así que la decisión es vender."]
     else:
-        por_que = [f"El puntaje total fue {score:+d} de ±100: queda entre -20 y +20, sin ventaja clara, por eso la decisión es mantener."]
+        por_que = [f"El puntaje total fue {score:+d} de ±100. Queda entre -20 y +20, sin ventaja clara, así que la decisión es mantener."]
     for c in sorted(comp, key=lambda x: -abs(x["puntos"])):
         if c["puntos"]:
             lado = "a favor de comprar" if c["puntos"] > 0 else "a favor de vender"
@@ -122,7 +122,7 @@ def razonar(veredicto_, score, comp, anterior=None):
     if neutros:
         por_que.append("Sin aporte hoy: " + ", ".join(neutros) + ".")
     if anterior and anterior != veredicto_:
-        por_que.append(f"Cambio de señal: el día anterior era {DECISION.get(anterior, anterior).lower()}.")
+        por_que.append(f"La señal cambió: el día anterior era {DECISION.get(anterior, anterior).lower()}.")
     return por_que
 
 
@@ -167,7 +167,7 @@ def _tendencia(c, i):
 
 def _texto(nombre, d):
     t = d["tendencia"]
-    partes = [f"{nombre} cerró en ${d['cierre']:.2f}, {'sube' if d['var_pct'] >= 0 else 'baja'} {abs(d['var_pct']):.2f}% vs. la sesión anterior."]
+    partes = [f"{nombre} cerró en ${d['cierre']:.2f} ({d['var_pct']:+.2f}% frente a la sesión anterior)."]
     if d["ret5"] is not None and d["ret20"] is not None:
         partes.append(f"En 5 sesiones acumula {d['ret5']:+.2f}% y en 20 sesiones {d['ret20']:+.2f}%.")
     if t["pendiente"] is not None:
@@ -188,18 +188,18 @@ def _respaldo_texto(v, r):
     """Evidencia estadística de la decisión: qué pasó a 5 sesiones tras señales del mismo tipo (dentro de la muestra de calibración)."""
     if not r or not r["n"]:
         return "Aún no hay sesiones suficientes para respaldar estadísticamente esta decisión."
-    marco = f"entre el {r['desde'][8:]}/{r['desde'][5:7]}/{r['desde'][:4]} y el {r['hasta'][8:]}/{r['hasta'][5:7]}/{r['hasta'][:4]} ({r['n']:,} observaciones de las 10 emisoras)"
+    marco = f"Entre el {r['desde'][8:]}/{r['desde'][5:7]}/{r['desde'][:4]} y el {r['hasta'][8:]}/{r['hasta'][5:7]}/{r['hasta'][:4]} ({r['n']:,} observaciones de las 10 emisoras)"
     if "COMPRA" in v and r["compra"]["n"]:
         c = r["compra"]
-        return (f"{marco.capitalize()[:1] + marco[1:]}, cuando el puntaje era de comprar el precio subió a 5 sesiones el {c['sube']:.2f}% de las veces "
-                f"(frente a {r['base_sube']:.2f}% en cualquier sesión) con un rendimiento medio de {c['media']:+.2f}%.")
+        return (f"{marco}, tras una señal de compra el precio subió a 5 sesiones el {c['sube']:.2f}% de las veces "
+                f"(en cualquier sesión, {r['base_sube']:.2f}%), con un rendimiento medio de {c['media']:+.2f}%.")
     if v in ("VENDER", "VENTA FUERTE") and r["venta"]["n"]:
         c = r["venta"]
-        return (f"{marco.capitalize()[:1] + marco[1:]}, cuando el puntaje era de vender el precio bajó a 5 sesiones el {c['baja']:.2f}% de las veces "
-                f"(frente a {100 - r['base_sube']:.2f}% en cualquier sesión) con un rendimiento medio de {c['media']:+.2f}%.")
+        return (f"{marco}, tras una señal de venta el precio bajó a 5 sesiones el {c['baja']:.2f}% de las veces "
+                f"(en cualquier sesión, {100 - r['base_sube']:.2f}%), con un rendimiento medio de {c['media']:+.2f}%.")
     c = r["mantener"]
-    return (f"{marco.capitalize()[:1] + marco[1:]}, cuando no había señal clara el precio se movió 2% o menos en solo {c['quieto']:.2f}% de los casos: "
-            "mantener significa que no hay ventaja estadística, no que se espere que el precio quede quieto.")
+    return (f"{marco}, sin una señal clara el precio se movió 2% o menos en solo {c['quieto']:.2f}% de los casos. "
+            "Mantener indica falta de ventaja estadística y el precio puede moverse en cualquier dirección.")
 
 
 def _riesgos(d, r):
@@ -212,10 +212,10 @@ def _riesgos(d, r):
     elif d["veredicto"] in ("VENDER", "VENTA FUERTE"):
         out.append(f"Si el precio cierra por encima de la resistencia de 20 sesiones ({s['resistencia']:.2f}), la señal de venta pierde validez.")
     if sem:
-        out.append(f"La oscilación típica de una semana es de ±{sem:.2f}%, normalmente mayor que la ventaja estadística de la señal: es normal que se equivoque con frecuencia.")
+        out.append(f"En una semana el precio suele moverse alrededor de ±{sem:.2f}%, más de lo que ayuda la señal, así que se equivoca con frecuencia.")
     if r and r["compra"]["sube"] and "COMPRA" in d["veredicto"] and r["compra"]["sube"] < 60:
-        out.append(f"Aun en el respaldo histórico la compra acertó {r['compra']['sube']:.2f}% de las veces: no es una señal segura.")
-    out.append("Noticias, resultados de la empresa o cambios de tasas pueden cambiar el precio sin que lo anticipen los indicadores técnicos.")
+        out.append(f"Incluso en el respaldo histórico la compra acertó solo {r['compra']['sube']:.2f}% de las veces.")
+    out.append("Una noticia, el reporte de resultados de la empresa o un cambio de tasas pueden mover el precio sin que los indicadores lo anticipen.")
     return out
 
 
@@ -263,7 +263,7 @@ def analizar_serie(nombre, rows, desde_vista=None, con_serie=True, con_backtest=
     d["por_que"] = razonar(d["veredicto"], score, comp, d["veredicto_ant"])
     cal = d["calibracion"]
     if cal:
-        d["por_que"].insert(1, f"Cómo se calcula: nueve señales técnicas se combinan con pesos recalculados hoy según cuánto anticiparon el rendimiento a 5 sesiones de las 10 emisoras en las últimas {cal['sesiones']} sesiones; el puntaje se escala para que +20 y −20 marquen las señales poco habituales.")
+        d["por_que"].insert(1, f"El puntaje combina nueve señales técnicas. Sus pesos se recalculan cada día según cuánto anticiparon el rendimiento a 5 sesiones de las 10 emisoras en las últimas {cal['sesiones']} sesiones, y el resultado se escala para que +20 y −20 marquen señales poco habituales.")
     d["accion"] = ACCION[d["veredicto"]]
     d["texto"] = _texto(nombre, d)
     if con_backtest:
