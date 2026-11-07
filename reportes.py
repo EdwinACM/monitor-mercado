@@ -15,6 +15,7 @@ from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+import fichas
 import glosario
 
 RAIZ = Path(__file__).parent
@@ -441,6 +442,35 @@ def _cabecera_ficha(pdf, titulo, sub, decision, veredicto):
     pdf.set_y(y + 19)
 
 
+def _datos_titulo(pdf, x):
+    F = fichas.ACCIONES.get(x["ticker"])
+    if not F:
+        return
+    _h3(pdf, "Valor de mercado y datos del título", GUINDA)
+    filas = [["Valor de mercado de la acción", f"{precio(x['cierre'], x['moneda'])}: precio de cierre del {fecha_corta(x['fecha'])}, determinado por la oferta y la demanda en {'la Bolsa Mexicana de Valores' if x['pais'] == 'México' else x['mercado']}."]]
+    if F.get("capitalizacion", True) and F.get("acciones"):
+        filas.append(["Valor de mercado de la empresa (aproximado)", f"{precio(x['cierre'] * F['acciones'] / 1e6, x['moneda'])} millones: cierre por {F['acciones']:,} acciones en circulación (dato del {F['acciones_fecha']})."])
+    filas += [["Denominación de la sociedad", F["denominacion"]], ["Clave de pizarra y mercado", F["clave"]], ["Fecha y lugar de constitución", F["constitucion"]],
+              ["Duración de la sociedad", F["duracion"]], ["Domicilio", F["domicilio"]], ["Inscripción en el Registro Público de Comercio", F["registro"]],
+              ["Serie y folio del título", F["serie_folio"]], ["Objeto social y actividad", F["objeto"]], ["Capital social, número de acciones y valor nominal", F["capital"]],
+              ["Tipo de acción", F["tipo"]], ["Derechos (patrimoniales o corporativos)", F["derechos"]], ["Firma de los administradores", F["firma"]]]
+    _tabla(pdf, ["Elemento del título", "Dato de la emisora"], filas, (50, 128), ["LEFT", "LEFT"], size=8)
+    for nombre, url in F["fuentes"]:
+        _p(pdf, f"Fuente: {nombre} ({url}). Consultado el {fecha_corta(fichas.CONSULTA)}.", size=7.8, color=GRIS, align="L", espacio=0.6)
+
+
+def _datos_instrumento(pdf, nombre):
+    F = fichas.DEUDA.get(nombre)
+    if not F:
+        return
+    _h3(pdf, "Datos del instrumento", GUINDA)
+    _tabla(pdf, ["Elemento", "Dato del instrumento"], [["Denominación", F["denominacion"]], ["Emisor", F["emisor"]], ["Clave", F["clave"]], ["Primera emisión", F["primera"]],
+                                                       ["Valor nominal", F["nominal"]], ["Plazo", F["plazo"]], ["Intereses y amortización", F["intereses"]], ["Tasa", F["tasa"]],
+                                                       ["Colocación", F["colocacion"]], ["Respaldo o garantía", F["garantia"]]], (40, 138), ["LEFT", "LEFT"], size=8)
+    for n, url in F["fuentes"]:
+        _p(pdf, f"Fuente: {n} ({url}). Consultado el {fecha_corta(fichas.CONSULTA)}.", size=7.8, color=GRIS, align="L", espacio=0.6)
+
+
 def _ficha_accion(pdf, x, ctx, e, g, hist):
     s = x["stats"]
     _cabecera_ficha(pdf, f"{x['nombre']} ({x['ticker'].replace('.MX', '')})", f"{x['mercado']} · {x['moneda']} · cierre del {fecha_corta(x['fecha'])}", x["decision"], x["veredicto"])
@@ -493,6 +523,7 @@ def _ficha_accion(pdf, x, ctx, e, g, hist):
     _h3(pdf, "Qué es", GUINDA)
     _p(pdf, g.get("que_es", ""), size=9.2)
     _p(pdf, "Qué la mueve. " + g.get("que_la_mueve", ""), size=9.2)
+    _datos_titulo(pdf, x)
     fac = _factores(x, ctx)
     if fac:
         _h3(pdf, "Qué podría mover su precio ahora", GUINDA)
@@ -559,6 +590,7 @@ def _ficha_deuda(pdf, x, ctx, g):
     _h3(pdf, "Qué es", GUINDA)
     _p(pdf, g.get("que_es", ""), size=9.2)
     _p(pdf, "Qué lo mueve. " + g.get("que_lo_mueve", ""), size=9.2)
+    _datos_instrumento(pdf, x["nombre"])
     fac = factores_deuda(ctx)
     if fac:
         _h3(pdf, "Qué podría mover su rendimiento ahora", GUINDA)
