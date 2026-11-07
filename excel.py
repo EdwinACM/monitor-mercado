@@ -196,35 +196,6 @@ TITULO = {  # tipo o serie de la acción que se sigue en la app
     "WALMEX.MX": "Acciones ordinarias, serie única", "AMXB.MX": "Acciones ordinarias, serie B", "KOFUBL.MX": "Unidad vinculada (serie UBL): un solo valor que agrupa acciones de más de una serie",
     "KIMBERA.MX": "Acciones ordinarias, serie A", "OMAB.MX": "Acciones ordinarias, serie B",
 }
-ELEMENTOS_ACCION = [
-    ("Fecha de constitución y datos de inscripción en el Registro Público de Comercio", "Cuándo nació legalmente la sociedad y dónde quedó registrada.", "Da certeza jurídica: sin inscripción la sociedad no puede acreditar su existencia frente a terceros."),
-    ("Serie y folio del título o del certificado provisional", "La serie agrupa acciones que otorgan los mismos derechos; el folio es el número único del documento.", "Permite identificar cada título y distinguir, por ejemplo, la serie A de la serie B de una misma empresa."),
-    ("Denominación, duración y domicilio de la sociedad", "Nombre legal de la empresa, por cuánto tiempo existirá y dónde está su domicilio.", "Identifica quién emite la acción y bajo qué reglas opera."),
-    ("Nombre, nacionalidad y domicilio del accionista", "Quién es el dueño del título.", "Acredita la propiedad. En la bolsa los títulos están depositados en Indeval y el accionista se registra en cuentas, no en papel."),
-    ("Objeto social", "Actividades que la sociedad puede realizar.", "Delimita a qué se dedica la empresa y qué riesgos de negocio asume quien invierte."),
-    ("Importe del capital social, número total y valor nominal de las acciones", "Cuánto dinero aportaron los socios y en cuántas partes iguales se dividió.", "El valor nominal es el valor contable de cada parte; no es el precio al que se negocia."),
-    ("Número de acciones que ampara el título", "Cuántas acciones representa ese documento.", "Define el tamaño de la participación: más acciones, mayor proporción del capital."),
-    ("Tipo de acción", "Ordinarias (otorgan voto), preferentes o de voto limitado, y series (A, B, L...).", "Determina qué derechos tiene el accionista; empresas con varias series las usan para repartir control y acceso al capital."),
-    ("Derechos patrimoniales o corporativos, según la acción", "Patrimoniales: recibir dividendos y la parte que corresponda al liquidar la empresa. Corporativos: asistir a asambleas y votar.", "Explican qué obtiene el inversionista por ser dueño: ingreso (dividendos) y participación en decisiones."),
-    ("Firma autógrafa de los administradores", "Firma de quienes administran la sociedad, conforme a su contrato social.", "Da validez al título como documento."),
-]
-
-
-def _hoja_concepto_accion(wb):
-    """Hoja con el concepto de acción: valor de mercado y los elementos que debe contener el título (Ley General de Sociedades Mercantiles, art. 125)."""
-    h = Hoja(wb, "Qué es una acción", "Qué es una acción y cuánto vale", "Valor de mercado y contenido del título")
-    h.bloque("Valor de mercado de una acción")
-    h.parrafo("Es el precio determinado por la oferta y la demanda que existen sobre la emisora y su emisión. La cotización se refiere al cierre diario o al precio durante las operaciones de compra y venta de esas acciones en la Bolsa Mexicana de Valores. "
-              "En este libro, el valor de mercado de cada acción es su precio de cierre.")
-    h.tabla(["Concepto", "Qué significa"], [["Valor de mercado de una acción", "Precio al que se compra y se vende hoy en la bolsa; cambia en cada operación según la oferta y la demanda."],
-                                          ["Valor nominal", "Valor contable de cada acción (capital social entre número de acciones). Aparece en el título y casi nunca coincide con el precio de mercado."],
-                                          ["Valor de mercado de la empresa", "Precio de la acción multiplicado por el número de acciones en circulación; también se llama capitalización bursátil."]], fusion=[(2, NCOL)])
-    h.bloque("Contenido de una acción")
-    h.nota("Elementos que debe contener el título, según el artículo 125 de la Ley General de Sociedades Mercantiles.")
-    h.tabla(["Elemento", "Qué es", "Para qué sirve"], [[a, b, c] for a, b, c in ELEMENTOS_ACCION], fusion=[(2, 4), (5, NCOL)])
-    h.nota("Este libro no reproduce estos datos de cada empresa porque no cambian con el precio: se consultan en el título, en el prospecto o en el reporte anual de la emisora (BMV, CNBV o SEC EDGAR).")
-    return h
-
 
 
 def _color_decision(f, col):
@@ -295,14 +266,13 @@ def libro_periodo(inf):
     hist = R.historial(arc)
     gl = {a["ticker"]: a for a in glosario.guia({x["ticker"]: x["nombre"] for x in acc}, srv.META, {})["acciones"]}
     gd = {d["nombre"]: d for d in glosario.guia({}, {}, {n: {"codigo": "", "emisor": ""} for n in glosario.DEUDA})["deuda"]}
-    usados = {"Léeme", "Resumen", "Qué es una acción", "Portafolio", "Entorno global", "Relación con EE. UU.", "Aciertos de las decisiones", "Simulación", "Fuentes"}
+    usados = {"Léeme", "Resumen", "Portafolio", "Entorno global", "Relación con EE. UU.", "Aciertos de las decisiones", "Simulación", "Fuentes"}
     hojas_acc = {x["ticker"]: nombre_hoja(x["ticker"].replace(".MX", ""), usados) for x in acc}
     hojas_deu = {x["nombre"]: nombre_hoja(frase(x["nombre"]), usados) for x in an["deuda"]}
     sub = f"Periodo del {R.fecha_corta(p['desde'])} al {R.fecha_corta(p['hasta'])} · último cierre {R.fecha_corta(p['ultimo_cierre'] or p['hasta'])}"
 
     wb = Workbook()
     indice = [("Resumen", "Lectura del periodo y tablero de cierres y decisiones de todas las emisoras y de la deuda."),
-              ("Qué es una acción", "Valor de mercado de una acción y los elementos que contiene el título."),
               ("Entorno global", "Dólar, tasas, inflación y bolsas del mundo, con su fuente y qué significa cada indicador."),
               ("Relación con EE. UU.", "Qué tan ligada está cada acción al S&P 500 y al dólar, y el efecto del tipo de cambio en las acciones de EE. UU.")]
     indice += [(hojas_acc[x["ticker"]], f"{x['nombre']}: cierre, decisión y por qué, estadística de riesgo, qué la mueve y cierres diarios con su gráfica.") for x in acc]
@@ -343,8 +313,6 @@ def libro_periodo(inf):
     h.tabla(["Instrumento", "Emisor", "Unidad", "Última cifra", "Cambio frente a la anterior", "Puntaje z", "Tendencia", "Decisión"], filas, colorear=lambda f: _color_decision(f, 7))
     _enlazar_primera_columna(h.ws, {frase(x["nombre"]): hojas_deu[x["nombre"]] for x in an["deuda"]})
     _enlazar_primera_columna(h.ws, {x["nombre"]: hojas_acc[x["ticker"]] for x in acc})
-
-    _hoja_concepto_accion(wb)
 
     # --- Entorno global
     h = Hoja(wb, "Entorno global", "Entorno global", sub)
@@ -468,18 +436,29 @@ def _fuentes(h, fuentes):
 
 
 def _bloque_titulo(h, x, mon):
-    """Valor de mercado y datos del título de la acción (constitución, domicilio, capital, series, derechos...), con su fuente."""
-    F = fichas.ACCIONES.get(x["ticker"])
-    h.bloque("Valor de mercado y datos del título")
+    """Valor de mercado, cifras financieras y datos del título de la acción, con su fuente."""
+    F = fichas.datos(x["ticker"])
+    h.bloque("Datos reales de la empresa")
     filas = [("Valor de mercado de la acción", x["cierre"], mon, f"Precio de cierre del {R.fecha_corta(x['fecha'])}, determinado por la oferta y la demanda en {'la Bolsa Mexicana de Valores' if x['pais'] == 'México' else x['mercado']}.")]
     if F and F.get("capitalizacion", True) and F.get("acciones"):
         filas.append(("Valor de mercado de la empresa, aproximado (millones)", x["cierre"] * F["acciones"] / 1e6, mon,
-                      f"Precio de cierre por {F['acciones']:,} acciones en circulación (dato del {F['acciones_fecha']}), en millones de {"dólares" if x["moneda"] == "USD" else "pesos"}; si el número de acciones cambió desde entonces, la cifra es una aproximación."))
+                      f"Precio de cierre por {F['acciones']:,} acciones en circulación (dato del {F['acciones_fecha']}), en millones de {'dólares' if x['moneda'] == 'USD' else 'pesos'}."))
     h.medidas(filas)
     if not F:
         h.nota("No hay datos del título de esta emisora.")
         return
-    h.nota("Elementos que contiene el título de una acción, con los datos de esta emisora.")
+    fin = F.get("financieros")
+    if fin:
+        h.bloque(f"Cifras financieras (en {fin['unidad']}, salvo lo marcado por acción)")
+        filas = []
+        for et, a, b, pa in fin["filas"]:
+            var = (a / b - 1) * 100 if b else None
+            fm = '0.000' if pa and abs(a) < 10 else N2
+            filas.append([et + (" (por acción)" if pa else ""), (a, fm), (b, fm), (var, PCT) if var is not None else "—"])
+        h.tabla(["Concepto", f"Ejercicio al {fin['periodos'][0]}", f"Ejercicio al {fin['periodos'][1]}", "Variación"], filas)
+        h.nota(f"{fin['actualiza']} Dato más reciente: ejercicio al {fin['dato']}.")
+        h.enlace(fin["fuente"][0], fin["fuente"][1])
+    h.bloque("Datos del título")
     h.tabla(["Elemento del título", "Dato de la emisora"], [
         ["Denominación de la sociedad", F["denominacion"]], ["Clave de pizarra y mercado", F["clave"]], ["Fecha y lugar de constitución", F["constitucion"]],
         ["Duración de la sociedad", F["duracion"]], ["Domicilio", F["domicilio"]], ["Inscripción en el Registro Público de Comercio", F["registro"]],
@@ -672,12 +651,12 @@ def _hoja_deuda(wb, nombre, x, ctx, g, sub):
 
 # ============================================================================ día
 def libro_dia(reg):
-    usados = {"Léeme", "Resumen", "Qué es una acción"}
+    usados = {"Léeme", "Resumen"}
     hojas = {e["ticker"]: nombre_hoja(e["ticker"], usados) for e in reg["emisoras"]}
     hojas_d = {x["nombre"]: nombre_hoja(frase(x["nombre"]), usados) for x in reg["deuda"]}
     sub = R.fecha_larga(reg["fecha"])
     wb = Workbook()
-    indice = [("Resumen", "Lectura del día, entorno global y tablero de decisiones."), ("Qué es una acción", "Valor de mercado de una acción y los elementos que contiene el título.")]
+    indice = [("Resumen", "Lectura del día, entorno global y tablero de decisiones.")]
     indice += [(hojas[e["ticker"]], f"{e['nombre']}: cierre, decisión, por qué, qué hacer y qué pasó después.") for e in reg["emisoras"]]
     indice += [(hojas_d[x["nombre"]], f"{frase(x['nombre'])}: última cifra y decisión.") for x in reg["deuda"]]
     _leeme(wb, "Análisis del día", sub, ["Decisión de cada acción e instrumento de deuda al cierre de la sesión, calculada solo con datos disponibles hasta ese día, con lo que ocurrió después cuando ya hay datos."], indice)
@@ -698,7 +677,6 @@ def libro_dia(reg):
             [[frase(x["nombre"]), frase(x["emisor"]), (d_iso(x["fecha"]), FECHA), (x["valor"], N2) if x["valor"] is not None else "—", (x["var_pb"], PB) if x.get("var_pb") is not None else "—",
               (x["z"], '+0.00;-0.00;0.00') if x.get("z") is not None else "—", frase(x["tendencia"]), x["decision"]] for x in reg["deuda"]], colorear=lambda f: _color_decision(f, 7))
     _enlazar_primera_columna(h.ws, {frase(x["nombre"]): hojas_d[x["nombre"]] for x in reg["deuda"]})
-    _hoja_concepto_accion(wb)
     for e in reg["emisoras"]:
         mon = moneda_fmt(e.get("moneda"))
         s = Hoja(wb, hojas[e["ticker"]], f"{e['nombre']} ({e['ticker']})", f"{e.get('mercado')} · {e.get('moneda')} · {sub}")

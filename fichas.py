@@ -26,13 +26,13 @@ ACCIONES = {
         "registro": NC + " (el reporte anual no publica los datos de inscripción en el Registro Público de Comercio).",
         "serie_folio": "Serie única. " + INDEVAL + ".",
         "objeto": "Cláusula tercera de los estatutos: promover, constituir y tomar participación en sociedades, asociaciones y empresas de cualquier tipo; adquirir, emitir y ofrecer valores y adquirir sus propias acciones; entre otros actos. Opera tiendas de autoservicio, mayoreo y formatos especializados por medio de sus subsidiarias.",
-        "capital": "Acciones nominativas sin expresión de valor nominal. En circulación: 17,461,402,631 al cierre de 2021 y 17,446 millones al cierre de 2024. Los estatutos fijan un mínimo de 3,000,000,000 y un máximo de 100,000,000,000 de acciones. El 20 de abril de 2026 la asamblea aprobó cancelar 154,110,374 acciones propias.",
-        "acciones": 17_446_000_000, "acciones_fecha": "31 de diciembre de 2024",
+        "capital": "Acciones nominativas sin expresión de valor nominal. En circulación: 17,292 millones al cierre de 2025 (17,446 millones al cierre de 2024). Los estatutos fijan un mínimo de 3,000,000,000 y un máximo de 100,000,000,000 de acciones. El 20 de abril de 2026 la asamblea aprobó cancelar 154,110,374 acciones propias.",
+        "acciones": 17_292_000_000, "acciones_fecha": "31 de diciembre de 2025",
         "tipo": "Una sola serie de acciones ordinarias, nominativas y de libre suscripción: pueden comprarlas personas físicas o morales, nacionales o extranjeras.",
         "derechos": "Todas las acciones tienen derecho a voto (representan el 100 % de las acciones con voto) y a recibir dividendos.",
         "firma": "Los títulos se firman, de forma autógrafa o facsimilar, por dos de las siguientes personas: el presidente del consejo, el director general (si es consejero), el secretario o prosecretario, o dos consejeros designados para ello.",
         "fuentes": [("Reporte anual 2021 (BMV): historia, estatutos y capital", "https://files.walmex.mx/upload/files/2021/es/anual/Walmex_Reporte_Anual_2021_BMV.pdf"),
-                    ("Resumen financiero 2024", "https://files.walmex.mx/upload/files/2024/ES/Anual/Walmex_IA24_Resumen_Financiero.pdf"),
+                    ("Resumen financiero 2025", "https://files.walmex.mx/upload/files/2025/ES/Anual/Walmex_IA25_Resumen_Financiero.pdf"),
                     ("Perfil de la emisora en la BMV", "https://www.bmv.com.mx/es/emisoras/perfil/WALMEX-5214")],
     },
     "AMXB.MX": {
@@ -178,6 +178,96 @@ ACCIONES = {
         "fuentes": [("Formulario 10-K de 2025 (SEC EDGAR)", "https://www.sec.gov/Archives/edgar/data/21344/000162828026010047/ko-20251231.htm")],
     },
 }
+
+# ----------------------------------------------------------- cifras de empresas que no reportan a la SEC
+# {concepto: (ejercicio actual, ejercicio anterior)} en millones de pesos, salvo lo marcado como «por acción»
+ESTATICOS = {
+    "WALMEX.MX": {"unidad": "millones de pesos", "periodos": ("2025", "2024"), "dato": "31 de diciembre de 2025",
+                  "fuente": ("Resumen financiero 2025 de Walmart de México", "https://files.walmex.mx/upload/files/2025/ES/Anual/Walmex_IA25_Resumen_Financiero.pdf"),
+                  "cifras": {"ingresos": (1_011_598, 958_507), "utilidad_bruta": (245_198, 231_473), "utilidad_operacion": (78_494, 77_359), "ebitda": (103_447, 99_998),
+                             "utilidad_neta": (49_891, 53_827), "activos": (495_273, 493_893), "capital": (235_580, 232_875), "utilidad_por_accion": (2.873, 3.085),
+                             "dividendos_pagados": (28_923, 37_399)}},
+    "KIMBERA.MX": {"unidad": "millones de pesos", "periodos": ("2025", "2024"), "dato": "31 de diciembre de 2025",
+                   "fuente": ("Reporte anual 2025 de Kimberly-Clark de México (BMV)", "https://www.kimberly-clark.com.mx/data/2026/Reporte-Anual-2025.pdf"),
+                   "cifras": {"ingresos": (55_371, 54_782), "utilidad_operacion": (12_091, 12_847), "ebitda": (14_108, 14_895), "utilidad_neta": (7_581, 7_830),
+                              "activos": (45_633, 52_109), "pasivos": (38_397, 44_703), "capital": (7_236, 7_407), "dividendo_por_accion": (2.04, 1.86)}},
+}
+ETIQUETAS = {"ingresos": "Ingresos", "utilidad_bruta": "Utilidad bruta", "utilidad_operacion": "Utilidad de operación", "ebitda": "Flujo operativo (EBITDA)",
+             "utilidad_neta": "Utilidad neta", "activos": "Activos totales", "pasivos": "Pasivos totales", "capital": "Capital contable",
+             "flujo_operacion": "Flujo de efectivo de operación", "utilidad_por_accion": "Utilidad por acción", "dividendo_por_accion": "Dividendo por acción",
+             "dividendos_pagados": "Dividendos pagados"}
+POR_ACCION = ("utilidad_por_accion", "dividendo_por_accion")
+ORDEN = ["ingresos", "utilidad_bruta", "utilidad_operacion", "ebitda", "utilidad_neta", "activos", "pasivos", "capital", "flujo_operacion", "utilidad_por_accion", "dividendo_por_accion", "dividendos_pagados"]
+US = ("AAPL", "MSFT", "NVDA", "TSLA", "KO")
+
+
+def _vivo():
+    """Datos de static/data/fichas.json (los actualiza actualizar_fichas.py cada día hábil con la SEC)."""
+    import json
+    from pathlib import Path
+    ruta = Path(__file__).parent / "static" / "data" / "fichas.json"
+    try:
+        return json.loads(ruta.read_text(encoding="utf-8"))
+    except Exception:
+        return {"empresas": {}}
+
+
+def _fmt_fecha(iso):
+    y, m, d = iso.split("-")
+    meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    return f"{int(d)} de {meses[int(m) - 1]} de {y}"
+
+
+def financieros(ticker):
+    """Cifras reales de la empresa: {unidad, periodos, filas [(etiqueta, actual, anterior, por_accion)], fuente, dato, actualiza}. None si no hay."""
+    est = ESTATICOS.get(ticker)
+    if est:
+        filas = [(ETIQUETAS[k], *est["cifras"][k], k in POR_ACCION) for k in ORDEN if k in est["cifras"]]
+        return {"unidad": est["unidad"], "periodos": est["periodos"], "filas": filas, "fuente": est["fuente"], "dato": est["dato"],
+                "actualiza": "Se actualizan con cada reporte anual de la empresa."}
+    e = _vivo()["empresas"].get(ticker)
+    if not e or not e.get("cifras"):
+        return None
+    cif = e["cifras"]
+    ref = max(cif.values(), key=lambda v: v[0]["fin"])
+    mon = ref[0]["unidad"].split("/")[0]
+    nombre_mon = {"USD": "dólares", "MXN": "pesos"}.get(mon, mon)
+    filas = []
+    for k in ORDEN:
+        v = cif.get(k)
+        if not v or len(v) < 2:
+            continue
+        pa = k in POR_ACCION
+        d = 1 if pa else 1e6
+        filas.append((ETIQUETAS[k], v[0]["valor"] / d, v[1]["valor"] / d, pa))
+    doc = e["documentos"].get("anual", {})
+    return {"unidad": f"millones de {nombre_mon}", "periodos": (_fmt_fecha(ref[0]["fin"]), _fmt_fecha(ref[1]["fin"])), "filas": filas,
+            "fuente": (f"Formulario {doc.get('formulario', '')} presentado a la SEC el {_fmt_fecha(doc['presentado']) if doc else ''} (cifras XBRL)", doc.get("url", "https://www.sec.gov/edgar")),
+            "dato": _fmt_fecha(ref[0]["fin"]), "actualiza": "Se actualizan automáticamente cada día hábil desde SEC EDGAR."}
+
+
+def datos(ticker):
+    """Ficha de la emisora con las cifras más recientes: para las empresas de EE. UU. el capital y las acciones salen de la SEC."""
+    F = dict(ACCIONES[ticker]) if ticker in ACCIONES else None
+    if not F:
+        return None
+    e = _vivo()["empresas"].get(ticker)
+    if e and ticker in US and e["acciones"].get("circulacion"):
+        a = e["acciones"]
+        c = a["circulacion"]
+        partes = []
+        if a.get("valor_par"):
+            partes.append(f"Valor par de ${a['valor_par']['valor']:.8f}".rstrip("0").rstrip(".") + " por acción")
+        if a.get("autorizadas"):
+            partes.append(f"Autorizadas: {a['autorizadas']['valor']:,.0f}")
+        if a.get("emitidas"):
+            partes.append(f"Emitidas al {_fmt_fecha(a['emitidas']['fecha'])}: {a['emitidas']['valor']:,.0f}")
+        partes.append(f"En circulación al {_fmt_fecha(c['fecha'])}: {c['valor']:,.0f} (formulario {c['formulario']} presentado el {_fmt_fecha(c['presentado'])})")
+        F["capital"] = ". ".join(partes) + "."
+        F["acciones"], F["acciones_fecha"] = c["valor"], _fmt_fecha(c["fecha"])
+    F["financieros"] = financieros(ticker)
+    return F
+
 
 # ----------------------------------------------------------------------- instrumentos de deuda
 BANXICO_II = ("Banco de México: El mercado de valores gubernamentales en México (capítulo II)", "https://www.banxico.org.mx/elib/mercado-valores-gub/OEBPS/Text/ii.html")

@@ -1,0 +1,1600 @@
+{
+ "actualizado": "2026-11-06T22:11:15.568324-06:00",
+ "fuente": "SEC EDGAR (data.sec.gov)",
+ "errores": {},
+ "empresas": {
+  "AAPL": {
+   "nombre": "Apple Inc.",
+   "cik": "0000320193",
+   "estado_constitucion": "CA",
+   "ejercicio_fiscal_termina": "0926",
+   "documentos": {
+    "anual": {
+     "formulario": "10-K",
+     "presentado": "2026-11-03",
+     "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/aapl-20260926.htm"
+    },
+    "ultimo": {
+     "formulario": "10-K",
+     "presentado": "2026-11-03",
+     "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/aapl-20260926.htm"
+    }
+   },
+   "acciones": {
+    "circulacion": {
+     "valor": 14532182000,
+     "fecha": "2026-10-23",
+     "formulario": "10-K",
+     "presentado": "2026-11-03"
+    },
+    "emitidas": {
+     "valor": 14532259000,
+     "fecha": "2026-09-26",
+     "formulario": "10-K",
+     "presentado": "2026-11-03"
+    },
+    "autorizadas": {
+     "valor": 50400000000,
+     "fecha": "2026-09-26",
+     "formulario": "10-K",
+     "presentado": "2026-11-03"
+    },
+    "valor_par": {
+     "valor": 1e-05,
+     "fecha": "2026-09-26",
+     "formulario": "10-K",
+     "presentado": "2026-11-03"
+    }
+   },
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2026-09-26",
+      "valor": 478834000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 416161000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 391035000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2026-09-26",
+      "valor": 132175000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 112010000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 93736000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2026-09-26",
+      "valor": 404548000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 359241000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 364980000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-10-31"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2026-09-26",
+      "valor": 292455000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 285508000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 308030000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-10-31"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2026-09-26",
+      "valor": 112093000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 73733000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 56950000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2026-09-26",
+      "valor": 8.98,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 7.46,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 6.08,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2026-09-26",
+      "valor": 145097000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 111482000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 118254000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     }
+    ],
+    "dividendo_por_accion": [
+     {
+      "fin": "2026-09-26",
+      "valor": 1.06,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2025-09-27",
+      "valor": 1.02,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     },
+     {
+      "fin": "2024-09-28",
+      "valor": 0.98,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-11-03"
+     }
+    ]
+   }
+  },
+  "MSFT": {
+   "nombre": "MICROSOFT CORP",
+   "cik": "0000789019",
+   "estado_constitucion": "WA",
+   "ejercicio_fiscal_termina": "0630",
+   "documentos": {
+    "anual": {
+     "formulario": "10-K",
+     "presentado": "2026-07-29",
+     "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm"
+    },
+    "ultimo": {
+     "formulario": "10-Q",
+     "presentado": "2026-10-28",
+     "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436133/msft-20260930.htm"
+    }
+   },
+   "acciones": {
+    "circulacion": {
+     "valor": 7426194552,
+     "fecha": "2026-10-22",
+     "formulario": "10-Q",
+     "presentado": "2026-10-28"
+    },
+    "emitidas": {
+     "valor": 7427000000,
+     "fecha": "2026-09-30",
+     "formulario": "10-Q",
+     "presentado": "2026-10-28"
+    },
+    "autorizadas": {
+     "valor": 24000000000,
+     "fecha": "2026-09-30",
+     "formulario": "10-Q",
+     "presentado": "2026-10-28"
+    }
+   },
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2026-06-30",
+      "valor": 331839000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 281724000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 245122000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2026-06-30",
+      "valor": 133749000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 101832000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 88136000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2026-06-30",
+      "valor": 758376000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 619003000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 512163000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-07-30"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2026-06-30",
+      "valor": 315989000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 275524000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 243686000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-07-30"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2026-06-30",
+      "valor": 442387000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 343479000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 268477000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2026-06-30",
+      "valor": 17.95,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 13.64,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 11.8,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2026-06-30",
+      "valor": 182935000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 136162000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 118548000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     }
+    ],
+    "dividendo_por_accion": [
+     {
+      "fin": "2026-06-30",
+      "valor": 3.64,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2025-06-30",
+      "valor": 3.32,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     },
+     {
+      "fin": "2024-06-30",
+      "valor": 3,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-07-29"
+     }
+    ]
+   }
+  },
+  "NVDA": {
+   "nombre": "NVIDIA CORP",
+   "cik": "0001045810",
+   "estado_constitucion": "DE",
+   "ejercicio_fiscal_termina": "0131",
+   "documentos": {
+    "anual": {
+     "formulario": "10-K",
+     "presentado": "2026-02-25",
+     "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm"
+    },
+    "ultimo": {
+     "formulario": "10-Q",
+     "presentado": "2026-08-26",
+     "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm"
+    }
+   },
+   "acciones": {
+    "circulacion": {
+     "valor": 24100000000,
+     "fecha": "2026-08-21",
+     "formulario": "10-Q",
+     "presentado": "2026-08-26"
+    },
+    "emitidas": {
+     "valor": 24304000000,
+     "fecha": "2026-01-25",
+     "formulario": "10-K",
+     "presentado": "2026-02-25"
+    },
+    "autorizadas": {
+     "valor": 80000000000,
+     "fecha": "2026-01-25",
+     "formulario": "10-K",
+     "presentado": "2026-02-25"
+    }
+   },
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2026-01-25",
+      "valor": 215938000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 130497000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 60922000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2026-01-25",
+      "valor": 120067000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 72880000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 29760000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2026-01-25",
+      "valor": 206803000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 111601000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 65728000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-02-26"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2026-01-25",
+      "valor": 49510000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 32274000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 22750000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-02-26"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2026-01-25",
+      "valor": 157293000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 79327000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 42978000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2026-01-25",
+      "valor": 4.9,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 2.94,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 1.19,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2026-01-25",
+      "valor": 102718000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 64089000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 28090000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     }
+    ],
+    "dividendo_por_accion": [
+     {
+      "fin": "2026-01-25",
+      "valor": 0.04,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2025-01-26",
+      "valor": 0.034,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     },
+     {
+      "fin": "2024-01-28",
+      "valor": 0.016,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-25"
+     }
+    ]
+   }
+  },
+  "TSLA": {
+   "nombre": "Tesla, Inc.",
+   "cik": "0001318605",
+   "estado_constitucion": "TX",
+   "ejercicio_fiscal_termina": "1231",
+   "documentos": {
+    "anual": {
+     "formulario": "10-K",
+     "presentado": "2026-01-29",
+     "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026003952/tsla-20251231.htm"
+    },
+    "ultimo": {
+     "formulario": "10-Q",
+     "presentado": "2026-10-22",
+     "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026066775/tsla-20260930.htm"
+    }
+   },
+   "acciones": {
+    "circulacion": {
+     "valor": 3952757946,
+     "fecha": "2026-10-15",
+     "formulario": "10-Q",
+     "presentado": "2026-10-22"
+    },
+    "emitidas": {
+     "valor": 3953000000,
+     "fecha": "2026-09-30",
+     "formulario": "10-Q",
+     "presentado": "2026-10-22"
+    },
+    "autorizadas": {
+     "valor": 6000000000,
+     "fecha": "2026-09-30",
+     "formulario": "10-Q",
+     "presentado": "2026-10-22"
+    },
+    "valor_par": {
+     "valor": 0.001,
+     "fecha": "2026-09-30",
+     "formulario": "10-Q",
+     "presentado": "2026-10-22"
+    }
+   },
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2025-12-31",
+      "valor": 94827000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 97690000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 96773000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2025-12-31",
+      "valor": 3794000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 7091000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 14997000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2025-12-31",
+      "valor": 137806000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 122070000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 106618000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-01-30"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2025-12-31",
+      "valor": 54941000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 48390000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 43009000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-01-30"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2025-12-31",
+      "valor": 82137000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 72913000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 62634000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-01-30"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2025-12-31",
+      "valor": 1.08,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 2.04,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 4.3,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2025-12-31",
+      "valor": 14747000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 14923000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 13256000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-01-29"
+     }
+    ]
+   }
+  },
+  "KO": {
+   "nombre": "COCA COLA CO",
+   "cik": "0000021344",
+   "estado_constitucion": "DE",
+   "ejercicio_fiscal_termina": "1231",
+   "documentos": {
+    "anual": {
+     "formulario": "10-K",
+     "presentado": "2026-02-20",
+     "url": "https://www.sec.gov/Archives/edgar/data/21344/000162828026010047/ko-20251231.htm"
+    },
+    "ultimo": {
+     "formulario": "10-Q",
+     "presentado": "2026-10-28",
+     "url": "https://www.sec.gov/Archives/edgar/data/21344/000162828026067844/ko-20261002.htm"
+    }
+   },
+   "acciones": {
+    "circulacion": {
+     "valor": 4301902335,
+     "fecha": "2026-10-26",
+     "formulario": "10-Q",
+     "presentado": "2026-10-28"
+    },
+    "emitidas": {
+     "valor": 7040000000,
+     "fecha": "2026-10-02",
+     "formulario": "10-Q",
+     "presentado": "2026-10-28"
+    },
+    "autorizadas": {
+     "valor": 11200000000,
+     "fecha": "2026-10-02",
+     "formulario": "10-Q",
+     "presentado": "2026-10-28"
+    }
+   },
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2025-12-31",
+      "valor": 47941000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 47061000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 45754000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2025-12-31",
+      "valor": 13107000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 10631000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 10714000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2025-12-31",
+      "valor": 104816000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 100549000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 97703000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-02-20"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2025-12-31",
+      "valor": 32169000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 24856000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 25941000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2025-02-20"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2025-12-31",
+      "valor": 3.04,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 2.46,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 2.47,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2025-12-31",
+      "valor": 7408000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 6805000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 11599000000,
+      "unidad": "USD",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     }
+    ],
+    "dividendo_por_accion": [
+     {
+      "fin": "2025-12-31",
+      "valor": 2.04,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2024-12-31",
+      "valor": 1.94,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 1.84,
+      "unidad": "USD/shares",
+      "formulario": "10-K",
+      "presentado": "2026-02-20"
+     }
+    ]
+   }
+  },
+  "AMXB.MX": {
+   "nombre": "AMERICA MOVIL SAB DE CV/",
+   "cik": "0001129137",
+   "estado_constitucion": "O5",
+   "ejercicio_fiscal_termina": "1231",
+   "documentos": {
+    "anual": {
+     "formulario": "20-F",
+     "presentado": "2026-04-28",
+     "url": "https://www.sec.gov/Archives/edgar/data/1129137/000114036126017486/ef20060642_20f.htm"
+    },
+    "ultimo": {
+     "formulario": "6-K",
+     "presentado": "2026-10-22",
+     "url": "https://www.sec.gov/Archives/edgar/data/1129137/000114036126040507/ef20084200_6k.htm"
+    }
+   },
+   "acciones": {
+    "circulacion": {
+     "valor": 60264000000,
+     "fecha": "2025-12-31",
+     "formulario": "20-F",
+     "presentado": "2026-04-28"
+    }
+   },
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 869220584000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 816012844000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 844501397000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2024-12-31",
+      "valor": 22902025000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 76110617000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 76159391000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 1793920957000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 1564185960000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 1618099344000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 1361736636000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 1142483578000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 1180270071000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2024-12-31",
+      "valor": 369085350000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 366712545000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 373804704000,
+      "unidad": "MXN",
+      "formulario": "20-F/A",
+      "presentado": "2025-04-10"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2024-12-31",
+      "valor": 239341121000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 248092195000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 225287031000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-05-14"
+     }
+    ]
+   }
+  },
+  "KOFUBL.MX": {
+   "nombre": "COCA COLA FEMSA SAB DE CV",
+   "cik": "0000910631",
+   "estado_constitucion": "",
+   "ejercicio_fiscal_termina": "1231",
+   "documentos": {
+    "anual": {
+     "formulario": "20-F",
+     "presentado": "2026-04-16",
+     "url": "https://www.sec.gov/Archives/edgar/data/910631/000162828026025313/kof-20251231.htm"
+    },
+    "ultimo": {
+     "formulario": "6-K",
+     "presentado": "2026-10-26",
+     "url": "https://www.sec.gov/Archives/edgar/data/910631/000129281426005006/kofpr3q26_6k.htm"
+    }
+   },
+   "acciones": {},
+   "cifras": {
+    "utilidad_neta": [
+     {
+      "fin": "2024-12-31",
+      "valor": 23729000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 19536000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 19034000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 307986000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 273520000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 277995000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 157445000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 139815000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 146119000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2024-12-31",
+      "valor": 143428000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 127025000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 125385000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2024-04-12"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2024-12-31",
+      "valor": 1.41,
+      "unidad": "MXN/shares",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 1.16,
+      "unidad": "MXN/shares",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 1.13,
+      "unidad": "MXN/shares",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2024-12-31",
+      "valor": 42442000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 42289000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 35491000000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-10"
+     }
+    ]
+   }
+  },
+  "OMAB.MX": {
+   "nombre": "Central North Airport Group",
+   "cik": "0001378239",
+   "estado_constitucion": "O5",
+   "ejercicio_fiscal_termina": "1231",
+   "documentos": {
+    "anual": {
+     "formulario": "20-F",
+     "presentado": "2026-04-30",
+     "url": "https://www.sec.gov/Archives/edgar/data/1378239/000110465926051987/omab-20251231x20f.htm"
+    },
+    "ultimo": {
+     "formulario": "6-K",
+     "presentado": "2026-11-06",
+     "url": "https://www.sec.gov/Archives/edgar/data/1378239/000199937126024703/omab-6k_110626.htm"
+    }
+   },
+   "acciones": {},
+   "cifras": {
+    "ingresos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 15072956000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 14457080000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 11934768000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ],
+    "utilidad_neta": [
+     {
+      "fin": "2024-12-31",
+      "valor": 4928804000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 5011842000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 3900967000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ],
+    "activos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 27233060000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 25237595000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 23069978000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ],
+    "pasivos": [
+     {
+      "fin": "2024-12-31",
+      "valor": 16688823000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 15399093000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 14515358000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ],
+    "capital": [
+     {
+      "fin": "2024-12-31",
+      "valor": 10384774000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 9670459000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 8369211000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ],
+    "utilidad_por_accion": [
+     {
+      "fin": "2024-12-31",
+      "valor": 12.76332,
+      "unidad": "MXN/shares",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 12.97835,
+      "unidad": "MXN/shares",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 10.10169,
+      "unidad": "MXN/shares",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ],
+    "flujo_operacion": [
+     {
+      "fin": "2024-12-31",
+      "valor": 6196669000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2023-12-31",
+      "valor": 6334747000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     },
+     {
+      "fin": "2022-12-31",
+      "valor": 4985336000,
+      "unidad": "MXN",
+      "formulario": "20-F",
+      "presentado": "2025-04-29"
+     }
+    ]
+   }
+  }
+ }
+}

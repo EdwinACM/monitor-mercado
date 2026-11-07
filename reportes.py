@@ -443,17 +443,31 @@ def _cabecera_ficha(pdf, titulo, sub, decision, veredicto):
 
 
 def _datos_titulo(pdf, x):
-    F = fichas.ACCIONES.get(x["ticker"])
+    F = fichas.datos(x["ticker"])
     if not F:
         return
-    _h3(pdf, "Valor de mercado y datos del título", GUINDA)
+    _h3(pdf, "Datos reales de la empresa", GUINDA)
     filas = [["Valor de mercado de la acción", f"{precio(x['cierre'], x['moneda'])}: precio de cierre del {fecha_corta(x['fecha'])}, determinado por la oferta y la demanda en {'la Bolsa Mexicana de Valores' if x['pais'] == 'México' else x['mercado']}."]]
     if F.get("capitalizacion", True) and F.get("acciones"):
         filas.append(["Valor de mercado de la empresa (aproximado)", f"{precio(x['cierre'] * F['acciones'] / 1e6, x['moneda'])} millones: cierre por {F['acciones']:,} acciones en circulación (dato del {F['acciones_fecha']})."])
-    filas += [["Denominación de la sociedad", F["denominacion"]], ["Clave de pizarra y mercado", F["clave"]], ["Fecha y lugar de constitución", F["constitucion"]],
-              ["Duración de la sociedad", F["duracion"]], ["Domicilio", F["domicilio"]], ["Inscripción en el Registro Público de Comercio", F["registro"]],
-              ["Serie y folio del título", F["serie_folio"]], ["Objeto social y actividad", F["objeto"]], ["Capital social, número de acciones y valor nominal", F["capital"]],
-              ["Tipo de acción", F["tipo"]], ["Derechos (patrimoniales o corporativos)", F["derechos"]], ["Firma de los administradores", F["firma"]]]
+    _tabla(pdf, ["Medida", "Dato"], filas, (50, 128), ["LEFT", "LEFT"], size=8)
+    fin = F.get("financieros")
+    if fin:
+        _h3(pdf, f"Cifras financieras (en {fin['unidad']}, salvo lo marcado por acción)", GUINDA)
+        tab, est = [], {}
+        for i, (et, a, b, pa) in enumerate(fin["filas"]):
+            var = (a / b - 1) * 100 if b else None
+            f_ = (lambda v: f"{v:,.3f}") if pa and abs(a) < 10 else (lambda v: f"{v:,.2f}")
+            tab.append([et + (" (por acción)" if pa else ""), f_(a), f_(b), pct(var) if var is not None else "-"])
+            if var is not None:
+                est[(i, 3)] = _color_var(var)
+        _tabla(pdf, ["Concepto", f"Ejercicio al {fin['periodos'][0]}", f"Ejercicio al {fin['periodos'][1]}", "Variación"], tab, (56, 46, 46, 30), ["LEFT", "RIGHT", "RIGHT", "RIGHT"], est, size=8)
+        _p(pdf, f"{fin['actualiza']} Dato más reciente: ejercicio al {fin['dato']}. Fuente: {fin['fuente'][0]} ({fin['fuente'][1]}).", size=7.8, color=GRIS, align="L", espacio=0.6)
+    _h3(pdf, "Datos del título", GUINDA)
+    filas = [["Denominación de la sociedad", F["denominacion"]], ["Clave de pizarra y mercado", F["clave"]], ["Fecha y lugar de constitución", F["constitucion"]],
+             ["Duración de la sociedad", F["duracion"]], ["Domicilio", F["domicilio"]], ["Inscripción en el Registro Público de Comercio", F["registro"]],
+             ["Serie y folio del título", F["serie_folio"]], ["Objeto social y actividad", F["objeto"]], ["Capital social, número de acciones y valor nominal", F["capital"]],
+             ["Tipo de acción", F["tipo"]], ["Derechos (patrimoniales o corporativos)", F["derechos"]], ["Firma de los administradores", F["firma"]]]
     _tabla(pdf, ["Elemento del título", "Dato de la emisora"], filas, (50, 128), ["LEFT", "LEFT"], size=8)
     for nombre, url in F["fuentes"]:
         _p(pdf, f"Fuente: {nombre} ({url}). Consultado el {fecha_corta(fichas.CONSULTA)}.", size=7.8, color=GRIS, align="L", espacio=0.6)
