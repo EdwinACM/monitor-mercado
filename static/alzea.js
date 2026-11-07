@@ -762,6 +762,8 @@ function drawSim() {
 const INFORME_HTML = `
   <div class="head"><h1>Informe</h1><p class="sub" id="iSub"></p><p class="intro" style="margin-top:10px">Descarga el informe del periodo que elegiste arriba o el análisis de un día. Todo lleva el formato institucional del IPN e incluye qué es cada instrumento, el entorno global con fuentes oficiales, la decisión de comprar, mantener o vender y por qué.</p></div>
   <section class="sec"><h2>Cierres y decisiones por emisora</h2><div class="scrollx" id="iVivo"></div><p class="note" id="iVivoNota" style="margin-top:8px"></p></section>
+  <section class="sec"><h2>Ejercicio de rendimientos con el IPC</h2><p class="intro">Precio de cierre, variación diaria, rendimiento efectivo, rendimiento promedio y su diferencia de las 10 acciones y del IPC, en un Excel con las fórmulas de la clase y una presentación ejecutiva de 8 páginas. Empieza el 1 de marzo de 2026 y termina el 25 de noviembre de 2026; antes de esa fecha llega al último cierre disponible.</p>
+    <div class="dl-grupo" id="ejercicio"></div></section>
   <section class="sec"><h2>Informe del periodo</h2><div class="prose" id="iResumen"></div><div class="dl-grupo" id="iDl"></div></section>
   <section class="sec"><h2>Análisis de un día</h2><div class="daybar"><button class="icon-btn" id="diaPrev" aria-label="Día anterior" style="color:var(--brand-text)"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chevron"/></svg></button><input type="date" id="diaSel" aria-label="Elegir día"><button class="icon-btn" id="diaNext" aria-label="Día siguiente" style="color:var(--brand-text)"><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></button><span class="dl-grupo" id="diaDl" style="margin:0 0 0 8px"></span></div></section>
   <section class="sec"><h2>¿Acertaron las decisiones?</h2><div id="aciertos"><p class="cargando">Calculando…</p></div></section>
@@ -781,6 +783,8 @@ async function renderInforme() {
   $("#iDl").innerHTML = dlBtn(`/api/informe?${qsP()}&formato=pdf`, "Informe en PDF", true) + dlBtn(`/api/informe?${qsP()}&formato=xlsx`, "Informe en Excel") +
     `<p class="note" style="flex-basis:100%">Se genera al momento con los datos más recientes; puede tardar unos segundos.</p>`;
   ligarDescargas($("#iDl"));
+  $("#ejercicio").innerHTML = dlBtn("/api/ejercicio?formato=xlsx", "Excel del ejercicio", true) + dlBtn("/api/ejercicio?formato=pdf", "Presentación ejecutiva en PDF");
+  ligarDescargas($("#ejercicio"));
   $("#descargas").innerHTML = dlBtn(`/api/informe?desde=${INICIO}&hasta=${hoyMX()}&formato=xlsx`, "Excel completo desde el 1 de marzo", true) +
     [["analisis_acciones.csv", "CSV de acciones"], ["analisis_deuda.csv", "CSV de deuda"]].map(([f, t]) => `<a class="btn" href="/static/data/${f}" download>${ICON("download")}${t}</a>`).join("");
   ligarDescargas($("#descargas"));
