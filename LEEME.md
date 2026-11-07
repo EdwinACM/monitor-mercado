@@ -61,7 +61,7 @@ La app solo muestra datos públicos y no tiene cuentas. Todo parámetro se valid
 - `analisis.py`: indicadores, estadística, decisiones, comparación, deuda y simulación.
 - `modelo.py`: modelo de decisión con pesos diarios (validación hacia adelante).
 - `proyeccion.py`: proyecciones, Sharpe, Sortino, CAPM, portafolio y duración.
-- `fichas.py`: datos del título de cada emisora e instrumento con su fuente (SEC, BMV, Banxico).
+- `fichas.py` y `actualizar_fichas.py`: datos reales de cada empresa (cifras financieras, acciones, título) con su fuente. Las de EE. UU. y las mexicanas que reportan a la SEC se actualizan solas cada día hábil desde SEC EDGAR (`static/data/fichas.json`); Walmart de México y Kimberly-Clark de México, con su reporte anual.
 - `contexto.py` y `fuentes.py`: entorno global con fuentes oficiales; `glosario.py`: qué es cada cosa.
 - `diario.py`, `reportes.py` y `excel.py`: registro diario, PDF y Excel.
 - `analisis_diario.py`: archivos de análisis diario.
