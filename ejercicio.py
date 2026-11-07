@@ -348,7 +348,7 @@ def _hoja_acciones(wb, d, acc, fichas_):
             ("Empresa", lambda it, f: f["F"].get("denominacion")), ("Bolsa y clave", lambda it, f: f["F"].get("clave")), ("Sector", lambda it, f: SECTOR[it["ticker"]]),
             ("Clasificación (SEC)", lambda it, f: f"{SIC_ES.get(f['sic'], f['sic'])} ({f['sic']})" if f["sic"] else "No consta"),
             ("Tipo de acción", lambda it, f: f["F"].get("tipo")), ("Serie", lambda it, f: "Una sola clase: no se emiten series"),
-            ("Constitución", lambda it, f: f["F"].get("constitucion")), ("Domicilio", lambda it, f: f["F"].get("domicilio"))])
+            ("Constitución", lambda it, f: f["F"].get("constitucion")), ("Domicilio", lambda it, f: f["F"].get("domicilio"))]),
         ("Capital y acciones", [
             ("Acciones autorizadas", lambda it, f: num(f["autorizadas"], "#,##0")), ("Acciones emitidas", lambda it, f: num(f["emitidas"], "#,##0")),
             ("Acciones en circulación", lambda it, f: num(f["F"].get("acciones"), "#,##0")), ("Fecha del dato de circulación", lambda it, f: f["F"].get("acciones_fecha")),
