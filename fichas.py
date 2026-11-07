@@ -266,6 +266,7 @@ def datos(ticker):
         F["capital"] = ". ".join(partes) + "."
         F["acciones"], F["acciones_fecha"] = c["valor"], _fmt_fecha(c["fecha"])
     F["financieros"] = financieros(ticker)
+    F["sic"] = (e or {}).get("sic")
     return F
 
 

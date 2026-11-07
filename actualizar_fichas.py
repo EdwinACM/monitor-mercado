@@ -87,7 +87,7 @@ def empresa(t, cik):
             acc = rec["accessionNumber"][k].replace("-", "")
             docs[nombre] = {"formulario": rec["form"][k], "presentado": rec["filingDate"][k],
                             "url": f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{acc}/{rec['primaryDocument'][k]}"}
-    out = {"nombre": sub["name"], "cik": cik, "estado_constitucion": sub.get("stateOfIncorporation"), "ejercicio_fiscal_termina": sub.get("fiscalYearEnd"),
+    out = {"nombre": sub["name"], "sic": sub.get("sicDescription"), "cik": cik, "estado_constitucion": sub.get("stateOfIncorporation"), "ejercicio_fiscal_termina": sub.get("fiscalYearEnd"),
            "documentos": docs, "acciones": {}, "cifras": {}}
     s = _ultimo(facts, "dei", "EntityCommonStockSharesOutstanding")
     if s:
