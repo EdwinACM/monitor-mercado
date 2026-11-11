@@ -64,7 +64,7 @@ La app queda en http://localhost:8765. En Mac, `iniciar.command` hace lo mismo c
 
 ## Pruebas
 
-Los cálculos de indicadores, decisión, proyecciones, portafolio y duración tienen pruebas que no necesitan internet.
+Los cálculos de indicadores, decisión, resumen del mercado, proyecciones, portafolio y duración tienen pruebas que no necesitan internet. Una acción de GitHub las corre en cada cambio a `main` y en cada pull request.
 
 ```bash
 pip install -r requirements-dev.txt
@@ -83,7 +83,7 @@ python -m pytest
 - `diario.py` y `analisis_diario.py` guardan el análisis de cada día en `static/data/`.
 - `api/index.py` es la única función de Vercel.
 - `static/` tiene la interfaz, el modo sin internet, las tipografías y los datos guardados.
-- `tests/` tiene las pruebas y `docs/` la metodología y las capturas.
+- `tests/` tiene las pruebas, `docs/` la metodología y las capturas, y `LICENSE` la licencia.
 
 ## Despliegue y análisis diario
 
@@ -92,6 +92,10 @@ Está alojada en Vercel (plan gratuito) y cada cambio a la rama `main` la public
 ## Seguridad
 
 La app solo muestra datos públicos y no tiene cuentas de usuario. Valida todo parámetro (fechas y claves de emisoras), consulta únicamente servidores fijos, no expone detalles internos en los errores y envía las cabeceras Content-Security-Policy, X-Frame-Options, nosniff y Referrer-Policy.
+
+## Licencia y créditos
+
+El código se publica con licencia MIT (archivo `LICENSE`). La licencia no cubre el escudo del IPN ni el de la ESE, ni los logotipos de `static/marca/`, que pertenecen a sus instituciones. Los archivos de terceros conservan su licencia: las tipografías Barlow (SIL Open Font License 1.1, texto en `static/marca/OFL-BarlowSemiCondensed.txt`) y la librería Chart.js (MIT).
 
 ## Avisos
 
