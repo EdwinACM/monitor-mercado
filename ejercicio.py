@@ -560,7 +560,7 @@ def _hoja_acciones(ws, d, acc, fichas_):
                     val, fmt = val
                 c = ws.cell(r, j, val if val is not None else "-")
                 c.font = _fnt()
-                c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(val, (int, float)) else "left")
+                c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(val, (int, float)) else "justify")
                 if fmt and isinstance(val, (int, float)):
                     c.number_format = fmt
                 if isinstance(val, str):
@@ -574,7 +574,7 @@ def _hoja_acciones(ws, d, acc, fichas_):
 
 def _hoja_deuda(ws, d):
     deu = d["deuda"]
-    _tit(ws, "Deuda: ficha y tasas semanales", "Banco de México. Riesgo y objetivo: material del equipo. Variación en puntos base (pb).")
+    _tit(ws, "Deuda: ficha y tasas semanales", "Banco de México. Variación en puntos base (pb).")
     ws.column_dimensions["A"].width = 24
     _enc(ws, 4, 1, "Concepto", alto=22)
     for j, x in enumerate(deu):
@@ -596,7 +596,7 @@ def _hoja_deuda(ws, d):
             ws.merge_cells(start_row=i, start_column=2 + 2 * j, end_row=i, end_column=3 + 2 * j)
             c = ws.cell(i, 2 + 2 * j, v)
             c.font = _fnt()
-            c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(v, (int, float)) else "left")
+            c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(v, (int, float)) else "justify")
             if fmt:
                 c.number_format = fmt
             if isinstance(v, str):
@@ -680,7 +680,7 @@ class _PDF(FPDF):
         self.set_font("Barlow", "", 7.5)
         self.set_text_color(*GRIS)
         self.set_x(14)
-        self.cell(230, 4, "Instituto Politécnico Nacional · Escuela Superior de Economía · Seminario de Titulación 2026 · Herramienta educativa, no es asesoría financiera")
+        self.cell(230, 4, "Instituto Politécnico Nacional · Escuela Superior de Economía · Seminario de Titulación 2026")
         self.cell(40, 4, f"{self.page_no()} de {self.total}", align="R")
 
 
@@ -712,7 +712,7 @@ def _pagina(pdf, titulo, mensaje=None):
         pdf.set_x(14)
         pdf.set_font("Barlow", "B", 12.5)
         pdf.set_text_color(*NEGRO)
-        pdf.multi_cell(269, 6, mensaje, new_x="LMARGIN", new_y="NEXT")
+        pdf.multi_cell(269, 6, mensaje, new_x="LMARGIN", new_y="NEXT", align="J")
 
 
 def _tabla(pdf, cols, filas, anchos, aligns=None, estilos=None, size=8.6, alto=5.6, y=None, x=14, tope=268.0):
@@ -894,10 +894,10 @@ def presentacion(d):
     pdf.cell(250, 8, periodo)
     pdf.set_xy(20, 190)
     pdf.set_font("Barlow", "", 9.5)
-    pdf.cell(250, 5, f"Elaborado el {R.fecha_corta(d['generado'].date().isoformat())}. " + ("Cubre hasta el 25 de noviembre de 2026." if d["completo"] else "El análisis termina el 25 de noviembre de 2026; este corte llega al último cierre disponible."))
+    pdf.cell(250, 5, f"Elaborado el {R.fecha_corta(FIN_ANALISIS.isoformat())}")
 
     # 6 ficha de las acciones
-    _pagina(pdf, "Ficha de las acciones", "Datos reales: SEC (EDGAR) y Yahoo Finance  |  Cifras en USD")
+    _pagina(pdf, "Ficha de las acciones", "Datos reales de la SEC (EDGAR) y Yahoo Finance. Cifras en USD.")
     g = lambda it, k: fichas_[it["clave"]][k]
     mm = lambda v: f"{v:,.2f}" if v is not None else "s/d"
     filas = [
@@ -922,10 +922,10 @@ def presentacion(d):
     pdf.set_x(14)
     pdf.set_font("Barlow", "I", 8)
     pdf.set_text_color(*GRIS)
-    pdf.multi_cell(269, 4, "Cifras de la SEC (EDGAR), último ejercicio presentado, y precios de Yahoo Finance. Bursatilidad: indicador propio con el volumen diario de Yahoo Finance; el índice oficial de la BMV (alta, media, baja, mínima) no se publica para estas emisoras.")
+    pdf.multi_cell(269, 4, "Cifras de la SEC (EDGAR), último ejercicio presentado, y precios de Yahoo Finance. Bursatilidad: indicador propio con el volumen diario de Yahoo Finance; el índice oficial de la BMV (alta, media, baja, mínima) no se publica para estas emisoras.", align="J")
 
     # 4 precio de cierre y rendimiento
-    _pagina(pdf, "Precio de cierre y rendimiento", "Efectivo = ((precio final / precio inicial) - 1) x 100  |  Rprom = media de las variaciones diarias")
+    _pagina(pdf, "Precio de cierre y rendimiento", "Efectivo = ((precio final / precio inicial) - 1) x 100. Rprom = media de las variaciones diarias.")
     filas, est = [], {}
     for i, x in enumerate(items):
         row = [x["clave"], _n(x["pi"]), _n(x["pf"]), _n(x["pmax"]), _n(x["pmin"]), _n(x["efectivo"], True), _n(x["stats"]["media"], True), _n(x["stats"]["desv"])]
@@ -943,7 +943,7 @@ def presentacion(d):
     _barras(pdf, 150, 116, 130, 76, [x["clave"] for x in items], [x["stats"]["media"] for x in items], "Rendimiento promedio diario Rprom (%)", cuerpo)
 
     # 2 lo esencial: una gráfica grande y el ranking
-    msg = (f"Mayor rendimiento: {mejor['clave']} {mejor['efectivo']:+.2f} %  |  Menor: {peor['clave']} {peor['efectivo']:+.2f} %  |  Superan al S&P 500 ({sp['efectivo']:+.2f} %): {len(ganan)} de {len(acc)}") if sp else ""
+    msg = (f"Mayor rendimiento: {mejor['clave']} {mejor['efectivo']:+.2f} %. Menor: {peor['clave']} {peor['efectivo']:+.2f} %. Superan al S&P 500 ({sp['efectivo']:+.2f} %): {len(ganan)} de {len(acc)}.") if sp else ""
     _pagina(pdf, "Comparación de rendimientos", msg)
     series = [(x["clave"], ac[x["clave"]], col_acc[x["clave"]], 0.55, False) for x in acc]
     if sp:
@@ -959,7 +959,7 @@ def presentacion(d):
     _tabla(pdf, ["Instrumento", "Rendimiento (%)"], [[x["clave"], _n(x["efectivo"], True)] for x in orden], (34, 34), None, {(i, 1): _color(x["efectivo"]) for i, x in enumerate(orden)}, size=9.5, alto=7, y=45, x=212, tope=70)
 
     # 3 cada acción frente a su índice
-    _pagina(pdf, "Cada acción frente a su índice", "Color: acción  |  Negro: S&P 500  |  Gris: IPC  |  Rendimiento acumulado (%)")
+    _pagina(pdf, "Cada acción frente a su índice", "Color: acción. Negro: S&P 500. Gris: IPC. Rendimiento acumulado (%).")
     pos = [(14, 34), (110, 34), (206, 34), (14, 114), (110, 114)]
     for (x0, y0), it in zip(pos, acc):
         s = [(it["clave"], ac[it["clave"]], col_acc[it["clave"]], 0.7, False)]
@@ -985,7 +985,7 @@ def presentacion(d):
     _tabla(pdf, ["Acción", "Rend. (%)", "Dif. (pts)", "Beta"], filas, (19, 19, 19, 17), None, est, size=8.6, alto=6.4, y=125, x=206, tope=76)
 
     # 5 riesgo, estadística, conclusiones y método
-    _pagina(pdf, "Riesgo, estadística y conclusiones", "Variación diaria en %  |  Estadística de muestra, como en Excel")
+    _pagina(pdf, "Riesgo, estadística y conclusiones", "Variación diaria en %. Estadística de muestra.")
     filas = [[x["clave"], _n(x["stats"]["media"], True), _n(x["stats"]["desv"]), _n(x["stats"]["var"]), _n(x["stats"]["asimetria"], True), _n(x["stats"]["curtosis"], True), _n(x["stats"]["min"], True),
               _n(x["stats"]["max"], True), str(x["stats"]["n"])] for x in items]
     y1 = _tabla(pdf, ["Instrumento", "Media (%)", "Desviación estándar", "Varianza", "Asimetría", "Curtosis", "Mínimo (%)", "Máximo (%)", "Días trabajados"], filas, (30, 26, 32, 26, 26, 26, 28, 28, 28), None, None, size=8.4, alto=4.7, y=33)
@@ -1003,19 +1003,19 @@ def presentacion(d):
     fm = [["Variación diaria Ra", "((precio de hoy / precio anterior) - 1) x 100"], ["Rendimiento efectivo", "((precio final / precio inicial) - 1) x 100"], ["Rendimiento promedio Rprom", "Promedio de los Ra"],
           ["Diferencia", "Ra - Rprom, y su cuadrado"], ["Beta", "Cov(índice, acción) / Var(índice), con las fechas en que operaron los dos"],
           ["Periodo", f"1 de marzo al {'25 de noviembre' if d['completo'] else R.fecha_corta(d['ultimo']) + ' (el análisis termina el 25 de noviembre de 2026)'}"],
-          ["Fuentes", "Yahoo Finance (precios), SEC EDGAR (empresas), Banco de México (deuda), material del equipo (riesgo y objetivo)"]]
+          ["Fuentes", "Yahoo Finance (precios), SEC EDGAR (empresas), Banco de México (deuda)"]]
     _tabla(pdf, ["Método", "Definición"], fm, (50, 219), ["LEFT", "LEFT"], None, size=7.8, alto=4.2, y=yc + 5, x=14, tope=269)
 
     # 7 deuda: qué es cada instrumento
-    _pagina(pdf, "Deuda: qué es cada instrumento", "Quien emite pide prestado y paga una tasa  |  Gobierno Federal: menor riesgo  |  Empresas: depende de su solvencia")
+    _pagina(pdf, "Deuda: qué es cada instrumento", "Instrumentos de gobierno: menor riesgo.")
     filas = []
     for x in deu:
         k = x["corto"]
         filas.append([k, QUE_ES[k], EMISOR[k], PLAZO[k], INTERES[k], x["riesgo"], x["objetivo"]])
-    _tabla(pdf, ["Instrumento", "Qué es", "Emisor", "Plazo", "Cómo paga", "Riesgo", "Para qué sirve"], filas, (30, 62, 28, 28, 32, 36, 53), ["LEFT"] * 7, None, size=9.4, alto=7.4, y=36)
+    _tabla(pdf, ["Instrumento", "Qué es", "Emisor", "Plazo", "Cómo paga", "Riesgo", "Para qué sirve"], filas, (30, 62, 28, 28, 32, 36, 53), ["LEFT", "J", "LEFT", "LEFT", "LEFT", "LEFT", "J"], None, size=9.4, alto=7.4, y=36)
 
     # 8 deuda: cada instrumento graficado, con sus datos
-    _pagina(pdf, "Deuda: cada instrumento y sus datos", "Cada gráfica tiene su propia escala  |  Cifra de cada subasta o colocación semanal  |  Fuente: Banco de México")
+    _pagina(pdf, "Deuda: cada instrumento y sus datos", "Cifra de cada subasta o colocación semanal. Fuente: Banco de México.")
     ETQ = {"CERTIFICADOS BURSÁTILES": "CEBURES", "PAPEL COMERCIAL": "PAPEL COM."}
     sub = {"tasa": "tasa %", "precio": "precio $", "monto": "mdp colocados"}
     for n, x in enumerate(deu):
