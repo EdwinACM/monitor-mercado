@@ -643,23 +643,26 @@ def _hoja_deuda(ws, d):
                 c = ws.cell(r, col, f"={fx}({L}{r0}:{L}{ult})")
                 c.number_format, c.font = "0.00", _fnt()
         _borde(ws, r, 1, 1 + 2 * len(deu), i % 2 == 1)
-    tasas = [(k, x) for k, x in enumerate(deu) if x["tipo"] == "tasa"]
-    ch = LineChart()
-    ch.title, ch.height, ch.width, ch.dispBlanksAs = "Tasa de cada subasta o colocación (%)", 9, 17, "span"
-    ch.y_axis.number_format, ch.x_axis.number_format = "0.00", "dd/mm"
-    ch.x_axis.delete = ch.y_axis.delete = False
-    ch.x_axis.tickLblSkip = max(1, len(fechas) // 6)
-    palette = [AZUL, NARANJA, "0A7F58", "C23B78"]
-    for n, (k, x) in enumerate(tasas):
+    palette = [AZUL, NARANJA, "0A7F58", "C23B78", "A86D00", "7F7F7F", "231F20"]
+    titulos = {"tasa": "Tasa (%)", "precio": "Precio por título ($)", "monto": "Monto colocado (mdp)"}
+    c0 = 2 + 2 * len(deu) + 1
+    for n, x in enumerate(deu):
+        k = n
+        ch = LineChart()
+        ch.title = f"{x['corto']}: {titulos[x['tipo']]}" + (" real" if "real" in x["unidad"] else "") + (" sobre la referencia" if x["corto"] == "BPAG28" else "")
+        ch.height, ch.width, ch.legend, ch.dispBlanksAs = 6.4, 11.5, None, "span"
+        ch.y_axis.number_format, ch.x_axis.number_format = "0.00", "dd/mm"
+        ch.x_axis.delete = ch.y_axis.delete = False
+        ch.x_axis.tickLblSkip = max(1, len(fechas) // 5)
+        ch.x_axis.tickLblPos = "low"
         ch.add_data(Reference(ws, min_col=2 + 2 * k, min_row=r0, max_row=ult), titles_from_data=False)
-        s = ch.series[-1]
-        s.tx = SeriesLabel(v=x["corto"])
-        s.graphicalProperties.line.solidFill = palette[n % 4]
-        s.graphicalProperties.line.width = 19000
-        s.marker.symbol, s.marker.size, s.smooth = "circle", 4, False
-        s.marker.graphicalProperties.solidFill = palette[n % 4]
-    ch.set_categories(Reference(ws, min_col=1, min_row=r0, max_row=ult))
-    ws.add_chart(ch, f"{LETRA(2 + 2 * len(deu) + 1)}{top + 1}")
+        s_ = ch.series[-1]
+        s_.graphicalProperties.line.solidFill = palette[n % 7]
+        s_.graphicalProperties.line.width = 19000
+        s_.marker.symbol, s_.marker.size, s_.smooth = "circle", 4, False
+        s_.marker.graphicalProperties.solidFill = palette[n % 7]
+        ch.set_categories(Reference(ws, min_col=1, min_row=r0, max_row=ult))
+        ws.add_chart(ch, f"{LETRA(c0 + 7 * (n % 2))}{4 + 13 * (n // 2)}")
     ws.freeze_panes = "B5"
 
 
@@ -800,7 +803,7 @@ def _lineas(pdf, x0, y0, w, h, series, fechas, titulo=None, signo=True, leyenda=
     pdf.set_line_width(0.2)
     pdf.set_text_color(*GRIS)
     pdf.set_font("Barlow", "", 7)
-    for i in (0, n // 2, n - 1):
+    for i in ((0, n - 1) if n < 12 else (0, n // 2, n - 1)):
         pdf.set_xy(min(max(px0 + i / max(1, n - 1) * pw - 10, x0), x0 + w - 20), y0 + ph + 1)
         pdf.cell(20, 3.4, R.fecha_corta(fechas[i]), align="C")
     if leyenda:
@@ -893,9 +896,55 @@ def presentacion(d):
     pdf.set_font("Barlow", "", 9.5)
     pdf.cell(250, 5, f"Elaborado el {R.fecha_corta(d['generado'].date().isoformat())}. " + ("Cubre hasta el 25 de noviembre de 2026." if d["completo"] else "El análisis termina el 25 de noviembre de 2026; este corte llega al último cierre disponible."))
 
+    # 6 ficha de las acciones
+    _pagina(pdf, "Ficha de las acciones", "Datos reales: SEC (EDGAR) y Yahoo Finance  |  Cifras en USD")
+    g = lambda it, k: fichas_[it["clave"]][k]
+    mm = lambda v: f"{v:,.2f}" if v is not None else "s/d"
+    filas = [
+        ["Tipo de acción y serie"] + ["Comunes, clase única"] * len(acc),
+        ["Clasificación (SEC)"] + [SIC_ES.get(g(x, "sic"), g(x, "sic")) or "s/d" for x in acc],
+        ["Sector"] + [SECTOR[x["ticker"]] for x in acc],
+        ["Constitución"] + [CONSTITUCION[x["ticker"]] for x in acc],
+        ["Acciones en circulación (millones)"] + [f"{g(x, 'F')['acciones'] / 1e6:,.0f}" for x in acc],
+        ["Valor par por acción (USD)"] + [f"{g(x, 'par'):.8f}".rstrip("0").rstrip(".") if g(x, "par") else "s/d" for x in acc],
+        ["Capital social (millones USD)"] + [mm(g(x, "capital_social")) for x in acc],
+        ["Capital contable (millones USD)"] + [mm(g(x, "cif").get("Capital contable", (None,))[0]) for x in acc],
+        ["Valor de mercado (millones USD)"] + [f"{x['pf'] * g(x, 'F')['acciones'] / 1e6:,.0f}" for x in acc],
+        ["Importe operado diario (millones USD)"] + [mm(g(x, "burs")["importe"]) if g(x, "burs") else "s/d" for x in acc],
+        ["Bursatilidad (1 = la más operada)"] + [str(g(x, "burs")["posicion"]) if g(x, "burs") else "s/d" for x in acc],
+        ["Ingresos (millones USD)"] + [mm(g(x, "cif").get("Ingresos", (None,))[0]) for x in acc],
+        ["Utilidad neta (millones USD)"] + [mm(g(x, "cif").get("Utilidad neta", (None,))[0]) for x in acc],
+        ["Cambio en 12 meses (%)"] + [_n(x.get("cambio_12m"), True) for x in acc],
+    ]
+    est = {(len(filas) - 1, j + 1): _color(x.get("cambio_12m") or 0) for j, x in enumerate(acc)}
+    _tabla(pdf, ["Concepto"] + [x["clave"] for x in acc], filas, (62, 41, 41, 41, 41, 41), ["LEFT"] + ["CENTER"] * len(acc), est, size=8.8, alto=5.8, y=34)
+    pdf.set_y(pdf.get_y() + 3)
+    pdf.set_x(14)
+    pdf.set_font("Barlow", "I", 8)
+    pdf.set_text_color(*GRIS)
+    pdf.multi_cell(269, 4, "Cifras de la SEC (EDGAR), último ejercicio presentado, y precios de Yahoo Finance. Bursatilidad: indicador propio con el volumen diario de Yahoo Finance; el índice oficial de la BMV (alta, media, baja, mínima) no se publica para estas emisoras.")
+
+    # 4 precio de cierre y rendimiento
+    _pagina(pdf, "Precio de cierre y rendimiento", "Efectivo = ((precio final / precio inicial) - 1) x 100  |  Rprom = media de las variaciones diarias")
+    filas, est = [], {}
+    for i, x in enumerate(items):
+        row = [x["clave"], _n(x["pi"]), _n(x["pf"]), _n(x["pmax"]), _n(x["pmin"]), _n(x["efectivo"], True), _n(x["stats"]["media"], True), _n(x["stats"]["desv"])]
+        for ix in idx:
+            row.append("-" if x["indice"] else _n(x["efectivo"] - ix["efectivo"], True))
+        filas.append(row)
+        est[(i, 5)] = _color(x["efectivo"])
+        for k, ix in enumerate(idx):
+            if not x["indice"]:
+                est[(i, 8 + k)] = _color(x["efectivo"] - ix["efectivo"])
+    _tabla(pdf, ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Promedio diario Rprom (%)", "Desviación diaria (%)"] + [f"Diferencia con {x['clave']} (puntos)" for x in idx],
+           filas, (30, 24, 24, 24, 24, 30, 30, 26, 30, 30), None, est, size=9, alto=6.4, y=36)
+    cuerpo = {len(items) - 1 - k: (35, 31, 32) for k in range(len(idx))}
+    _barras(pdf, 14, 116, 130, 76, [x["clave"] for x in items], [x["efectivo"] for x in items], "Rendimiento efectivo del periodo (%)", cuerpo)
+    _barras(pdf, 150, 116, 130, 76, [x["clave"] for x in items], [x["stats"]["media"] for x in items], "Rendimiento promedio diario Rprom (%)", cuerpo)
+
     # 2 lo esencial: una gráfica grande y el ranking
     msg = (f"Mayor rendimiento: {mejor['clave']} {mejor['efectivo']:+.2f} %  |  Menor: {peor['clave']} {peor['efectivo']:+.2f} %  |  Superan al S&P 500 ({sp['efectivo']:+.2f} %): {len(ganan)} de {len(acc)}") if sp else ""
-    _pagina(pdf, "Lo esencial", msg)
+    _pagina(pdf, "Comparación de rendimientos", msg)
     series = [(x["clave"], ac[x["clave"]], col_acc[x["clave"]], 0.55, False) for x in acc]
     if sp:
         series.append(("S&P 500", ac["S&P 500"], NEGRO, 0.8, True))
@@ -935,24 +984,6 @@ def presentacion(d):
             est[(i, 2)] = _color(it["efectivo"] - sp["efectivo"])
     _tabla(pdf, ["Acción", "Rend. (%)", "Dif. (pts)", "Beta"], filas, (19, 19, 19, 17), None, est, size=8.6, alto=6.4, y=125, x=206, tope=76)
 
-    # 4 precio de cierre y rendimiento
-    _pagina(pdf, "Precio de cierre y rendimiento", "Efectivo = ((precio final / precio inicial) - 1) x 100  |  Rprom = media de las variaciones diarias")
-    filas, est = [], {}
-    for i, x in enumerate(items):
-        row = [x["clave"], _n(x["pi"]), _n(x["pf"]), _n(x["pmax"]), _n(x["pmin"]), _n(x["efectivo"], True), _n(x["stats"]["media"], True), _n(x["stats"]["desv"])]
-        for ix in idx:
-            row.append("-" if x["indice"] else _n(x["efectivo"] - ix["efectivo"], True))
-        filas.append(row)
-        est[(i, 5)] = _color(x["efectivo"])
-        for k, ix in enumerate(idx):
-            if not x["indice"]:
-                est[(i, 8 + k)] = _color(x["efectivo"] - ix["efectivo"])
-    _tabla(pdf, ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Promedio diario Rprom (%)", "Desviación diaria (%)"] + [f"Diferencia con {x['clave']} (puntos)" for x in idx],
-           filas, (30, 24, 24, 24, 24, 30, 30, 26, 30, 30), None, est, size=9, alto=6.4, y=36)
-    cuerpo = {len(items) - 1 - k: (35, 31, 32) for k in range(len(idx))}
-    _barras(pdf, 14, 116, 130, 76, [x["clave"] for x in items], [x["efectivo"] for x in items], "Rendimiento efectivo del periodo (%)", cuerpo)
-    _barras(pdf, 150, 116, 130, 76, [x["clave"] for x in items], [x["stats"]["media"] for x in items], "Rendimiento promedio diario Rprom (%)", cuerpo)
-
     # 5 riesgo, estadística, conclusiones y método
     _pagina(pdf, "Riesgo, estadística y conclusiones", "Variación diaria en %  |  Estadística de muestra, como en Excel")
     filas = [[x["clave"], _n(x["stats"]["media"], True), _n(x["stats"]["desv"]), _n(x["stats"]["var"]), _n(x["stats"]["asimetria"], True), _n(x["stats"]["curtosis"], True), _n(x["stats"]["min"], True),
@@ -975,34 +1006,6 @@ def presentacion(d):
           ["Fuentes", "Yahoo Finance (precios), SEC EDGAR (empresas), Banco de México (deuda), material del equipo (riesgo y objetivo)"]]
     _tabla(pdf, ["Método", "Definición"], fm, (50, 219), ["LEFT", "LEFT"], None, size=7.8, alto=4.2, y=yc + 5, x=14, tope=269)
 
-    # 6 ficha de las acciones
-    _pagina(pdf, "Ficha de las acciones", "Datos reales: SEC (EDGAR) y Yahoo Finance  |  Cifras en USD")
-    g = lambda it, k: fichas_[it["clave"]][k]
-    mm = lambda v: f"{v:,.2f}" if v is not None else "s/d"
-    filas = [
-        ["Tipo de acción y serie"] + ["Comunes, clase única"] * len(acc),
-        ["Clasificación (SEC)"] + [SIC_ES.get(g(x, "sic"), g(x, "sic")) or "s/d" for x in acc],
-        ["Sector"] + [SECTOR[x["ticker"]] for x in acc],
-        ["Constitución"] + [CONSTITUCION[x["ticker"]] for x in acc],
-        ["Acciones en circulación (millones)"] + [f"{g(x, 'F')['acciones'] / 1e6:,.0f}" for x in acc],
-        ["Valor par por acción (USD)"] + [f"{g(x, 'par'):.8f}".rstrip("0").rstrip(".") if g(x, "par") else "s/d" for x in acc],
-        ["Capital social (millones USD)"] + [mm(g(x, "capital_social")) for x in acc],
-        ["Capital contable (millones USD)"] + [mm(g(x, "cif").get("Capital contable", (None,))[0]) for x in acc],
-        ["Valor de mercado (millones USD)"] + [f"{x['pf'] * g(x, 'F')['acciones'] / 1e6:,.0f}" for x in acc],
-        ["Importe operado diario (millones USD)"] + [mm(g(x, "burs")["importe"]) if g(x, "burs") else "s/d" for x in acc],
-        ["Bursatilidad (1 = la más operada)"] + [str(g(x, "burs")["posicion"]) if g(x, "burs") else "s/d" for x in acc],
-        ["Ingresos (millones USD)"] + [mm(g(x, "cif").get("Ingresos", (None,))[0]) for x in acc],
-        ["Utilidad neta (millones USD)"] + [mm(g(x, "cif").get("Utilidad neta", (None,))[0]) for x in acc],
-        ["Cambio en 12 meses (%)"] + [_n(x.get("cambio_12m"), True) for x in acc],
-    ]
-    est = {(len(filas) - 1, j + 1): _color(x.get("cambio_12m") or 0) for j, x in enumerate(acc)}
-    _tabla(pdf, ["Concepto"] + [x["clave"] for x in acc], filas, (62, 41, 41, 41, 41, 41), ["LEFT"] + ["CENTER"] * len(acc), est, size=8.8, alto=5.8, y=34)
-    pdf.set_y(pdf.get_y() + 3)
-    pdf.set_x(14)
-    pdf.set_font("Barlow", "I", 8)
-    pdf.set_text_color(*GRIS)
-    pdf.multi_cell(269, 4, "Cifras de la SEC (EDGAR), último ejercicio presentado, y precios de Yahoo Finance. Bursatilidad: indicador propio con el volumen diario de Yahoo Finance; el índice oficial de la BMV (alta, media, baja, mínima) no se publica para estas emisoras.")
-
     # 7 deuda: qué es cada instrumento
     _pagina(pdf, "Deuda: qué es cada instrumento", "Quien emite pide prestado y paga una tasa  |  Gobierno Federal: menor riesgo  |  Empresas: depende de su solvencia")
     filas = []
@@ -1011,19 +1014,30 @@ def presentacion(d):
         filas.append([k, QUE_ES[k], EMISOR[k], PLAZO[k], INTERES[k], x["riesgo"], x["objetivo"]])
     _tabla(pdf, ["Instrumento", "Qué es", "Emisor", "Plazo", "Cómo paga", "Riesgo", "Para qué sirve"], filas, (30, 62, 28, 28, 32, 36, 53), ["LEFT"] * 7, None, size=9.4, alto=7.4, y=36)
 
-    # 8 deuda: qué pasó con las tasas
-    tasas = [x for x in deu if x["tipo"] == "tasa"]
-    _pagina(pdf, "Deuda: qué pasó con las tasas", "Tasa de cada subasta o colocación semanal (%)  |  Si la tasa sube, el emisor paga más por pedir prestado  |  Fuente: Banco de México")
-    tf = sorted({f for x in tasas for f, _ in x["serie"]})
-    if tasas and tf:
-        sd = []
-        for n, x in enumerate(tasas):
-            m, ult, arr = dict(x["serie"]), None, []
-            for f in tf:
-                ult = m.get(f, ult)
-                arr.append(ult)
-            sd.append((x["corto"] + ("" if x["corto"] != "BPAG28" else " (sobretasa)"), arr, COLORES[n % 5], 0.7, False))
-        _lineas(pdf, 14, 36, 269, 82, sd, tf, None, signo=False)
+    # 8 deuda: cada instrumento graficado, con sus datos
+    _pagina(pdf, "Deuda: cada instrumento y sus datos", "Cada gráfica tiene su propia escala  |  Cifra de cada subasta o colocación semanal  |  Fuente: Banco de México")
+    ETQ = {"CERTIFICADOS BURSÁTILES": "CEBURES", "PAPEL COMERCIAL": "PAPEL COM."}
+    sub = {"tasa": "tasa %", "precio": "precio $", "monto": "mdp colocados"}
+    for n, x in enumerate(deu):
+        x0, y0 = 14 + (n % 4) * 67.7, 34 + (n // 4) * 56
+        nom = ETQ.get(x["corto"], x["corto"])
+        fx = [f for f, _ in x["serie"]]
+        vs = [v for _, v in x["serie"]]
+        if max(vs) == min(vs) == 0:
+            pdf.set_xy(x0, y0)
+            pdf.set_font("Barlow", "B", 9.5)
+            pdf.set_text_color(*NEGRO)
+            pdf.cell(64, 5, f"{nom} ({sub[x['tipo']]})")
+            pdf.set_draw_color(*GRIS_SUAVE)
+            pdf.rect(x0 + 11, y0 + 8, 50, 30)
+            pdf.set_xy(x0 + 11, y0 + 20)
+            pdf.set_font("Barlow", "", 8.5)
+            pdf.set_text_color(*GRIS)
+            pdf.cell(50, 5, "Sin colocaciones en el periodo", align="C")
+            continue
+        _lineas(pdf, x0, y0, 64, 52, [(nom, vs, COLORES[n % 5], 0.7, False)], fx, f"{nom} ({sub[x['tipo']]})", signo=False, leyenda=False)
+    tas = [x for x in deu if x["tipo"] == "tasa"]
+    _barras(pdf, 14 + 3 * 67.7, 90, 64, 52, [ETQ.get(x["corto"], x["corto"]) for x in tas], [(x["ult"] - x["inicial"]) * 100 for x in tas], "Cambio en el periodo (pb)")
     filas, est = [], {}
     for i, x in enumerate(deu):
         t = x["tipo"]
@@ -1031,9 +1045,5 @@ def presentacion(d):
         if t != "monto":
             est[(i, 4)] = _color(x["ult"] - x["inicial"])
         filas.append([x["corto"], UNIDAD[x["corto"]], f"{x['inicial']:.2f}", f"{x['ult']:.2f}", cambio, f"{x['min']:.2f}", f"{x['max']:.2f}", f"{x['media']:.2f}"])
-    _tabla(pdf, ["Instrumento", "Unidad", "Inicial", "Final", "Cambio", "Mínimo", "Máximo", "Promedio"], filas, (42, 52, 26, 26, 26, 31, 31, 35), ["LEFT", "LEFT"] + ["RIGHT"] * 6, est, size=8.4, alto=5.2, y=124)
-    pdf.set_x(14)
-    pdf.set_font("Barlow", "I", 8)
-    pdf.set_text_color(*GRIS)
-    pdf.cell(269, 4.5, "pb = puntos base (100 pb = 1 punto porcentual). El papel comercial no tuvo colocaciones en el periodo. Riesgo y objetivo: material del equipo; Bondes F y BPAG28, de la ficha de la app.")
+    _tabla(pdf, ["Instrumento", "Unidad", "Inicial", "Final", "Cambio", "Mínimo", "Máximo", "Promedio"], filas, (42, 52, 26, 26, 26, 31, 31, 35), ["LEFT", "LEFT"] + ["RIGHT"] * 6, est, size=7.8, alto=4.1, y=148)
     return bytes(pdf.output())
