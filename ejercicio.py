@@ -17,7 +17,9 @@ from statistics import mean, median, stdev, variance
 from fpdf import FPDF
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.chart.series import SeriesLabel
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.formatting.rule import CellIsRule
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.properties import PageSetupProperties
 
@@ -216,8 +218,9 @@ def _conclusion(it, f, sp):
 # ------------------------------------------------------------------------------ Excel
 AMARILLO = PatternFill("solid", fgColor="FFFF00")
 FILA = Side(style="thin", color=GRIS_S)
-F_RET = "[Color10]+0.00;[Red]-0.00;0.00"  # verde si sube, rojo si baja
+F_RET = "+0.00;-0.00;0.00"  # el color verde/rojo lo pone el formato condicional (_colorear)
 F_PX = "#,##0.00"
+LETRA = get_column_letter
 
 
 def _fnt(**kw):
@@ -229,16 +232,16 @@ def _tit(ws, titulo, sub=None):
     ws.row_dimensions[1].height = 30
     ws.cell(1, 1, titulo).font = _fnt(bold=True, size=18, color=G)
     if sub:
-        ws.cell(2, 1, sub).font = _fnt(italic=True, color=GTXT)
+        ws.cell(2, 1, sub).font = _fnt(color=GTXT)
     ws.sheet_properties.tabColor = G
 
 
-def _enc(ws, fila, col, texto, ancho=None, alto=None):
+def _enc(ws, fila, col, texto, ancho=None, alto=None, color=None):
     c = ws.cell(fila, col, texto)
-    c.fill, c.font = PatternFill("solid", fgColor=G), _fnt(bold=True, color="FFFFFF")
+    c.fill, c.font = PatternFill("solid", fgColor=color or G), _fnt(bold=True, color="FFFFFF")
     c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     if ancho:
-        ws.column_dimensions[get_column_letter(col)].width = ancho
+        ws.column_dimensions[LETRA(col)].width = ancho
     if alto:
         ws.row_dimensions[fila].height = alto
     return c
@@ -258,8 +261,21 @@ def _borde(ws, r, c1, c2, par=False):
             ws.cell(r, j).fill = PatternFill("solid", fgColor="FAF5F8")
 
 
+def _colorear(ws, rango):
+    """Verde si es positivo y rojo si es negativo."""
+    ws.conditional_formatting.add(rango, CellIsRule(operator="greaterThan", formula=["0"], font=Font(color="00643F")))
+    ws.conditional_formatting.add(rango, CellIsRule(operator="lessThan", formula=["0"], font=Font(color="B3261E")))
+
+
 def _f(s):
     return datetime.strptime(s, "%Y-%m-%d").date()
+
+
+PLAZO = {"CETES": "28 días (máximo 1 año)", "BONOS": "3 a 30 años (aquí, 10)", "UDIBONOS": "3, 10 y 30 años (aquí, 10)", "PAPEL COMERCIAL": "Corto plazo", "CERTIFICADOS BURSÁTILES": "Corto plazo"}
+INTERES = {"CETES": "A descuento, sin cupones", "BONOS": "Cupón cada 182 días", "UDIBONOS": "Cupón cada 182 días, en UDIS", "PAPEL COMERCIAL": "A descuento", "CERTIFICADOS BURSÁTILES": "Periódicos o a descuento"}
+NOMINAL = {"CETES": "$10", "BONOS": "$100", "UDIBONOS": "100 UDIS", "PAPEL COMERCIAL": "Según la emisión", "CERTIFICADOS BURSÁTILES": "Según la emisión"}
+TASA = {"CETES": "De descuento", "BONOS": "Fija", "UDIBONOS": "Real fija", "PAPEL COMERCIAL": "De mercado", "CERTIFICADOS BURSÁTILES": "Fija o variable"}
+EMISOR = {"CETES": "Gobierno Federal", "BONOS": "Gobierno Federal", "UDIBONOS": "Gobierno Federal", "PAPEL COMERCIAL": "Empresas privadas", "CERTIFICADOS BURSÁTILES": "Empresas privadas"}
 
 
 def libro(d):
@@ -268,112 +284,241 @@ def libro(d):
     items, acc, idx = d["items"], _acciones(d), _indices(d)
     burs = _bursatilidad(d)
     fichas_ = {x["clave"]: _ficha(d, x, burs) for x in acc}
-    hojas = {}
-    _hoja_inicio(wb, d)
-    _hoja_acciones(wb, d, acc, fichas_)
-    _hoja_ancha(wb, d)
-    for it in items:
-        hojas[it["clave"]] = _hoja_instrumento(wb, d, it, idx)
-    _hoja_comparacion(wb, d, hojas)
-    _hoja_graficas(wb, d)
-    _hoja_estadistica(wb, d)
-    _hoja_deuda(wb, d)
-    _hoja_conclusiones(wb, d, fichas_)
-    orden = ["Inicio", "Acciones", "Comparación", "Gráficas", "Precios y variaciones", "Estadística"] + [it["clave"] for it in items] + ["Deuda tasas", "Instrumentos de deuda", "Conclusiones"]
-    wb._sheets = [wb[n] for n in orden]
+    ws_res = wb.active
+    ws_res.title = "Resumen"
+    ws_acc, ws_dat, ws_est, ws_deu = (wb.create_sheet(n) for n in ("Acciones", "Datos", "Estadística", "Deuda"))
+    pos = _hoja_datos(ws_dat, d)
+    cols_est = _hoja_estadistica(ws_est, d, pos)
+    _hoja_resumen(ws_res, ws_dat, ws_est, d, pos, cols_est)
+    _hoja_acciones(ws_acc, d, acc, fichas_)
+    _hoja_deuda(ws_deu, d)
     for w in wb.worksheets:
         w.page_setup.orientation, w.page_setup.fitToWidth, w.page_setup.fitToHeight = "landscape", 1, 0
         w.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
     return X._guardar(wb)
 
 
-def _hoja_inicio(wb, d):
-    ws = wb.active
-    ws.title = "Inicio"
-    _tit(ws, "Rendimiento de 5 acciones, el IPC y la deuda", f"Del {R.fecha_corta(d['inicio'])} al {R.fecha_corta(d['ultimo'])}")
-    ws.column_dimensions["A"].width = 30
-    ws.column_dimensions["B"].width = 96
-    _seccion(ws, 4, "Qué hay en este archivo", 1, 2)
-    indice = [("Acciones", "Acciones", "Ficha de cada empresa: tipo de acción, serie, clasificación, capital social, bursatilidad, cifras financieras y comportamiento."),
-              ("Comparación", "Comparación", "Precio inicial y final, rendimiento efectivo y promedio, y diferencia contra el S&P 500 y el IPC."),
-              ("Gráficas", "Gráficas", "Rendimiento acumulado de cada acción frente a su índice."),
-              ("Precios y variaciones", "Precios y variaciones", "Fecha, precio de cierre y variación de cada instrumento y de los índices."),
-              ("Estadística", "Estadística", "Media, desviación, curtosis y demás medidas, y beta contra cada índice."),
-              ("AAPL, MSFT, NVDA, TSLA, KO", "AAPL", "Una hoja por acción con las fórmulas de la clase; también para el IPC y el S&P 500."),
-              ("Deuda tasas", "Deuda tasas", "Tasa semanal y variación de CETES, Bonos, Udibonos, papel comercial y certificados bursátiles."),
-              ("Instrumentos de deuda", "Instrumentos de deuda", "Emisor, plazo, intereses, riesgo y objetivo de cada instrumento."),
-              ("Conclusiones", "Conclusiones", "Resultado de cada acción y de la deuda.")]
-    for i, (a, dest, b) in enumerate(indice, 5):
-        c = ws.cell(i, 1, a)
-        c.hyperlink = f"#'{dest}'!A1"
-        c.font = _fnt(bold=True, color=G, underline="single")
-        ws.cell(i, 2, b).font = _fnt()
-        ws.cell(i, 2).alignment = Alignment(wrap_text=True, vertical="top")
-        _borde(ws, i, 1, 2)
-    r = 5 + len(indice) + 1
-    _seccion(ws, r, "Cómo se calcula", 1, 2)
-    calc = [("Variación diaria Ra", "((precio de hoy / precio del día anterior) - 1) x 100"), ("Rendimiento efectivo", "((precio final / precio inicial) - 1) x 100, de todo el periodo"),
-            ("Rendimiento promedio Rprom", "Promedio de las variaciones diarias"), ("Diferencia de rendimiento", "Ra - Rprom de cada día, y ese valor al cuadrado"), ("Beta", "Cov(índice, acción) / Var(índice)")]
-    for i, (a, b) in enumerate(calc, r + 1):
-        ws.cell(i, 1, a).font = _fnt(bold=True)
-        ws.cell(i, 2, b).font = _fnt()
-        _borde(ws, i, 1, 2)
-    r = r + len(calc) + 2
-    _seccion(ws, r, "Antes de comparar", 1, 2)
-    notas = [("Monedas", "Las acciones cotizan en dólares y el IPC en pesos. El índice que corresponde a estas acciones es el S&P 500; el IPC se muestra como referencia mexicana."),
-             ("Días sin operación", "Si una bolsa no abrió un día, ese instrumento queda en blanco y su variación se calcula contra su cierre anterior."),
-             ("Periodo", "Empieza el 1 de marzo de 2026 y termina el 25 de noviembre de 2026" + ("." if d["completo"] else "; este archivo llega al último cierre disponible y se completa al volver a generarlo después de esa fecha.")),
-             ("Fuentes", "Precios: Yahoo Finance (referencia). Empresas: SEC EDGAR. Deuda: Banco de México."), ("Aviso", R.AVISO)]
-    for i, (a, b) in enumerate(notas, r + 1):
-        ws.cell(i, 1, a).font = _fnt(bold=True)
-        ws.cell(i, 1).alignment = Alignment(vertical="top")
-        c = ws.cell(i, 2, b)
-        c.font = _fnt()
-        c.alignment = Alignment(wrap_text=True, vertical="top")
-        ws.row_dimensions[i].height = max(16, 14 * (len(b) // 92 + 1))
-        _borde(ws, i, 1, 2)
+def _hoja_datos(ws, d):
+    """Fecha | precio | variación de cada instrumento; a la derecha Ra - Rprom, su cuadrado y el rendimiento acumulado."""
+    items = d["items"]
+    n = len(items)
+    N = len(d["fechas"])
+    r0, ult = 6, 5 + N
+    _tit(ws, "Datos: precio de cierre y variación diaria", "Variación = ((cierre de hoy / cierre anterior) - 1) x 100. Acciones en USD; IPC y S&P 500 en puntos. Sin dato = la bolsa no operó.")
+    ws.column_dimensions["A"].width = 12
+    _enc(ws, 4, 1, "Fecha", alto=20)
+    ws.merge_cells(start_row=4, start_column=1, end_row=5, end_column=1)
+    pos = {}
+    mapas = [_por_fecha(it) for it in items]
+    prev = [None] * n
+    c_dif, c_sq, c_acu = 2 + 2 * n + 1, 2 + 2 * n + 1 + n + 1, 2 + 2 * n + 1 + 2 * (n + 1)
+    for k, it in enumerate(items):
+        cp, cv = 2 + 2 * k, 3 + 2 * k
+        pos[it["clave"]] = {"precio": cp, "var": cv, "dif": c_dif + k, "sq": c_sq + k, "acu": c_acu + 1 + k}
+        color = GOSC if it["indice"] else G
+        _enc(ws, 4, cp, it["clave"], color=color)
+        _enc(ws, 4, cv, it["clave"], color=color)
+        ws.merge_cells(start_row=4, start_column=cp, end_row=4, end_column=cv)
+        _enc(ws, 5, cp, "Precio de cierre", 13, color=color)
+        _enc(ws, 5, cv, "Variación (%)", 12, color=color)
+        _enc(ws, 4, c_dif + k, "Ra - Rprom", 11, color=color)
+        _enc(ws, 5, c_dif + k, it["clave"], color=color)
+        _enc(ws, 4, c_sq + k, "(Ra - Rprom)²", 11, color=color)
+        _enc(ws, 5, c_sq + k, it["clave"], color=color)
+        _enc(ws, 4, c_acu + 1 + k, "Rend. acumulado (%)", 11, color=color)
+        _enc(ws, 5, c_acu + 1 + k, it["clave"], color=color)
+    _enc(ws, 4, c_acu, "Fecha", 12)
+    ws.merge_cells(start_row=4, start_column=c_acu, end_row=5, end_column=c_acu)
+    for c in (2 + 2 * n, c_dif + n, c_sq + n):
+        ws.column_dimensions[LETRA(c)].width = 3
+    acu = [_acumulado(d, it) for it in items]
+    for i, f in enumerate(d["fechas"]):
+        r = r0 + i
+        ws.cell(r, 1, _f(f)).number_format = "dd/mm/yyyy"
+        ws.cell(r, c_acu, _f(f)).number_format = "dd/mm/yyyy"
+        for k, (it, m) in enumerate(zip(items, mapas)):
+            cp, cv = 2 + 2 * k, 3 + 2 * k
+            if f in m:
+                ws.cell(r, cp, round(m[f], 4)).number_format = F_PX
+                if prev[k] is not None:
+                    ws.cell(r, cv, (m[f] / prev[k] - 1) * 100).number_format = F_RET
+                    L = LETRA(cv)
+                    ws.cell(r, c_dif + k, f'=IF({L}{r}="","",{L}{r}-AVERAGE({L}${r0}:{L}${ult}))').number_format = "0.0000"
+                    ws.cell(r, c_sq + k, f'=IF({LETRA(c_dif + k)}{r}="","",{LETRA(c_dif + k)}{r}^2)').number_format = "0.0000"
+                prev[k] = m[f]
+            if acu[k][i] is not None:
+                ws.cell(r, c_acu + 1 + k, round(acu[k][i], 4)).number_format = "0.00"
+        for j in range(1, c_acu + n + 1):
+            ws.cell(r, j).font = _fnt()
+        _borde(ws, r, 1, 1 + 2 * n, i % 2 == 1)
+    for k in range(n):
+        _colorear(ws, f"{LETRA(3 + 2 * k)}{r0}:{LETRA(3 + 2 * k)}{ult}")
+        _colorear(ws, f"{LETRA(c_acu + 1 + k)}{r0}:{LETRA(c_acu + 1 + k)}{ult}")
+    ws.freeze_panes = "B6"
+    pos["_fil"] = (r0, ult)
+    pos["_acu_fecha"] = c_acu
+    return pos
 
 
-def _hoja_acciones(wb, d, acc, fichas_):
-    ws = wb.create_sheet("Acciones")
-    _tit(ws, "Las 5 acciones: ficha completa", "Cifras reales de la SEC (EDGAR) y de Yahoo Finance. Cada columna es una acción.")
-    ws.column_dimensions["A"].width = 40
-    _enc(ws, 4, 1, "Concepto", alto=34)
+def _hoja_estadistica(ws, d, pos):
+    """Estadística de la clase para cada instrumento (fórmulas sobre la hoja Datos) y relación con los índices."""
+    items, acc, idx = d["items"], _acciones(d), _indices(d)
+    r0, ult = pos["_fil"]
+    _tit(ws, "Estadística del rendimiento diario (Ra, en %)")
+    ws.column_dimensions["A"].width = 34
+    _enc(ws, 4, 1, "Medida")
+    cols = {}
+    for k, it in enumerate(items):
+        cols[it["clave"]] = 2 + k
+        _enc(ws, 4, 2 + k, it["clave"], 12, color=GOSC if it["indice"] else G)
+    rng = lambda it: f"Datos!${LETRA(pos[it['clave']]['var'])}${r0}:${LETRA(pos[it['clave']]['var'])}${ult}"
+    sqr = lambda it: f"Datos!${LETRA(pos[it['clave']]['sq'])}${r0}:${LETRA(pos[it['clave']]['sq'])}${ult}"
+    filas = [("Precio inicial", lambda it, c: it["pi"], F_PX), ("Precio final", lambda it, c: it["pf"], F_PX),
+             ("Rendimiento efectivo (%)", lambda it, c: f"=(({c}6/{c}5)-1)*100", F_RET),
+             ("Rendimiento promedio diario, Rprom (%)", lambda it, c: f"=AVERAGE({rng(it)})", F_RET),
+             ("Error típico", lambda it, c: f"=STDEV({rng(it)})/SQRT(COUNT({rng(it)}))", "0.0000"), ("Mediana", lambda it, c: f"=MEDIAN({rng(it)})", "0.0000"),
+             ("Moda", lambda it, c: f'=IFERROR(MODE({rng(it)}),"No se repite")', "0.0000"), ("Desviación estándar", lambda it, c: f"=STDEV({rng(it)})", "0.0000"),
+             ("Varianza de la muestra", lambda it, c: f"=VAR({rng(it)})", "0.0000"), ("Curtosis", lambda it, c: f"=KURT({rng(it)})", "0.0000"),
+             ("Coeficiente de asimetría", lambda it, c: f"=SKEW({rng(it)})", "0.0000"), ("Rango", lambda it, c: f"=MAX({rng(it)})-MIN({rng(it)})", "0.0000"),
+             ("Mínimo", lambda it, c: f"=MIN({rng(it)})", "0.0000"), ("Máximo", lambda it, c: f"=MAX({rng(it)})", "0.0000"), ("Suma", lambda it, c: f"=SUM({rng(it)})", "0.0000"),
+             ("Días trabajados", lambda it, c: f"=COUNT({rng(it)})", "0"), ("Suma de (Ra - Rprom)²", lambda it, c: f"=SUM({sqr(it)})", "0.0000")]
+    fila_de = {}
+    for i, (et, fn, nf) in enumerate(filas):
+        r = 5 + i
+        fila_de[et] = r
+        ws.cell(r, 1, et).font = _fnt(bold=True)
+        for it in items:
+            c = LETRA(cols[it["clave"]])
+            cell = ws.cell(r, cols[it["clave"]], fn(it, c))
+            cell.number_format, cell.font, cell.alignment = nf, _fnt(), Alignment(horizontal="right")
+        _borde(ws, r, 1, 1 + len(items), i % 2 == 1)
+    _colorear(ws, f"B7:{LETRA(1 + len(items))}8")
+    r1 = 5 + len(filas) + 1
+    _seccion(ws, r1, "Relación con los índices (fechas en que operaron los dos)", 1, 1 + len(items))
+    enc = ["Medida"] + [x["clave"] for x in acc]
+    r2 = r1 + 1
+    for j, t in enumerate(enc, 1):
+        _enc(ws, r2, j, t, color=GOSC if j == 1 else None)
+    r = r2 + 1
+    for ix in idx:
+        for etq, key, nf in ((f"Cov({ix['clave']}, acción)", "cov", "0.0000"), (f"Var({ix['clave']})", "var", "0.0000"), (f"Beta frente al {ix['clave']}", "beta", "0.00"), (f"Correlación con {ix['clave']}", "corr", "0.00")):
+            ws.cell(r, 1, etq).font = _fnt(bold=True)
+            for j, it in enumerate(acc, 2):
+                b = _beta(d, it, ix)
+                c = ws.cell(r, j, b[key] if b else None)
+                c.number_format, c.font, c.alignment = nf, _fnt(), Alignment(horizontal="right")
+            _borde(ws, r, 1, 1 + len(acc), (r % 2) == 0)
+            r += 1
+    ws.freeze_panes = "B5"
+    return {"cols": cols, "filas": fila_de}
+
+
+def _hoja_resumen(ws, wd, we, d, pos, ce):
+    items, acc, idx = d["items"], _acciones(d), _indices(d)
+    r0, ult = pos["_fil"]
+    _tit(ws, "Rendimiento de 5 acciones frente al S&P 500 y al IPC", f"Del {R.fecha_corta(d['inicio'])} al {R.fecha_corta(d['ultimo'])} · Fuentes: Yahoo Finance, SEC EDGAR, Banco de México")
+    cols = ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Rendimiento promedio diario Rprom (%)", "Desviación estándar diaria (%)"] + \
+          [f"Beta {x['clave']}" for x in idx] + [f"Diferencia con el {x['clave']} (puntos)" for x in idx]
+    anchos = [30, 13, 13, 13, 13, 16, 18, 16] + [11] * len(idx) + [16] * len(idx)
+    for j, (t, a) in enumerate(zip(cols, anchos), 1):
+        _enc(ws, 4, j, t, a)
+    ws.row_dimensions[4].height = 54
+    fila = ce["filas"]
+    cc = ce["cols"]
+    fr = {x["clave"]: 5 + i for i, x in enumerate(items)}
+    for i, it in enumerate(items):
+        r = 5 + i
+        c = LETRA(cc[it["clave"]])
+        ws.cell(r, 1, f"{it['clave']} · {it['nombre']}" if not it["indice"] else it["nombre"])
+        for j, key in ((2, "Precio inicial"), (3, "Precio final"), (6, "Rendimiento efectivo (%)"), (7, "Rendimiento promedio diario, Rprom (%)"), (8, "Desviación estándar")):
+            ws.cell(r, j, f"=Estadística!{c}{fila[key]}")
+        ws.cell(r, 4, round(it["pmax"], 4))
+        ws.cell(r, 5, round(it["pmin"], 4))
+        for k, ix in enumerate(idx):
+            if not it["indice"]:
+                col_est = LETRA(2 + acc.index(it))
+                rb = [rr for rr in range(1, 80) if we.cell(rr, 1).value == f"Beta frente al {ix['clave']}"]
+                if rb:
+                    ws.cell(r, 9 + k, f"=Estadística!{col_est}{rb[0]}").number_format = "0.00"
+                ws.cell(r, 9 + len(idx) + k, f"=F{r}-$F${fr[ix['clave']]}").number_format = F_RET
+        for j in (2, 3, 4, 5):
+            ws.cell(r, j).number_format = F_PX
+        for j in (6, 7):
+            ws.cell(r, j).number_format = F_RET
+        ws.cell(r, 8).number_format = "0.00"
+        for j in range(1, len(cols) + 1):
+            ws.cell(r, j).font = _fnt(bold=(j == 1))
+        _borde(ws, r, 1, len(cols), i % 2 == 1)
+        if it["indice"]:
+            for j in range(1, len(cols) + 1):
+                ws.cell(r, j).fill = PatternFill("solid", fgColor="EFEFEF")
+    _colorear(ws, f"F5:G{4 + len(items)}")
+    _colorear(ws, f"{LETRA(9 + len(idx))}5:{LETRA(8 + 2 * len(idx))}{4 + len(items)}")
+    # gráfica de rendimiento acumulado (datos en la hoja Datos)
+    ch = LineChart()
+    ch.title, ch.height, ch.width = "Rendimiento acumulado (%)", 11.5, 24
+    ch.y_axis.number_format, ch.x_axis.number_format = "0.00", "dd/mm"
+    ch.x_axis.delete = ch.y_axis.delete = False
+    ch.x_axis.tickLblSkip = max(1, len(d["fechas"]) // 8)
+    ch.x_axis.tickLblPos = "low"
+    colores = [AZUL, NARANJA, "0A7F58", "A86D00", "C23B78", "7F7F7F", "231F20"]
+    for k, it in enumerate(items):
+        ch.add_data(Reference(wd, min_col=pos[it["clave"]]["acu"], min_row=5, max_row=ult), titles_from_data=True)
+        s = ch.series[-1]
+        s.graphicalProperties.line.solidFill = colores[k]
+        s.graphicalProperties.line.width = 26000 if it["indice"] else 17000
+        if it["indice"]:
+            s.graphicalProperties.line.dashStyle = "dash"
+        s.marker.symbol, s.smooth = "none", False
+    ch.set_categories(Reference(wd, min_col=pos["_acu_fecha"], min_row=6, max_row=ult))
+    ws.add_chart(ch, f"A{6 + len(items) + 2}")
+    # barras: efectivo y promedio
+    for n, (clave, titulo, ancla) in enumerate((("Rendimiento efectivo (%)", "Rendimiento efectivo del periodo (%)", f"I{6 + len(items) + 2}"), ("Rendimiento promedio diario, Rprom (%)", "Rendimiento promedio diario Rprom (%)", f"I{6 + len(items) + 14}"))):
+        b = BarChart()
+        b.type, b.title, b.height, b.width, b.legend = "col", titulo, 5.6, 15, None
+        b.y_axis.number_format = "0.00"
+        b.x_axis.tickLblPos = "low"
+        b.x_axis.delete = b.y_axis.delete = False
+        b.add_data(Reference(we, min_col=1, max_col=1 + len(items), min_row=fila[clave]), from_rows=True, titles_from_data=True)
+        b.set_categories(Reference(we, min_col=2, max_col=1 + len(items), min_row=4))
+        b.series[0].graphicalProperties.solidFill = G
+        b.series[0].invertIfNegative = False
+        ws.add_chart(b, ancla)
+    ws.freeze_panes = "B5"
+
+
+def _hoja_acciones(ws, d, acc, fichas_):
+    _tit(ws, "Acciones: ficha", "Cifras de la SEC (EDGAR) y de Yahoo Finance. USD.")
+    ws.column_dimensions["A"].width = 44
+    _enc(ws, 4, 1, "Concepto", alto=30)
     for j, it in enumerate(acc, 2):
-        _enc(ws, 4, j, f"{it['clave']}\n{it['nombre']}", 30)
-    sp = next((x for x in _indices(d) if x["clave"] == "S&P 500"), None)
+        _enc(ws, 4, j, f"{it['clave']}\n{it['nombre']}", 24)
     num = lambda v, fmt: (v, fmt)
     bloques = [
         ("Identificación", [
-            ("Empresa", lambda it, f: f["F"].get("denominacion")), ("Bolsa y clave", lambda it, f: f["F"].get("clave")), ("Sector", lambda it, f: SECTOR[it["ticker"]]),
-            ("Clasificación (SEC)", lambda it, f: f"{SIC_ES.get(f['sic'], f['sic'])} ({f['sic']})" if f["sic"] else "No consta"),
-            ("Tipo de acción", lambda it, f: f["F"].get("tipo")), ("Serie", lambda it, f: "Una sola clase: no se emiten series"),
-            ("Constitución", lambda it, f: f["F"].get("constitucion")), ("Domicilio", lambda it, f: f["F"].get("domicilio"))]),
-        ("Capital y acciones", [
+            ("Empresa", lambda it, f: f["F"].get("denominacion")), ("Bolsa", lambda it, f: f["F"].get("clave")), ("Sector", lambda it, f: SECTOR[it["ticker"]]),
+            ("Clasificación (SEC)", lambda it, f: SIC_ES.get(f["sic"], f["sic"]) if f["sic"] else None), ("Tipo de acción", lambda it, f: "Comunes"), ("Serie", lambda it, f: "Clase única"),
+            ("Constitución", lambda it, f: CONSTITUCION[it["ticker"]]), ("Domicilio", lambda it, f: f["F"].get("domicilio", "").replace(", EE. UU.", ""))]),
+        ("Capital", [
             ("Acciones autorizadas", lambda it, f: num(f["autorizadas"], "#,##0")), ("Acciones emitidas", lambda it, f: num(f["emitidas"], "#,##0")),
-            ("Acciones en circulación", lambda it, f: num(f["F"].get("acciones"), "#,##0")), ("Fecha del dato de circulación", lambda it, f: f["F"].get("acciones_fecha")),
-            ("Valor par (nominal) por acción, USD", lambda it, f: num(f["par"], "0.00000000")),
-            ("Capital social (emitidas x valor par), millones de USD", lambda it, f: num(f["capital_social"], "#,##0.00")),
-            ("Capital contable del último ejercicio, millones de USD", lambda it, f: num(f["cif"].get("Capital contable", (None,))[0], "#,##0.00")), ("Derechos", lambda it, f: f["F"].get("derechos"))]),
+            ("Acciones en circulación", lambda it, f: num(f["F"].get("acciones"), "#,##0")), ("Valor par por acción", lambda it, f: num(f["par"], "0.00000000")),
+            ("Capital social (millones)", lambda it, f: num(f["capital_social"], "#,##0.00")), ("Capital contable (millones)", lambda it, f: num(f["cif"].get("Capital contable", (None,))[0], "#,##0.00"))]),
         ("Mercado y bursatilidad", [
-            ("Precio final, USD", lambda it, f: num(it["pf"], F_PX)), ("Valor de mercado, millones de USD", lambda it, f: num(it["pf"] * f["F"]["acciones"] / 1e6 if f["F"].get("acciones") else None, "#,##0.00")),
-            ("Cambio en 12 meses (%)", lambda it, f: num(it.get("cambio_12m"), F_RET)), ("Máximo de 12 meses, USD", lambda it, f: num(it.get("max52"), F_PX)),
-            ("Mínimo de 12 meses, USD", lambda it, f: num(it.get("min52"), F_PX)),
-            ("Importe operado promedio diario, millones de USD", lambda it, f: num(f["burs"]["importe"] if f["burs"] else None, "#,##0.00")),
-            ("Volumen promedio diario, millones de acciones", lambda it, f: num(f["burs"]["volumen"] if f["burs"] else None, "#,##0.00")),
-            ("Rotación diaria (% de las acciones en circulación)", lambda it, f: num(f["burs"]["rotacion"] if f["burs"] else None, "0.000")),
-            ("Posición de bursatilidad entre las 5 (1 = la más operada)", lambda it, f: num(f["burs"]["posicion"] if f["burs"] else None, "0"))]),
-        ("Finanzas del último ejercicio (millones de USD)", [
-            ("Ejercicio fiscal al", lambda it, f: f["fin"]["periodos"][0] if f["fin"] else "No consta"), ("Ingresos", lambda it, f: num(f["cif"].get("Ingresos", (None,))[0], "#,##0.00")),
+            ("Precio final", lambda it, f: num(it["pf"], F_PX)), ("Valor de mercado (millones)", lambda it, f: num(it["pf"] * f["F"]["acciones"] / 1e6 if f["F"].get("acciones") else None, "#,##0.00")),
+            ("Cambio en 12 meses (%)", lambda it, f: num(it.get("cambio_12m"), F_RET)), ("Máximo de 12 meses", lambda it, f: num(it.get("max52"), F_PX)), ("Mínimo de 12 meses", lambda it, f: num(it.get("min52"), F_PX)),
+            ("Importe operado diario (millones)", lambda it, f: num(f["burs"]["importe"] if f["burs"] else None, "#,##0.00")),
+            ("Volumen diario (millones de acciones)", lambda it, f: num(f["burs"]["volumen"] if f["burs"] else None, "#,##0.00")),
+            ("Rotación diaria (% de acciones en circulación)", lambda it, f: num(f["burs"]["rotacion"] if f["burs"] else None, "0.000")),
+            ("Posición de bursatilidad (1 = la más operada)", lambda it, f: num(f["burs"]["posicion"] if f["burs"] else None, "0"))]),
+        ("Finanzas del último ejercicio (millones)", [
+            ("Cierre del ejercicio", lambda it, f: f["fin"]["periodos"][0] if f["fin"] else None), ("Ingresos", lambda it, f: num(f["cif"].get("Ingresos", (None,))[0], "#,##0.00")),
             ("Variación de ingresos (%)", lambda it, f: num(f["crec_ing"], F_RET)), ("Utilidad neta", lambda it, f: num(f["cif"].get("Utilidad neta", (None,))[0], "#,##0.00")),
             ("Variación de utilidad neta (%)", lambda it, f: num(f["crec_util"], F_RET)), ("Activos totales", lambda it, f: num(f["cif"].get("Activos totales", (None,))[0], "#,##0.00")),
-            ("Pasivos totales", lambda it, f: num(f["cif"].get("Pasivos totales", (None,))[0], "#,##0.00")), ("Utilidad por acción, USD", lambda it, f: num(f["cif"].get("Utilidad por acción", (None,))[0], "0.00")),
-            ("Dividendo por acción, USD", lambda it, f: num(f["cif"].get("Dividendo por acción", (None,))[0], "0.00"))]),
-        ("Desempeño en el periodo", [
-            ("Rendimiento efectivo (%)", lambda it, f: num(it["efectivo"], F_RET)), ("Rendimiento promedio diario Rprom (%)", lambda it, f: num(it["stats"]["media"], F_RET)),
-            ("Desviación estándar diaria (%)", lambda it, f: num(it["stats"]["desv"], "0.00")), ("Volatilidad anual (%)", lambda it, f: num(f["vol"], "0.00")),
-            ("Beta frente al S&P 500", lambda it, f: num((f["betas"].get("S&P 500") or {}).get("beta"), "0.00")), ("Beta frente al IPC", lambda it, f: num((f["betas"].get("IPC") or {}).get("beta"), "0.00"))]),
-        ("Lectura", [("Qué mueve su precio", lambda it, f: _razon(it, f)), ("Conclusión", lambda it, f: _conclusion(it, f, sp))]),
+            ("Pasivos totales", lambda it, f: num(f["cif"].get("Pasivos totales", (None,))[0], "#,##0.00")), ("Utilidad por acción", lambda it, f: num(f["cif"].get("Utilidad por acción", (None,))[0], "0.00")),
+            ("Dividendo por acción", lambda it, f: num(f["cif"].get("Dividendo por acción", (None,))[0], "0.00"))]),
+        ("Riesgo en el periodo", [
+            ("Volatilidad anual (%)", lambda it, f: num(f["vol"], "0.00")), ("Beta frente al S&P 500", lambda it, f: num((f["betas"].get("S&P 500") or {}).get("beta"), "0.00")),
+            ("Beta frente al IPC", lambda it, f: num((f["betas"].get("IPC") or {}).get("beta"), "0.00"))]),
     ]
     r = 5
     for titulo, filas in bloques:
@@ -381,365 +526,74 @@ def _hoja_acciones(wb, d, acc, fichas_):
         r += 1
         for etq, fn in filas:
             ws.cell(r, 1, etq).font = _fnt(bold=True)
-            ws.cell(r, 1).alignment = Alignment(wrap_text=True, vertical="top")
+            ws.cell(r, 1).alignment = Alignment(vertical="top")
             largo = 0
             for j, it in enumerate(acc, 2):
                 val = fn(it, fichas_[it["clave"]])
                 fmt = None
                 if isinstance(val, tuple):
                     val, fmt = val
-                if val is None:
-                    val = "No consta"
-                c = ws.cell(r, j, val)
+                c = ws.cell(r, j, val if val is not None else "-")
                 c.font = _fnt()
                 c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(val, (int, float)) else "left")
                 if fmt and isinstance(val, (int, float)):
                     c.number_format = fmt
                 if isinstance(val, str):
                     largo = max(largo, len(val))
-            ws.row_dimensions[r].height = max(16, 14 * (largo // 30 + 1))
+            ws.row_dimensions[r].height = max(15, 14 * (largo // 26 + 1))
             _borde(ws, r, 1, 1 + len(acc), (r % 2) == 0)
             r += 1
-    ws.freeze_panes = "B5"
-    ws.cell(r + 1, 1, "Bursatilidad: indicador propio con el volumen de Yahoo Finance. El índice oficial de la BMV (alta, media, baja, mínima) no se publica para estas emisoras.").font = _fnt(italic=True, color=GTXT)
-
-
-def _hoja_ancha(wb, d):
-    ws = wb.create_sheet("Precios y variaciones")
-    items = d["items"]
-    _tit(ws, "Precios de cierre y variación diaria", "Fecha | precio de cierre | variación de cada acción, y al final los índices. Variación = ((cierre de hoy / cierre anterior) - 1) x 100.")
-    _enc(ws, 4, 1, "Fecha", 12)
-    ws.merge_cells(start_row=4, start_column=1, end_row=5, end_column=1)
-    mapas = [_por_fecha(it) for it in items]
-    prev = [None] * len(items)
-    for k, it in enumerate(items):
-        c0 = 2 + 2 * k
-        _enc(ws, 4, c0, it["clave"])
-        _enc(ws, 4, c0 + 1, it["clave"])
-        ws.merge_cells(start_row=4, start_column=c0, end_row=4, end_column=c0 + 1)
-        if it["indice"]:
-            ws.cell(4, c0).fill = ws.cell(4, c0 + 1).fill = PatternFill("solid", fgColor=GOSC)
-        _enc(ws, 5, c0, "Precio de cierre" + (" (puntos)" if it["indice"] else " (USD)"), 14)
-        _enc(ws, 5, c0 + 1, "Variación (%)", 12)
-    ws.row_dimensions[5].height = 32
-    for i, f in enumerate(d["fechas"]):
-        r = 6 + i
-        ws.cell(r, 1, _f(f)).number_format = "dd/mm/yyyy"
-        ws.cell(r, 1).font = _fnt()
-        for k, (it, m) in enumerate(zip(items, mapas)):
-            if f in m:
-                c0 = 2 + 2 * k
-                c = ws.cell(r, c0, round(m[f], 4))
-                c.number_format, c.font = F_PX, _fnt()
-                if prev[k] is not None:
-                    c = ws.cell(r, c0 + 1, (m[f] / prev[k] - 1) * 100)
-                    c.number_format, c.font = F_RET, _fnt()
-                prev[k] = m[f]
-        _borde(ws, r, 1, 1 + 2 * len(items), i % 2 == 1)
-    ws.freeze_panes = "B6"
-
-
-def _bloque_indice(ws, d, it, idx, col, r0):
-    """Date | Cierre índice | Rendimiento índice | Cierre acción | Rendimiento acción, con Cov, Var y Beta (como en la clase)."""
-    a, b = _por_fecha(it), _por_fecha(idx)
-    com = [f for f in d["fechas"] if f in a and f in b]
-    u = r0 + len(com) - 1
-    nc = idx["clave"]
-    for j, (t, w) in enumerate(zip(["Date", f"Cierre {nc}", f"Rendimiento {nc}", f"Cierre {it['clave']}", f"Rendimiento {it['clave']}"], [12, 13, 15, 13, 15])):
-        _enc(ws, 4, col + j, t, w)
-    L = lambda k: get_column_letter(col + k)
-    for i, f in enumerate(com):
-        r = r0 + i
-        ws.cell(r, col, _f(f)).number_format = "dd/mm/yyyy"
-        ws.cell(r, col + 1, round(b[f], 4)).number_format = F_PX
-        ws.cell(r, col + 3, round(a[f], 4)).number_format = F_PX
-        if i:
-            ws.cell(r, col + 2, f"=(({L(1)}{r}/{L(1)}{r - 1})-1)*100").number_format = "0.0000"
-            ws.cell(r, col + 4, f"=(({L(3)}{r}/{L(3)}{r - 1})-1)*100").number_format = "0.0000"
-        for j in range(5):
-            ws.cell(r, col + j).font = _fnt()
-        _borde(ws, r, col, col + 4, i % 2 == 1)
-    ri, re_ = f"${L(2)}${r0 + 1}:${L(2)}${u}", f"${L(4)}${r0 + 1}:${L(4)}${u}"
-    ws.column_dimensions[get_column_letter(col + 5)].width = 3
-    ws.column_dimensions[get_column_letter(col + 6)].width = 24
-    ws.column_dimensions[get_column_letter(col + 7)].width = 14
-    c1, c2 = col + 6, col + 7
-    cv = get_column_letter(c2)
-    for k, (et, f) in enumerate([(f"Cov({nc}, {it['clave']})", f"=COVAR({ri},{re_})"), (f"Var({nc})", f"=VARP({ri})"), ("Beta", f"={cv}5/{cv}6"), ("Correlación", f"=CORREL({ri},{re_})")]):
-        r = 5 + k
-        ws.cell(r, c1, et).font = _fnt(bold=True)
-        ws.cell(r, c2, f).number_format = "0.0000"
-        ws.cell(r, c1).fill = ws.cell(r, c2).fill = AMARILLO
-    ws.cell(10, c1, f"Beta = Cov({nc}, acción) / Var({nc}).").font = _fnt(italic=True, color=GTXT)
-    ws.cell(11, c1, f"Fechas en que operaron los dos: {len(com)}.").font = _fnt(italic=True, color=GTXT)
-    return {"beta": f"{cv}7", "corr": f"{cv}8"}
-
-
-def _hoja_instrumento(wb, d, it, idx):
-    """Formato de la clase: datos en amarillo, tabla de rendimientos, estadística, rendimientos ordenados y bloques contra cada índice."""
-    ws = wb.create_sheet(it["clave"])
-    n = len(it["serie"])
-    r0, ult = 5, 5 + n - 1
-    unidad = "puntos" if it["indice"] else "USD"
-    _tit(ws, f"Rendimiento de precio de cierre: {it['nombre']}", "Ra = ((precio final - precio inicial) / precio inicial) x 100, con el cierre del día anterior como precio inicial de cada día.")
-    _enc(ws, 4, 1, "Date", 12, 48)
-    _enc(ws, 4, 2, f"Precios Cierre {it['clave']}", 16)
-    ws.column_dimensions["C"].width = 3
-    for i, (f, p) in enumerate(it["serie"]):
-        r = r0 + i
-        ws.cell(r, 1, _f(f)).number_format = "dd/mm/yyyy"
-        ws.cell(r, 2, round(p, 4)).number_format = F_PX
-        ws.cell(r, 1).fill = ws.cell(r, 2).fill = AMARILLO
-        ws.cell(r, 1).font = ws.cell(r, 2).font = _fnt()
-    enc = ["N", "Date", f"Precios Cierre {it['clave']} ({unidad})", "Ra = ((Pf - Pi) / Pi) x 100\nRendimiento del activo", "Rendimiento prom.\nRprom", "Diferencia de rendimiento\nRa - Rprom", "Diferencia del rendimiento al cuadrado"]
-    for j, (t, a) in enumerate(zip(enc, [6, 12, 18, 21, 16, 20, 20]), 4):
-        _enc(ws, 4, j, t, a)
-    rng = f"$G${r0 + 1}:$G${ult}"
-    for i in range(n):
-        r = r0 + i
-        ws.cell(r, 4, i + 1)
-        ws.cell(r, 5, f"=A{r}").number_format = "dd/mm/yyyy"
-        ws.cell(r, 6, f"=B{r}").number_format = F_PX
-        if i:
-            ws.cell(r, 7, f"=((F{r}/F{r - 1})-1)*100").number_format = "0.0000"
-            ws.cell(r, 8, f"=AVERAGE({rng})").number_format = "0.0000"
-            ws.cell(r, 9, f"=G{r}-H{r}").number_format = "0.0000"
-            ws.cell(r, 10, f"=I{r}^2").number_format = "0.0000"
-        for j in range(4, 11):
-            ws.cell(r, j).font = _fnt()
-        _borde(ws, r, 4, 10, i % 2 == 1)
-    for j, w in zip((12, 13, 14), (28, 16, 70)):
-        ws.column_dimensions[get_column_letter(j)].width = w
-    ws.column_dimensions["K"].width = 3
-    _enc(ws, 4, 12, "Estadística de Ra")
-    _enc(ws, 4, 13, "Valor")
-    _enc(ws, 4, 14, "Cómo se calcula")
-    est = [("Media", f"=AVERAGE({rng})", "Suma de los rendimientos entre el número de días."), ("Error típico", f"=STDEV({rng})/SQRT(COUNT({rng}))", "Desviación estándar entre la raíz del número de datos."),
-           ("Mediana", f"=MEDIAN({rng})", "Valor central de los rendimientos ordenados."), ("Moda", f'=IFERROR(MODE({rng}),"No se repite")', "Valor que más se repite."),
-           ("Desviación estándar", f"=STDEV({rng})", "Qué tanto se alejan los rendimientos de la media (muestra)."), ("Varianza de la muestra", f"=VAR({rng})", "Desviación estándar al cuadrado."),
-           ("Curtosis", f"=KURT({rng})", "Mayor que 0: colas más pesadas que una distribución normal."), ("Coeficiente de asimetría", f"=SKEW({rng})", "Positivo: más extremos al alza."),
-           ("Rango", f"=MAX({rng})-MIN({rng})", "Diferencia entre el rendimiento mayor y el menor."), ("Mínimo", f"=MIN({rng})", "Peor rendimiento diario."), ("Máximo", f"=MAX({rng})", "Mejor rendimiento diario."),
-           ("Suma", f"=SUM({rng})", "Suma de los rendimientos diarios."), ("DIAS TRABAJADOS", f"=COUNT({rng})", "Número de variaciones diarias.")]
-    for k, (a, f, e) in enumerate(est):
-        r = 5 + k
-        ws.cell(r, 12, a).font = _fnt(bold=True)
-        c = ws.cell(r, 13, f)
-        c.number_format, c.font = ("0" if a == "DIAS TRABAJADOS" else "0.0000"), _fnt()
-        ws.cell(r, 14, e).font = _fnt(size=9, color=GTXT)
-        _borde(ws, r, 12, 14)
-    base = 5 + len(est) + 1
-    _enc(ws, base, 12, "Rendimiento del periodo")
-    _enc(ws, base, 13, "Valor")
-    _enc(ws, base, 14, "Cómo se calcula")
-    res = [("Precio inicial", f"=B{r0}", "Cierre del primer día.", F_PX), ("Precio final", f"=B{ult}", "Cierre del último día.", F_PX), ("Rendimiento efectivo (%)", f"=((B{ult}/B{r0})-1)*100", "((precio final / precio inicial) - 1) x 100.", "0.0000"),
-           ("Rendimiento promedio Rprom (%)", f"=AVERAGE({rng})", "Promedio de los Ra diarios.", "0.0000"), ("Suma de diferencias al cuadrado", f"=SUM($J${r0 + 1}:$J${ult})", "Entre los días menos uno da la varianza.", "0.0000")]
-    for k, (a, f, e, nf) in enumerate(res):
-        r = base + 1 + k
-        ws.cell(r, 12, a).font = _fnt(bold=True)
-        c = ws.cell(r, 13, f)
-        c.number_format, c.font = nf, _fnt()
-        ws.cell(r, 14, e).font = _fnt(size=9, color=GTXT)
-        _borde(ws, r, 12, 14)
-    ws.column_dimensions["O"].width = 3
-    _enc(ws, 4, 16, "N", 6)
-    _enc(ws, 4, 17, "Ra ordenados (menor a mayor)", 20)
-    for k in range(1, n):
-        r = r0 + k - 1
-        ws.cell(r, 16, k).font = _fnt()
-        c = ws.cell(r, 17, f"=SMALL({rng},P{r})")
-        c.number_format, c.font = "0.0000", _fnt()
-        _borde(ws, r, 16, 17, k % 2 == 0)
-    ws.column_dimensions["R"].width = 3
-    celdas = {"hoja": it["clave"], "pi": f"M{base + 1}", "pf": f"M{base + 2}", "efectivo": f"M{base + 3}", "promedio": f"M{base + 4}", "desv": "M9", "n": "M17", "betas": {}}
-    col = 19
-    if not it["indice"]:
-        for x in idx:
-            celdas["betas"][x["clave"]] = _bloque_indice(ws, d, it, x, col, r0)
-            col += 9
-        _enc(ws, 4, col, "Date", 12)
-        _enc(ws, 4, col + 1, f"{it['clave']} (%)", 11)
-        for k, x in enumerate(idx):
-            _enc(ws, 4, col + 2 + k, f"{x['clave']} (%)", 11)
-        acu = [_acumulado(d, it)] + [_acumulado(d, x) for x in idx]
-        for i, f in enumerate(d["fechas"]):
-            r = 5 + i
-            ws.cell(r, col, _f(f)).number_format = "dd/mm/yyyy"
-            for k, serie in enumerate(acu):
-                if serie[i] is not None:
-                    ws.cell(r, col + 1 + k, round(serie[i], 4)).number_format = "0.00"
-        ult2 = 4 + len(d["fechas"])
-        ch = LineChart()
-        ch.title, ch.height, ch.width = f"{it['clave']} frente a sus índices: rendimiento acumulado (%)", 9.5, 22
-        ch.y_axis.number_format, ch.x_axis.number_format = "0.00", "dd/mm"
-        ch.x_axis.delete = ch.y_axis.delete = False
-        ch.x_axis.tickLblSkip = max(1, len(d["fechas"]) // 8)
-        for k, color in enumerate([G, AZUL, NARANJA][:1 + len(idx)]):
-            ch.add_data(Reference(ws, min_col=col + 1 + k, min_row=4, max_row=ult2), titles_from_data=True)
-            s = ch.series[-1]
-            s.graphicalProperties.line.solidFill = color
-            s.graphicalProperties.line.width = 28000 if k == 0 else 17000
-            s.marker.symbol, s.smooth = "none", False
-        ch.set_categories(Reference(ws, min_col=col, min_row=5, max_row=ult2))
-        ws.add_chart(ch, "L" + str(base + 8))
-    ws.freeze_panes = "A5"
-    ws.sheet_properties.tabColor = GOSC if it["indice"] else G
-    return celdas
-
-
-def _hoja_comparacion(wb, d, hojas):
-    ws = wb.create_sheet("Comparación")
-    items, idx = d["items"], _indices(d)
-    _tit(ws, "Comparación: precio, rendimiento efectivo y promedio", f"Del {R.fecha_corta(d['inicio'])} al {R.fecha_corta(d['ultimo'])}. Las cifras se leen de la hoja de cada instrumento.")
-    cols = ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Rendimiento promedio diario Rprom (%)", "Desviación estándar diaria (%)", "Días trabajados"] + \
-          [f"Beta frente al {x['clave']}" for x in idx] + [f"Diferencia contra el {x['clave']} (puntos)" for x in idx]
-    anchos = [30, 13, 13, 13, 13, 16, 18, 16, 11] + [13] * len(idx) + [17] * len(idx)
-    for j, (t, a) in enumerate(zip(cols, anchos), 1):
-        _enc(ws, 4, j, t, a)
-    ws.row_dimensions[4].height = 58
-    pos = {x["clave"]: 5 + i for i, x in enumerate(items)}
-    for i, it in enumerate(items):
-        r = 5 + i
-        h = hojas[it["clave"]]
-        q = f"'{h['hoja']}'!"
-        ws.cell(r, 1, f"{it['clave']} · {it['nombre']}" if not it["indice"] else it["nombre"])
-        for j, ref in ((2, h["pi"]), (3, h["pf"]), (6, h["efectivo"]), (7, h["promedio"]), (8, h["desv"]), (9, h["n"])):
-            ws.cell(r, j, f"={q}{ref}")
-        ws.cell(r, 4, round(it["pmax"], 4))
-        ws.cell(r, 5, round(it["pmin"], 4))
-        for k, x in enumerate(idx):
-            if not it["indice"]:
-                ws.cell(r, 10 + k, f"={q}{h['betas'][x['clave']]['beta']}").number_format = "0.00"
-                ws.cell(r, 10 + len(idx) + k, f"=F{r}-$F${pos[x['clave']]}").number_format = F_RET
-        for j in (2, 3, 4, 5):
-            ws.cell(r, j).number_format = F_PX
-        for j in (6, 7):
-            ws.cell(r, j).number_format = F_RET
-        ws.cell(r, 8).number_format = "0.00"
-        ws.cell(r, 9).number_format = "0"
-        ws.cell(r, 1).hyperlink = f"#'{h['hoja']}'!A1"
-        for j in range(1, len(cols) + 1):
-            ws.cell(r, j).font = _fnt(bold=(j == 1), color=G if j == 1 else None, underline="single" if j == 1 else None)
-        _borde(ws, r, 1, len(cols), i % 2 == 1)
-        if it["indice"]:
-            for j in range(1, len(cols) + 1):
-                ws.cell(r, j).fill = PatternFill("solid", fgColor="EFEFEF")
-    ws.cell(6 + len(items), 1, "Diferencia: rendimiento efectivo de la acción menos el del índice, en puntos porcentuales. Verde sube, rojo baja.").font = _fnt(italic=True, color=GTXT)
+    ws.cell(r + 1, 1, "Bursatilidad: indicador propio con el volumen de Yahoo Finance; el índice oficial de la BMV no se publica para estas emisoras.").font = _fnt(italic=True, color=GTXT, size=9)
     ws.freeze_panes = "B5"
 
 
-def _hoja_graficas(wb, d):
-    ws = wb.create_sheet("Gráficas")
-    items, acc, idx = d["items"], _acciones(d), _indices(d)
-    _tit(ws, "Rendimientos para comparar", "Rendimiento acumulado (%) = ((precio de hoy / precio inicial) - 1) x 100. Cada acción se compara con el S&P 500 y el IPC.")
-    c0 = 40
-    _enc(ws, 4, c0, "Fecha", 12)
-    for k, it in enumerate(items):
-        _enc(ws, 4, c0 + 1 + k, it["clave"], 11)
-    acum = [_acumulado(d, it) for it in items]
-    for i, f in enumerate(d["fechas"]):
-        r = 5 + i
-        ws.cell(r, c0, _f(f)).number_format = "dd/mm/yyyy"
-        for k in range(len(items)):
-            if acum[k][i] is not None:
-                ws.cell(r, c0 + 1 + k, round(acum[k][i], 4)).number_format = "0.00"
-    ult = 4 + len(d["fechas"])
-    col = {it["clave"]: c0 + 1 + k for k, it in enumerate(items)}
-    palette = [AZUL, NARANJA, "0A7F58", "A86D00", "C23B78"]
-
-    def linea(titulo, claves, ancla, colores):
-        ch = LineChart()
-        ch.title, ch.height, ch.width = titulo, 9.5, 24
-        ch.y_axis.number_format, ch.x_axis.number_format = "0.00", "dd/mm"
-        ch.x_axis.delete = ch.y_axis.delete = False
-        ch.x_axis.tickLblSkip = max(1, len(d["fechas"]) // 8)
-        for k, cl in enumerate(claves):
-            ch.add_data(Reference(ws, min_col=col[cl], min_row=4, max_row=ult), titles_from_data=True)
-            s = ch.series[-1]
-            s.graphicalProperties.line.solidFill = colores[k]
-            s.graphicalProperties.line.width = 28000 if k == 0 else 17000
-            s.marker.symbol, s.smooth = "none", False
-        ch.set_categories(Reference(ws, min_col=c0, min_row=5, max_row=ult))
-        ws.add_chart(ch, ancla)
-
-    lugar = lambda n: f"{'A' if n % 2 == 0 else 'M'}{4 + (n // 2) * 21}"
-    for n, it in enumerate(acc):
-        linea(f"{it['clave']} frente al S&P 500 y al IPC (%)", [it["clave"]] + [x["clave"] for x in idx], lugar(n), [G, AZUL, NARANJA])
-    sp = [x["clave"] for x in idx if x["clave"] == "S&P 500"]
-    linea("Las 5 acciones y el S&P 500 (%)", [x["clave"] for x in acc] + sp, lugar(len(acc)), palette + ["231F20"])
-    ws.cell(4, c0 + 10, "Instrumento")
-    ws.cell(4, c0 + 11, "Rendimiento efectivo (%)")
-    for k, it in enumerate(items):
-        ws.cell(5 + k, c0 + 10, it["clave"])
-        ws.cell(5 + k, c0 + 11, round(it["efectivo"], 4)).number_format = "0.00"
-    b = BarChart()
-    b.type, b.title, b.height, b.width, b.legend = "col", "Rendimiento efectivo del periodo (%)", 9.5, 24, None
-    b.y_axis.number_format = "0.00"
-    b.x_axis.delete = b.y_axis.delete = False
-    b.add_data(Reference(ws, min_col=c0 + 11, min_row=4, max_row=4 + len(items)), titles_from_data=True)
-    b.set_categories(Reference(ws, min_col=c0 + 10, min_row=5, max_row=4 + len(items)))
-    b.series[0].graphicalProperties.solidFill = G
-    ws.add_chart(b, lugar(len(acc) + 1))
-
-
-def _hoja_estadistica(wb, d):
-    ws = wb.create_sheet("Estadística")
-    items, acc, idx = d["items"], _acciones(d), _indices(d)
-    _tit(ws, "Estadística descriptiva de los rendimientos diarios (Ra, en %)", "Las mismas medidas de la hoja de cada instrumento, una columna por instrumento.")
-    _enc(ws, 4, 1, "Medida", 26)
-    for k, it in enumerate(items):
-        _enc(ws, 4, 2 + k, it["clave"], 12)
-        if it["indice"]:
-            ws.cell(4, 2 + k).fill = PatternFill("solid", fgColor=GOSC)
-    medidas = [("Media", "media"), ("Error típico", "error"), ("Mediana", "mediana"), ("Moda", "moda"), ("Desviación estándar", "desv"), ("Varianza de la muestra", "var"), ("Curtosis", "curtosis"),
-               ("Coeficiente de asimetría", "asimetria"), ("Rango", "rango"), ("Mínimo", "min"), ("Máximo", "max"), ("Suma", "suma"), ("Días trabajados", "n")]
-    for i, (et, k) in enumerate(medidas):
-        r = 5 + i
-        ws.cell(r, 1, et).font = _fnt(bold=True)
-        for j, it in enumerate(items):
-            v = it["stats"][k]
-            c = ws.cell(r, 2 + j, "No se repite" if v is None and k == "moda" else v)
-            c.number_format, c.font, c.alignment = ("0" if k == "n" else "0.00"), _fnt(), Alignment(horizontal="right")
-        _borde(ws, r, 1, 1 + len(items), i % 2 == 1)
-    r0 = 5 + len(medidas) + 2
-    ws.cell(r0, 1, "Relación con los índices (rendimientos diarios en las fechas en que operaron los dos)").font = _fnt(bold=True, size=12, color=G)
-    enc = ["Acción"]
-    for x in idx:
-        enc += [f"Cov({x['clave']}, acción)", f"Var({x['clave']})", f"Beta {x['clave']}", f"Correlación {x['clave']}"]
-    for j, t in enumerate(enc, 1):
-        _enc(ws, r0 + 1, j, t)
-    ws.row_dimensions[r0 + 1].height = 34
-    for i, it in enumerate(acc):
-        r = r0 + 2 + i
-        ws.cell(r, 1, it["clave"]).font = _fnt(bold=True)
-        for k, x in enumerate(idx):
-            b = _beta(d, it, x)
-            if b:
-                for j, v in enumerate([b["cov"], b["var"], b["beta"], b["corr"]]):
-                    c = ws.cell(r, 2 + 4 * k + j, v)
-                    c.number_format, c.font = "0.0000", _fnt()
-        _borde(ws, r, 1, len(enc), i % 2 == 1)
-    ws.cell(r0 + 8, 1, "Beta: cuánto se mueve la acción por cada 1 % que se mueve el índice (covarianza entre varianza). La correlación va de -1 a +1.").font = _fnt(italic=True, color=GTXT)
-    ws.freeze_panes = "B5"
-
-
-def _hoja_deuda(wb, d):
-    ws = wb.create_sheet("Deuda tasas")
+def _hoja_deuda(ws, d):
     deu = d["deuda"]
-    _tit(ws, "Deuda: tasas semanales y variaciones", "La deuda no tiene precio diario: se muestra la tasa de cada subasta o colocación (Banco de México). Variación en puntos base (pb).")
-    _enc(ws, 4, 1, "Fecha", 12)
-    ws.merge_cells(start_row=4, start_column=1, end_row=5, end_column=1)
+    _tit(ws, "Deuda: ficha y tasas semanales", "Banco de México. Riesgo y objetivo: material del equipo. Variación en puntos base (pb).")
+    ws.column_dimensions["A"].width = 24
+    _enc(ws, 4, 1, "Concepto", alto=22)
+    for j, x in enumerate(deu):
+        _enc(ws, 4, 2 + 2 * j, x["corto"], 15)
+        _enc(ws, 4, 3 + 2 * j, x["corto"], 13)
+        ws.merge_cells(start_row=4, start_column=2 + 2 * j, end_row=4, end_column=3 + 2 * j)
+    ficha = [("Emisor", lambda x: EMISOR[x["corto"]]), ("Plazo", lambda x: PLAZO[x["corto"]]), ("Intereses", lambda x: INTERES[x["corto"]]), ("Valor nominal", lambda x: NOMINAL[x["corto"]]),
+             ("Tasa", lambda x: TASA[x["corto"]]), ("Riesgo", lambda x: x["riesgo"]), ("Objetivo", lambda x: x["objetivo"]),
+             ("Última cifra", lambda x: (x["ult"], "0.00")), ("Fecha", lambda x: R.fecha_corta(x["fult"])), ("Mínimo", lambda x: (x["min"], "0.00")), ("Máximo", lambda x: (x["max"], "0.00")), ("Promedio", lambda x: (x["media"], "0.00"))]
+    for i, (et, fn) in enumerate(ficha, 5):
+        ws.cell(i, 1, et).font = _fnt(bold=True)
+        ws.cell(i, 1).alignment = Alignment(vertical="top")
+        largo = 0
+        for j, x in enumerate(deu):
+            v = fn(x)
+            fmt = None
+            if isinstance(v, tuple):
+                v, fmt = v
+            ws.merge_cells(start_row=i, start_column=2 + 2 * j, end_row=i, end_column=3 + 2 * j)
+            c = ws.cell(i, 2 + 2 * j, v)
+            c.font = _fnt()
+            c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(v, (int, float)) else "left")
+            if fmt:
+                c.number_format = fmt
+            if isinstance(v, str):
+                largo = max(largo, len(v))
+        ws.row_dimensions[i].height = max(15, 14 * (largo // 26 + 1))
+        _borde(ws, i, 1, 1 + 2 * len(deu), i % 2 == 0)
+    ws.cell(5 + len(ficha), 1, "Unidades: % anual (Udibonos, % real); papel comercial, millones de pesos colocados por semana (sin colocaciones en el periodo).").font = _fnt(italic=True, color=GTXT, size=9)
+    top = 5 + len(ficha) + 2
+    _seccion(ws, top, "Tasas semanales", 1, 1 + 2 * len(deu))
+    _enc(ws, top + 1, 1, "Fecha", alto=22)
+    ws.merge_cells(start_row=top + 1, start_column=1, end_row=top + 2, end_column=1)
     for k, x in enumerate(deu):
-        c0 = 2 + 2 * k
-        _enc(ws, 4, c0, x["corto"])
-        _enc(ws, 4, c0 + 1, x["corto"])
-        ws.merge_cells(start_row=4, start_column=c0, end_row=4, end_column=c0 + 1)
-        _enc(ws, 5, c0, "Monto colocado (millones de pesos)" if x["es_monto"] else ("Tasa real (%)" if "real" in x["unidad"] else "Tasa (%)"), 16)
-        _enc(ws, 5, c0 + 1, "Variación del monto (mdp)" if x["es_monto"] else "Variación (pb)", 14)
-    ws.row_dimensions[5].height = 44
+        _enc(ws, top + 1, 2 + 2 * k, x["corto"])
+        _enc(ws, top + 1, 3 + 2 * k, x["corto"])
+        ws.merge_cells(start_row=top + 1, start_column=2 + 2 * k, end_row=top + 1, end_column=3 + 2 * k)
+        _enc(ws, top + 2, 2 + 2 * k, "Monto (mdp)" if x["es_monto"] else ("Tasa real (%)" if "real" in x["unidad"] else "Tasa (%)"))
+        _enc(ws, top + 2, 3 + 2 * k, "Var. (mdp)" if x["es_monto"] else "Var. (pb)")
     fechas = sorted({f for x in deu for f, _ in x["serie"]})
     mapas = [{f: (v, vr) for (f, v), vr in zip(x["serie"], x["var"])} for x in deu]
+    r0 = top + 3
     for i, f in enumerate(fechas):
-        r = 6 + i
+        r = r0 + i
         ws.cell(r, 1, _f(f)).number_format = "dd/mm/yyyy"
         ws.cell(r, 1).font = _fnt()
         for k, m in enumerate(mapas):
@@ -751,93 +605,37 @@ def _hoja_deuda(wb, d):
                     c = ws.cell(r, 3 + 2 * k, vr)
                     c.number_format, c.font = F_RET, _fnt()
         _borde(ws, r, 1, 1 + 2 * len(deu), i % 2 == 1)
-    ult = 5 + len(fechas)
-    r0 = ult + 2
-    _seccion(ws, r0, "Estadística", 1, 1 + 2 * len(deu))
-    for i, (et, f) in enumerate([("Media", "AVERAGE({})"), ("Desviación estándar", "STDEV({})"), ("Mínimo", "MIN({})"), ("Máximo", "MAX({})"), ("Datos", "COUNT({})")]):
-        r = r0 + 1 + i
+    ult = r0 + len(fechas) - 1
+    for k in range(len(deu)):
+        _colorear(ws, f"{LETRA(3 + 2 * k)}{r0}:{LETRA(3 + 2 * k)}{ult}")
+    rs = ult + 2
+    for i, (et, fx) in enumerate([("Media", "AVERAGE"), ("Desviación estándar", "STDEV"), ("Mínimo", "MIN"), ("Máximo", "MAX")]):
+        r = rs + i
         ws.cell(r, 1, et).font = _fnt(bold=True)
         for k in range(len(deu)):
             for col in (2 + 2 * k, 3 + 2 * k):
-                L = get_column_letter(col)
-                c = ws.cell(r, col, "=" + f.format(f"{L}6:{L}{ult}"))
-                c.number_format, c.font = ("0" if et == "Datos" else "0.00"), _fnt()
+                L = LETRA(col)
+                c = ws.cell(r, col, f"={fx}({L}{r0}:{L}{ult})")
+                c.number_format, c.font = "0.00", _fnt()
         _borde(ws, r, 1, 1 + 2 * len(deu), i % 2 == 1)
-    ws.cell(r0 + 7, 1, "Papel comercial: no hubo colocaciones en el periodo, por eso su monto es 0.00. Los certificados bursátiles son los de corto plazo.").font = _fnt(italic=True, color=GTXT)
     tasas = [(k, x) for k, x in enumerate(deu) if not x["es_monto"]]
     ch = LineChart()
-    ch.title, ch.height, ch.width = "Tasas de las subastas y colocaciones (%)", 9.5, 24
+    ch.title, ch.height, ch.width, ch.dispBlanksAs = "Tasa de cada subasta o colocación (%)", 9, 17, "span"
     ch.y_axis.number_format, ch.x_axis.number_format = "0.00", "dd/mm"
     ch.x_axis.delete = ch.y_axis.delete = False
-    ch.x_axis.tickLblSkip = max(1, len(fechas) // 8)
+    ch.x_axis.tickLblSkip = max(1, len(fechas) // 6)
     palette = [AZUL, NARANJA, "0A7F58", "C23B78"]
     for n, (k, x) in enumerate(tasas):
-        ch.add_data(Reference(ws, min_col=2 + 2 * k, min_row=5, max_row=ult), titles_from_data=True)
+        ch.add_data(Reference(ws, min_col=2 + 2 * k, min_row=r0, max_row=ult), titles_from_data=False)
         s = ch.series[-1]
+        s.tx = SeriesLabel(v=x["corto"])
         s.graphicalProperties.line.solidFill = palette[n % 4]
         s.graphicalProperties.line.width = 19000
-        s.marker.symbol, s.smooth = "none", False
-    ch.set_categories(Reference(ws, min_col=1, min_row=6, max_row=ult))
-    ws.add_chart(ch, f"A{r0 + 10}")
-    ws.freeze_panes = "B6"
-    w2 = wb.create_sheet("Instrumentos de deuda")
-    _tit(w2, "Instrumentos de deuda: ficha", "Riesgo y objetivo: material del equipo. Características: Banco de México. Cifras: subastas del periodo.")
-    w2.column_dimensions["A"].width = 30
-    _enc(w2, 4, 1, "Concepto", alto=30)
-    for j, x in enumerate(deu, 2):
-        _enc(w2, 4, j, x["corto"], 34)
-    filas = [("Emisor", lambda x, F: F.get("emisor")), ("Plazo", lambda x, F: F.get("plazo")), ("Pago de intereses", lambda x, F: F.get("intereses")), ("Valor nominal", lambda x, F: F.get("nominal")),
-             ("Tasa", lambda x, F: F.get("tasa")), ("Primera emisión", lambda x, F: F.get("primera")), ("Respaldo", lambda x, F: F.get("garantia")), ("Riesgo (equipo)", lambda x, F: x["riesgo"]),
-             ("Objetivo (equipo)", lambda x, F: x["objetivo"]), ("Última cifra", lambda x, F: (x["ult"], "0.00")), ("Fecha de la última cifra", lambda x, F: R.fecha_corta(x["fult"])),
-             ("Mínimo del periodo", lambda x, F: (x["min"], "0.00")), ("Máximo del periodo", lambda x, F: (x["max"], "0.00")), ("Promedio del periodo", lambda x, F: (x["media"], "0.00"))]
-    for i, (et, fn) in enumerate(filas, 5):
-        w2.cell(i, 1, et).font = _fnt(bold=True)
-        w2.cell(i, 1).alignment = Alignment(vertical="top")
-        largo = 0
-        for j, x in enumerate(deu, 2):
-            v = fn(x, fichas.DEUDA.get(x["nombre"], {}))
-            fmt = None
-            if isinstance(v, tuple):
-                v, fmt = v
-            c = w2.cell(i, j, v)
-            c.font = _fnt()
-            c.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right" if isinstance(v, (int, float)) else "left")
-            if fmt:
-                c.number_format = fmt
-            if isinstance(v, str):
-                largo = max(largo, len(v))
-        w2.row_dimensions[i].height = max(16, 14 * (largo // 34 + 1))
-        _borde(w2, i, 1, 1 + len(deu), i % 2 == 0)
-    w2.cell(5 + len(filas) + 1, 1, "Cifras en % anual (Udibonos, % real); en papel comercial, millones de pesos colocados por semana.").font = _fnt(italic=True, color=GTXT)
-    w2.freeze_panes = "B5"
-
-
-def _hoja_conclusiones(wb, d, fichas_):
-    ws = wb.create_sheet("Conclusiones")
-    _tit(ws, "Conclusiones")
-    ws.column_dimensions["A"].width = 130
-    acc, idx = _acciones(d), _indices(d)
-    sp = next((x for x in idx if x["clave"] == "S&P 500"), None)
-    mejor, peor = max(acc, key=lambda x: x["efectivo"]), min(acc, key=lambda x: x["efectivo"])
-    sup = [x["clave"] for x in acc if sp and x["efectivo"] > sp["efectivo"]]
-    lineas = [("Acciones", True)]
-    lineas += [("• " + _conclusion(it, fichas_[it["clave"]], sp), False) for it in acc]
-    lineas.append((f"En conjunto, {mejor['clave']} fue la de mayor rendimiento ({mejor['efectivo']:+.2f} %) y {peor['clave']} la de menor ({peor['efectivo']:+.2f} %)."
-                   + (f" El S&P 500 rindió {sp['efectivo']:+.2f} % y lo superaron {', '.join(sup) if sup else 'ninguna'}." if sp else ""), False))
-    lineas.append(("", False))
-    lineas.append(("Deuda", True))
-    for x in d["deuda"]:
-        if x["es_monto"]:
-            lineas.append((f"• {x['corto']}: {x['ult']:,.2f} millones de pesos colocados en la última semana; en el periodo se colocaron {sum(v for _, v in x['serie']):,.2f} millones. Riesgo: {x['riesgo'].lower()}.", False))
-        else:
-            lineas.append((f"• {x['corto']}: última tasa {x['ult']:.2f} % ({R.fecha_corta(x['fult'])}), entre {x['min']:.2f} % y {x['max']:.2f} %, promedio {x['media']:.2f} %. Riesgo: {x['riesgo'].lower()}.", False))
-    lineas.append(("CETES, Bonos y Udibonos son deuda del Gobierno Federal y tienen el menor riesgo. El papel comercial y los certificados bursátiles los emiten empresas, y su riesgo depende de la solvencia del emisor.", False))
-    for i, (t, h) in enumerate(lineas, 3):
-        c = ws.cell(i, 1, t)
-        c.alignment = Alignment(wrap_text=True, vertical="top")
-        c.font = _fnt(bold=True, size=12, color=G) if h else _fnt(size=11)
-        if not h:
-            ws.row_dimensions[i].height = max(18, 15 * (len(t) // 120 + 1))
+        s.marker.symbol, s.marker.size, s.smooth = "circle", 4, False
+        s.marker.graphicalProperties.solidFill = palette[n % 4]
+    ch.set_categories(Reference(ws, min_col=1, min_row=r0, max_row=ult))
+    ws.add_chart(ch, f"{LETRA(2 + 2 * len(deu) + 1)}{top + 1}")
+    ws.freeze_panes = "B5"
 
 
 # ------------------------------------------------------------------------------- PDF
@@ -1071,8 +869,7 @@ def presentacion(d):
     pdf.cell(250, 5, f"Elaborado el {R.fecha_corta(d['generado'].date().isoformat())}. " + ("Cubre hasta el 25 de noviembre de 2026." if d["completo"] else "El análisis termina el 25 de noviembre de 2026; este corte llega al último cierre disponible."))
 
     # 2 lo esencial: una gráfica grande y el ranking
-    msg = (f"{mejor['nombre']} rindió más ({mejor['efectivo']:+.2f} %) y {peor['nombre']} menos ({peor['efectivo']:+.2f} %). "
-           f"{len(ganan)} de {len(acc)} acciones superaron al S&P 500, que rindió {sp['efectivo']:+.2f} %.") if sp else ""
+    msg = (f"Mayor rendimiento: {mejor['clave']} {mejor['efectivo']:+.2f} %  |  Menor: {peor['clave']} {peor['efectivo']:+.2f} %  |  Superan al S&P 500 ({sp['efectivo']:+.2f} %): {len(ganan)} de {len(acc)}") if sp else ""
     _pagina(pdf, "Lo esencial", msg)
     series = [(x["clave"], ac[x["clave"]], col_acc[x["clave"]], 0.55, False) for x in acc]
     if sp:
@@ -1088,8 +885,8 @@ def presentacion(d):
     _tabla(pdf, ["Instrumento", "Rendimiento (%)"], [[x["clave"], _n(x["efectivo"], True)] for x in orden], (34, 34), None, {(i, 1): _color(x["efectivo"]) for i, x in enumerate(orden)}, size=9.5, alto=7, y=45, x=212, tope=70)
 
     # 3 cada acción frente a su índice
-    _pagina(pdf, "Cada acción frente a su índice", "Línea de color: la acción. Negra: S&P 500. Gris: IPC. Las acciones cotizan en dólares, así que el S&P 500 es su referencia directa.")
-    pos = [(14, 36), (110, 36), (206, 36), (14, 114), (110, 114)]
+    _pagina(pdf, "Cada acción frente a su índice", "Color: acción  |  Negro: S&P 500  |  Gris: IPC  |  Rendimiento acumulado (%)")
+    pos = [(14, 34), (110, 34), (206, 34), (14, 114), (110, 114)]
     for (x0, y0), it in zip(pos, acc):
         s = [(it["clave"], ac[it["clave"]], col_acc[it["clave"]], 0.7, False)]
         if sp:
@@ -1097,18 +894,24 @@ def presentacion(d):
         if ipc:
             s.append(("IPC", ac["IPC"], GRIS, 0.5, True))
         b = fichas_[it["clave"]]["betas"].get("S&P 500")
-        _lineas(pdf, x0, y0, 90, 74, s, fechas, f"{it['clave']} · {it['nombre']}" + (f"   (beta frente al S&P 500: {b['beta']:.2f})" if b else ""))
-    pdf.set_xy(206, 122)
+        _lineas(pdf, x0, y0, 90, 72, s, fechas, f"{it['clave']} · {it['nombre']}" + (f"   (beta frente al S&P 500: {b['beta']:.2f})" if b else ""))
+    pdf.set_xy(206, 118)
     pdf.set_font("Barlow", "B", 9.5)
     pdf.set_text_color(*NEGRO)
-    pdf.cell(75, 5, "Cómo leerlo")
-    pdf.set_xy(206, 129)
-    pdf.set_font("Barlow", "", 8.8)
-    pdf.set_text_color(*GRIS)
-    pdf.multi_cell(76, 4.4, "Cuando la línea de color va arriba de la negra, la acción rindió más que el mercado de EE. UU. en ese tramo. La beta indica cuánto se mueve la acción por cada 1 % que se mueve el S&P 500.")
+    pdf.cell(75, 5, "Frente al S&P 500")
+    filas = []
+    for it in acc:
+        b = fichas_[it["clave"]]["betas"].get("S&P 500")
+        filas.append([it["clave"], _n(it["efectivo"], True), _n(it["efectivo"] - sp["efectivo"], True) if sp else "-", f"{b['beta']:.2f}" if b else "s/d"])
+    est = {}
+    for i, it in enumerate(acc):
+        est[(i, 1)] = _color(it["efectivo"])
+        if sp:
+            est[(i, 2)] = _color(it["efectivo"] - sp["efectivo"])
+    _tabla(pdf, ["Acción", "Rend. (%)", "Dif. (pts)", "Beta"], filas, (19, 19, 19, 17), None, est, size=8.6, alto=6.4, y=125, x=206, tope=76)
 
     # 4 precio de cierre y rendimiento
-    _pagina(pdf, "Precio de cierre y rendimiento", "El rendimiento efectivo cubre todo el periodo; el promedio diario es la media de las variaciones día a día.")
+    _pagina(pdf, "Precio de cierre y rendimiento", "Efectivo = ((precio final / precio inicial) - 1) x 100  |  Rprom = media de las variaciones diarias")
     filas, est = [], {}
     for i, x in enumerate(items):
         row = [x["clave"], _n(x["pi"]), _n(x["pf"]), _n(x["pmax"]), _n(x["pmin"]), _n(x["efectivo"], True), _n(x["stats"]["media"], True), _n(x["stats"]["desv"])]
@@ -1126,7 +929,7 @@ def presentacion(d):
     _barras(pdf, 150, 116, 130, 76, [x["clave"] for x in items], [x["stats"]["media"] for x in items], "Rendimiento promedio diario Rprom (%)", cuerpo)
 
     # 5 riesgo y estadística
-    _pagina(pdf, "Riesgo y estadística", "La desviación estándar y la beta resumen cuánto se mueve cada acción y qué tan unida va a su índice.")
+    _pagina(pdf, "Riesgo y estadística", "Variación diaria en %  |  Estadística de muestra, como en Excel")
     filas = [[x["clave"], _n(x["stats"]["media"], True), _n(x["stats"]["desv"]), _n(x["stats"]["var"]), _n(x["stats"]["asimetria"], True), _n(x["stats"]["curtosis"], True), _n(x["stats"]["min"], True),
               _n(x["stats"]["max"], True), str(x["stats"]["n"])] for x in items]
     y1 = _tabla(pdf, ["Instrumento", "Media (%)", "Desviación estándar", "Varianza", "Asimetría", "Curtosis", "Mínimo (%)", "Máximo (%)", "Días trabajados"], filas, (30, 26, 32, 26, 26, 26, 28, 28, 28), None, None, size=9, alto=6.2, y=36)
@@ -1141,13 +944,9 @@ def presentacion(d):
             fila += [f"{b['beta']:.2f}" if b else "s/d", f"{b['corr']:.2f}" if b else "s/d"]
         filas.append(fila)
     y2 = _tabla(pdf, enc, filas, (30, 40, 40, 40, 40), None, None, size=9, alto=6.2, y=y1 + 8)
-    pdf.set_xy(14, y2 + 5)
-    pdf.set_font("Barlow", "", 9)
-    pdf.set_text_color(*GRIS)
-    pdf.multi_cell(269, 4.6, "Estadística con las mismas definiciones de Excel (muestra). Cov(índice, acción) y Var(índice) de cada acción están en su hoja del Excel.")
 
     # 6 ficha de las acciones
-    _pagina(pdf, "Ficha de las acciones", "Tipo de acción, serie, clasificación, capital y bursatilidad de cada empresa, con cifras reales.")
+    _pagina(pdf, "Ficha de las acciones", "Datos reales: SEC (EDGAR) y Yahoo Finance  |  Cifras en USD")
     g = lambda it, k: fichas_[it["clave"]][k]
     mm = lambda v: f"{v:,.2f}" if v is not None else "s/d"
     filas = [
@@ -1176,7 +975,7 @@ def presentacion(d):
 
     # 7 deuda
     tasas = [x for x in deu if not x["es_monto"]]
-    _pagina(pdf, "Deuda", "CETES, Bonos y Udibonos son deuda del Gobierno Federal, de menor riesgo. El papel comercial y los certificados bursátiles los emiten empresas.")
+    _pagina(pdf, "Deuda", "Subastas y colocaciones semanales  |  Fuente: Banco de México")
     filas = []
     for x in deu:
         F = fichas.DEUDA.get(x["nombre"], {})
@@ -1196,37 +995,23 @@ def presentacion(d):
 
     # 8 conclusiones y método
     _pagina(pdf, "Conclusiones y método")
-    pdf.set_x(14)
-    pdf.set_font("Barlow", "B", 11.5)
-    pdf.set_text_color(*GUINDA)
-    pdf.cell(269, 7, "Acciones", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Barlow", "", 9.6)
-    pdf.set_text_color(*NEGRO)
-    for it in acc:
-        pdf.set_x(14)
-        pdf.multi_cell(269, 4.8, "•  " + _conclusion(it, fichas_[it["clave"]], sp), new_x="LMARGIN", new_y="NEXT")
-        pdf.ln(0.8)
-    pdf.set_x(14)
-    pdf.set_font("Barlow", "B", 11.5)
-    pdf.set_text_color(*GUINDA)
-    pdf.cell(269, 8, "Deuda", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Barlow", "", 9.6)
-    pdf.set_text_color(*NEGRO)
-    pdf.set_x(14)
-    pdf.multi_cell(269, 4.8, "•  " + "; ".join(f"{x['corto']} {x['ult']:.2f} %" for x in tasas) + " en su última subasta o colocación. El papel comercial no tuvo colocaciones en el periodo.", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(2)
-    pdf.set_x(14)
-    pdf.set_font("Barlow", "B", 11.5)
-    pdf.set_text_color(*GUINDA)
-    pdf.cell(269, 8, "Método", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Barlow", "", 9.2)
-    pdf.set_text_color(*NEGRO)
-    met = ["Variación diaria Ra = ((precio de hoy / precio anterior) - 1) x 100. Rendimiento efectivo = ((precio final / precio inicial) - 1) x 100. Rprom = promedio de los Ra. Diferencia = Ra - Rprom. Beta = Cov(índice, acción) / Var(índice).",
-           "Precios: Yahoo Finance (referencia). Empresas: SEC EDGAR. Deuda: Banco de México. Riesgo y objetivo de cada instrumento: material del equipo.",
-           "El periodo empieza el 1 de marzo y termina el 25 de noviembre de 2026" + ("." if d["completo"] else "; este corte llega al último cierre disponible y el archivo se completa al generarlo de nuevo después de esa fecha."),
-           "El Excel adjunto trae las fórmulas de la clase en la hoja de cada instrumento, además de la ficha completa de cada acción."]
-    for t in met:
-        pdf.set_x(14)
-        pdf.multi_cell(269, 4.6, "•  " + t, new_x="LMARGIN", new_y="NEXT")
-        pdf.ln(0.6)
+    filas, est = [], {}
+    for i, it in enumerate(acc):
+        f = fichas_[it["clave"]]
+        b = f["betas"].get("S&P 500")
+        dif = it["efectivo"] - sp["efectivo"] if sp else None
+        filas.append([it["clave"], _n(it["efectivo"], True), _n(dif, True) if dif is not None else "-", f"{f['vol']:.2f}", f["nivel"].capitalize(), f"{b['beta']:.2f}" if b else "s/d",
+                      "Supera al S&P 500" if dif is not None and dif > 0 else "Por debajo del S&P 500"])
+        est[(i, 1)] = _color(it["efectivo"])
+        if dif is not None:
+            est[(i, 2)] = _color(dif)
+    yc = _tabla(pdf, ["Acción", "Rend. efectivo (%)", "Dif. S&P 500 (pts)", "Volatilidad anual (%)", "Volatilidad", "Beta S&P 500", "Resultado"], filas, (30, 40, 44, 38, 30, 30, 57), ["LEFT"] + ["RIGHT"] * 3 + ["CENTER"] * 2 + ["LEFT"], est, size=9.2, alto=7, y=34)
+    tasas_ = [x for x in deu if not x["es_monto"]]
+    filas = [[x["corto"], f"{x['ult']:.2f}", f"{x['min']:.2f}", f"{x['max']:.2f}", f"{x['media']:.2f}"] for x in tasas_]
+    yd2 = _tabla(pdf, ["Deuda (tasa, %)", "Última", "Mínimo", "Máximo", "Promedio"], filas, (46, 26, 26, 26, 26), ["LEFT"] + ["RIGHT"] * 4, None, size=9, alto=6.4, y=yc + 10, x=14, tope=150)
+    fm = [["Variación diaria Ra", "((precio de hoy / precio anterior) - 1) x 100"], ["Rendimiento efectivo", "((precio final / precio inicial) - 1) x 100"], ["Rendimiento promedio Rprom", "Promedio de los Ra"],
+          ["Diferencia", "Ra - Rprom, y su cuadrado"], ["Beta", "Cov(índice, acción) / Var(índice), con las fechas en que operaron los dos"],
+          ["Periodo", f"1 de marzo al {'25 de noviembre' if d['completo'] else R.fecha_corta(d['ultimo']) + ' (el análisis termina el 25 de noviembre de 2026)'}"],
+          ["Fuentes", "Yahoo Finance (precios), SEC EDGAR (empresas), Banco de México (deuda), material del equipo (riesgo y objetivo)"]]
+    _tabla(pdf, ["Método", "Definición"], fm, (32, 79), ["LEFT", "LEFT"], None, size=8, alto=4.6, y=yc + 10, x=172, tope=111)
     return bytes(pdf.output())
