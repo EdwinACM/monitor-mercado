@@ -36,6 +36,7 @@ def test_los_scripts_no_usan_unsafe_inline():
     script_src = next(p for p in csp.split(";") if p.strip().startswith("script-src"))
     assert "'unsafe-inline'" not in script_src
     assert "object-src 'none'" in csp and "frame-ancestors 'none'" in csp
+    assert "style-src-elem 'self'" in csp  # no se aceptan bloques <style> inyectados
 
 
 def test_el_script_de_la_pagina_coincide_con_la_huella_de_la_politica():
