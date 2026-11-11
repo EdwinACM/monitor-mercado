@@ -684,6 +684,22 @@ class _PDF(FPDF):
         self.cell(40, 4, f"{self.page_no()} de {self.total}", align="R")
 
 
+ESC_F = 0.034  # mm por píxel: fórmulas de unos 12 pt, todas a la misma escala
+
+
+def _tam_formula(nombre, esc=None):
+    from PIL import Image
+    with Image.open(R.MARCA / "formulas" / f"{nombre}.png") as im:
+        return im.width * (esc or ESC_F), im.height * (esc or ESC_F)
+
+
+def _formula(pdf, nombre, x, y_centro, esc=None):
+    """Coloca la fórmula (imagen LaTeX de recursos/formulas) centrada en y_centro y devuelve su ancho."""
+    w, h = _tam_formula(nombre, esc)
+    pdf.image(str(R.MARCA / "formulas" / f"{nombre}.png"), x=x, y=y_centro - h / 2, w=w, h=h)
+    return w
+
+
 def _nuevo():
     pdf = _PDF(orientation="L", format="A4")
     for est, arch in (("", "Barlow-Regular"), ("B", "Barlow-Bold"), ("I", "Barlow-Italic")):
@@ -885,7 +901,7 @@ def presentacion(d):
         pdf.cell(150, 7, txt)
     pdf.set_xy(20, 112)
     pdf.set_font("BarlowC", "B", 38)
-    pdf.cell(250, 16, "Cinco acciones frente a su índice", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(250, 16, "Acciones y bonos gubernamentales", new_x="LMARGIN", new_y="NEXT")
     pdf.set_x(20)
     pdf.set_font("Barlow", "", 15)
     pdf.cell(250, 9, "Apple, Microsoft, NVIDIA, Tesla y Coca-Cola, el S&P 500, el IPC y la deuda", new_x="LMARGIN", new_y="NEXT")
@@ -925,7 +941,15 @@ def presentacion(d):
     pdf.multi_cell(269, 4, "Cifras de la SEC (EDGAR), último ejercicio presentado, y precios de Yahoo Finance. Bursatilidad: indicador propio con el volumen diario de Yahoo Finance; el índice oficial de la BMV (alta, media, baja, mínima) no se publica para estas emisoras.", align="J")
 
     # 4 precio de cierre y rendimiento
-    _pagina(pdf, "Precio de cierre y rendimiento", "Efectivo = ((precio final / precio inicial) - 1) x 100. Rprom = media de las variaciones diarias.")
+    _pagina(pdf, "Precio de cierre y rendimiento")
+    pdf.set_font("Barlow", "B", 10)
+    pdf.set_text_color(*NEGRO)
+    pdf.set_xy(14, 29)
+    pdf.cell(38, 6, "Rendimiento efectivo")
+    w = _formula(pdf, "re", 54, 32, 0.04)
+    pdf.set_xy(54 + w + 14, 29)
+    pdf.cell(42, 6, "Rendimiento promedio")
+    _formula(pdf, "rprom", 54 + w + 14 + 42, 32, 0.04)
     filas, est = [], {}
     for i, x in enumerate(items):
         row = [x["clave"], _n(x["pi"]), _n(x["pf"]), _n(x["pmax"]), _n(x["pmin"]), _n(x["efectivo"], True), _n(x["stats"]["media"], True), _n(x["stats"]["desv"])]
@@ -937,7 +961,7 @@ def presentacion(d):
             if not x["indice"]:
                 est[(i, 8 + k)] = _color(x["efectivo"] - ix["efectivo"])
     _tabla(pdf, ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Promedio diario Rprom (%)", "Desviación diaria (%)"] + [f"Diferencia con {x['clave']} (puntos)" for x in idx],
-           filas, (30, 24, 24, 24, 24, 30, 30, 26, 30, 30), None, est, size=9, alto=6.4, y=36)
+           filas, (30, 24, 24, 24, 24, 30, 30, 26, 30, 30), None, est, size=9, alto=6.4, y=40)
     cuerpo = {len(items) - 1 - k: (35, 31, 32) for k in range(len(idx))}
     _barras(pdf, 14, 116, 130, 76, [x["clave"] for x in items], [x["efectivo"] for x in items], "Rendimiento efectivo del periodo (%)", cuerpo)
     _barras(pdf, 150, 116, 130, 76, [x["clave"] for x in items], [x["stats"]["media"] for x in items], "Rendimiento promedio diario Rprom (%)", cuerpo)
@@ -988,7 +1012,7 @@ def presentacion(d):
     _pagina(pdf, "Riesgo, estadística y conclusiones", "Variación diaria en %. Estadística de muestra.")
     filas = [[x["clave"], _n(x["stats"]["media"], True), _n(x["stats"]["desv"]), _n(x["stats"]["var"]), _n(x["stats"]["asimetria"], True), _n(x["stats"]["curtosis"], True), _n(x["stats"]["min"], True),
               _n(x["stats"]["max"], True), str(x["stats"]["n"])] for x in items]
-    y1 = _tabla(pdf, ["Instrumento", "Media (%)", "Desviación estándar", "Varianza", "Asimetría", "Curtosis", "Mínimo (%)", "Máximo (%)", "Días trabajados"], filas, (30, 26, 32, 26, 26, 26, 28, 28, 28), None, None, size=8.4, alto=4.7, y=33)
+    y1 = _tabla(pdf, ["Instrumento", "Media (%)", "Desviación estándar", "Varianza", "Asimetría", "Curtosis", "Mínimo (%)", "Máximo (%)", "Días trabajados"], filas, (30, 26, 32, 26, 26, 26, 28, 28, 28), None, None, size=8.2, alto=4.3, y=33)
     filas, est = [], {}
     for i, it in enumerate(acc):
         f = fichas_[it["clave"]]
@@ -999,12 +1023,36 @@ def presentacion(d):
         est[(i, 1)] = _color(it["efectivo"])
         if dif is not None:
             est[(i, 2)] = _color(dif)
-    yc = _tabla(pdf, ["Acción", "Rend. efectivo (%)", "Dif. S&P 500 (pts)", "Volatilidad anual (%)", "Volatilidad", "Beta S&P 500", "Beta IPC", "Resultado"], filas, (26, 34, 36, 36, 26, 28, 24, 59), ["LEFT"] + ["RIGHT"] * 3 + ["CENTER"] * 3 + ["LEFT"], est, size=8.4, alto=4.9, y=y1 + 5)
-    fm = [["Variación diaria Ra", "((precio de hoy / precio anterior) - 1) x 100"], ["Rendimiento efectivo", "((precio final / precio inicial) - 1) x 100"], ["Rendimiento promedio Rprom", "Promedio de los Ra"],
-          ["Diferencia", "Ra - Rprom, y su cuadrado"], ["Beta", "Cov(índice, acción) / Var(índice), con las fechas en que operaron los dos"],
-          ["Periodo", f"1 de marzo al {'25 de noviembre' if d['completo'] else R.fecha_corta(d['ultimo']) + ' (el análisis termina el 25 de noviembre de 2026)'}"],
-          ["Fuentes", "Yahoo Finance (precios), SEC EDGAR (empresas), Banco de México (deuda)"]]
-    _tabla(pdf, ["Método", "Definición"], fm, (50, 219), ["LEFT", "LEFT"], None, size=7.8, alto=4.2, y=yc + 5, x=14, tope=269)
+    yc = _tabla(pdf, ["Acción", "Rend. efectivo (%)", "Dif. S&P 500 (pts)", "Volatilidad anual (%)", "Volatilidad", "Beta S&P 500", "Beta IPC", "Resultado"], filas, (26, 34, 36, 36, 26, 28, 24, 59), ["LEFT"] + ["RIGHT"] * 3 + ["CENTER"] * 3 + ["LEFT"], est, size=8.2, alto=4.5, y=y1 + 4)
+    y = yc + 4
+    pdf.set_xy(14, y)
+    pdf.set_fill_color(*GUINDA)
+    pdf.set_text_color(*BLANCO)
+    pdf.set_font("Barlow", "B", 8)
+    pdf.cell(50, 5.4, "Método", fill=True)
+    pdf.cell(219, 5.4, "Definición", fill=True)
+    y += 5.4
+    fm = [("Variación diaria", "ra", None), ("Rendimiento efectivo", "re", None), ("Rendimiento promedio", "rprom", None), ("Diferencia y su cuadrado", "dif", None),
+          ("Beta", "beta", "Con las fechas en que operaron los dos."), ("Periodo", None, f"1 de marzo al {'25 de noviembre' if d['completo'] else R.fecha_corta(d['ultimo']) + ' (el análisis termina el 25 de noviembre de 2026)'}"),
+          ("Fuentes", None, "Yahoo Finance (precios), SEC EDGAR (empresas), Banco de México (deuda)")]
+    for i, (et, fo, tx) in enumerate(fm):
+        alto = max(_tam_formula(fo)[1] + 1.6, 6.2) if fo else 5.6
+        if i % 2 == 0:
+            pdf.set_fill_color(*GUINDA_SUAVE)
+            pdf.rect(14, y, 269, alto, "F")
+        pdf.set_text_color(*NEGRO)
+        pdf.set_font("Barlow", "", 8)
+        pdf.set_xy(15.6, y + (alto - 4) / 2)
+        pdf.cell(48, 4, et)
+        xf = 64
+        if fo:
+            xf += _formula(pdf, fo, 64, y + alto / 2) + 6
+        if tx:
+            pdf.set_xy(xf, y + (alto - 4) / 2)
+            pdf.cell(200, 4, tx)
+        pdf.set_draw_color(*GRIS_SUAVE)
+        pdf.line(14, y + alto, 283, y + alto)
+        y += alto
 
     # 7 deuda: qué es cada instrumento
     _pagina(pdf, "Deuda: qué es cada instrumento", "Instrumentos de gobierno: menor riesgo.")
