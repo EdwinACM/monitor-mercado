@@ -92,6 +92,8 @@ DEUDA = {
 }
 
 _cache, _lock = {}, threading.Lock()
+MAX_CACHE = 300  # tope de entradas: evita que consultas con muchas combinaciones de fechas llenen la memoria
+MONEDAS = ("mxn", "original")
 
 
 def cached(key, ttl, fn):
@@ -102,11 +104,16 @@ def cached(key, ttl, fn):
     val = fn()
     with _lock:
         _cache[key] = (time.time(), val)
+        if len(_cache) > MAX_CACHE:  # se descartan las entradas más antiguas
+            for k, _ in sorted(_cache.items(), key=lambda kv: kv[1][0])[: len(_cache) - MAX_CACHE]:
+                del _cache[k]
     return val
 
 
 def http_get(url, timeout=60, reintentos=3, cabeceras=None):
-    """GET con reintentos (los portales oficiales limitan ráfagas con HTTP 429)."""
+    """GET con reintentos (los portales oficiales limitan ráfagas con HTTP 429). Solo conexiones https."""
+    if not url.startswith("https://"):
+        raise ValueError("Solo se permiten conexiones https")
     for k in range(reintentos):
         try:
             req = urllib.request.Request(url, headers={**UA, **(cabeceras or {})})
@@ -282,6 +289,14 @@ def acciones(tickers, desde):
 
     with ThreadPoolExecutor(max_workers=6) as ex:
         return list(ex.map(uno, tickers))
+
+
+def moneda_de(qs):
+    """Moneda de la consulta: solo valores conocidos (no se aceptan textos libres)."""
+    m = qs.get("moneda", ["mxn"])[0]
+    if m not in MONEDAS:
+        raise ValueError("Moneda no válida")
+    return m
 
 
 def periodo(qs):
@@ -514,6 +529,7 @@ class Handler(SimpleHTTPRequestHandler):
                 data = reg
             else:
                 desde, hasta = periodo(qs)
+                moneda = moneda_de(qs)
                 clave = (desde, hasta, date.today())
                 if ruta == "/api/ejercicio":
                     import ejercicio
@@ -528,9 +544,9 @@ class Handler(SimpleHTTPRequestHandler):
                 elif ruta == "/api/deuda":
                     data = analisis_completo(list(ACCIONES)[:1], desde, hasta)["deuda"]
                 elif ruta == "/api/comparar":
-                    data = comparacion(tickers, desde, hasta, qs.get("moneda", ["mxn"])[0])
+                    data = comparacion(tickers, desde, hasta, moneda)
                 elif ruta == "/api/simulacion":
-                    data = cached(("sim", clave, qs.get("moneda", ["mxn"])[0]), 300, lambda: simulacion(desde, hasta, qs.get("moneda", ["mxn"])[0]))
+                    data = cached(("sim", clave, moneda), 300, lambda: simulacion(desde, hasta, moneda))
                 elif ruta == "/api/archivo":
                     data = cached(("arch", clave), 300, lambda: archivo(desde, hasta))
                 elif ruta == "/api/contexto":
@@ -548,6 +564,9 @@ class Handler(SimpleHTTPRequestHandler):
                 else:
                     return self.send(b'{"error":"ruta no encontrada"}', status=404)
             self.send(json.dumps(data, ensure_ascii=False).encode())
+        except json.JSONDecodeError as e:  # una fuente devolvió algo que no es JSON: falla externa, no consulta inválida
+            print(f"[ERROR] {self.path}: {type(e).__name__}: {e}")
+            self.send(json.dumps({"error": "No se pudo obtener la información de las fuentes. Intenta de nuevo en unos segundos."}, ensure_ascii=False).encode(), status=502)
         except (ValueError, KeyError) as e:  # entradas inválidas: el mensaje es para quien consulta
             self.send(json.dumps({"error": str(e) if isinstance(e, ValueError) else "Falta un parámetro de la consulta"}, ensure_ascii=False).encode(), status=400)
         except Exception as e:  # fallas de fuentes externas o internas: no se exponen rutas ni detalles del servidor
@@ -555,9 +574,12 @@ class Handler(SimpleHTTPRequestHandler):
             self.send(json.dumps({"error": "No se pudo obtener la información de las fuentes. Intenta de nuevo en unos segundos."}, ensure_ascii=False).encode(), status=502)
 
 
-CABECERAS_SEGURAS = {  # mismas que en vercel.json
+CABECERAS_SEGURAS = {  # mismas que en vercel.json (una prueba lo verifica)
     "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer",
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Resource-Policy": "same-origin",
+    # El único script dentro de la página (tema claro u oscuro) se autoriza con su huella; no se usa 'unsafe-inline' en scripts.
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'sha256-b+GEKfADrumbut8UfZgVSmfDoR59+67b2vMDLgMt/hM='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
