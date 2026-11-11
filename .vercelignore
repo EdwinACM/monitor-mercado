@@ -1,5 +1,8 @@
 iniciar.command
-LEEME.md
+README.md
 PRODUCT.md
 DESIGN.md
 .impeccable
+docs
+tests
+requirements-dev.txt
