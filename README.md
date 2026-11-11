@@ -95,7 +95,7 @@ La app solo muestra datos públicos y no tiene cuentas de usuario. Valida todo p
 
 ## Licencia y créditos
 
-El código se publica con licencia MIT (archivo `LICENSE`). La licencia no cubre el escudo del IPN ni el de la ESE, ni los logotipos de `static/marca/`, que pertenecen a sus instituciones. Los archivos de terceros conservan su licencia: las tipografías Barlow (SIL Open Font License 1.1, texto en `static/marca/OFL-BarlowSemiCondensed.txt`) y la librería Chart.js (MIT).
+El código se publica con licencia MIT (archivo `LICENSE`; el detalle de lo que no cubre está en `NOTICE.md`). La licencia no cubre el escudo del IPN ni el de la ESE, ni los logotipos de `static/marca/`, que pertenecen a sus instituciones. Los archivos de terceros conservan su licencia: las tipografías Barlow (SIL Open Font License 1.1, texto en `static/marca/OFL-BarlowSemiCondensed.txt`) y la librería Chart.js (MIT).
 
 ## Avisos
 
