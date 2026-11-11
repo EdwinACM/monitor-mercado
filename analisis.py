@@ -306,7 +306,7 @@ def resumen_mercado(items):
         pr = min(items, key=lambda x: x["ret_periodo"])
         out["texto_periodo"] = (f"En el periodo, {len(pos)} de {len(items)} emisoras tuvieron rendimiento positivo en su moneda. "
                                 f"Mejor: {mj['nombre']} ({mj['ret_periodo']:+.2f}%); peor: {pr['nombre']} ({pr['ret_periodo']:+.2f}%). "
-                                f"Al último cierre: {cuenta.get('COMPRAR', 0)} decisiones de comprar, {cuenta.get('MANTENER', 0)} de mantener y {cuenta.get('VENDER', 0)} de vender.")
+                                f"Al último cierre: {ver(cuenta.get('COMPRAR', 0), 'decisión', 'decisiones')} de comprar, {cuenta.get('MANTENER', 0)} de mantener y {cuenta.get('VENDER', 0)} de vender.")
     return out
 
 
