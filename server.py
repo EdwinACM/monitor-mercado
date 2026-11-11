@@ -579,7 +579,7 @@ CABECERAS_SEGURAS = {  # mismas que en vercel.json (una prueba lo verifica)
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
     "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Resource-Policy": "same-origin",
     # El único script dentro de la página (tema claro u oscuro) se autoriza con su huella; no se usa 'unsafe-inline' en scripts.
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'sha256-b+GEKfADrumbut8UfZgVSmfDoR59+67b2vMDLgMt/hM='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'sha256-b+GEKfADrumbut8UfZgVSmfDoR59+67b2vMDLgMt/hM='; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
