@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-13T19:58:59.148908-06:00",
+ "actualizado": "2026-11-16T22:20:14.206492-06:00",
  "fuente": "SEC EDGAR (data.sec.gov)",
  "errores": {},
  "empresas": {
@@ -8,7 +8,7 @@
    "sic": "Electronic Computers",
    "cik": "0000320193",
    "estado_constitucion": "CA",
-   "ejercicio_fiscal_termina": "0926",
+   "ejercicio_fiscal_termina": "0925",
    "documentos": {
     "anual": {
      "formulario": "10-K",
@@ -1435,8 +1435,8 @@
     },
     "ultimo": {
      "formulario": "6-K",
-     "presentado": "2026-11-06",
-     "url": "https://www.sec.gov/Archives/edgar/data/1378239/000199937126024703/omab-6k_110626.htm"
+     "presentado": "2026-11-16",
+     "url": "https://www.sec.gov/Archives/edgar/data/1378239/000199937126025371/omab-6k_111226.htm"
     }
    },
    "acciones": {},
