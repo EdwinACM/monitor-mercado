@@ -686,7 +686,7 @@ class _PDF(FPDF):
         self.set_font("Barlow", "", 7.5)
         self.set_text_color(*GRIS)
         self.set_x(14)
-        self.cell(230, 4, "Instituto Politécnico Nacional · Escuela Superior de Economía · Seminario de Titulación 2026")
+        self.cell(230, 4, "Instituto Politécnico Nacional · Escuela Superior de Economía · Seminario de Titulación")
         self.cell(40, 4, f"{self.page_no()} de {self.total}", align="R")
 
 
@@ -901,7 +901,7 @@ def presentacion(d):
     pdf.ellipse(238, 24, 40, 40, "F")
     pdf.image(str(R.MARCA / "ese-escudo.png"), x=241, y=27, w=34, h=34)
     pdf.set_text_color(*BLANCO)
-    for y, txt, fnt, sz in ((30, "INSTITUTO POLITÉCNICO NACIONAL", "B", 18), (38, "ESCUELA SUPERIOR DE ECONOMÍA", "B", 14), (45, "Seminario de Titulación 2026", "", 12)):
+    for y, txt, fnt, sz in ((30, "INSTITUTO POLITÉCNICO NACIONAL", "B", 18), (38, "ESCUELA SUPERIOR DE ECONOMÍA", "B", 14), (45, "Seminario de Titulación", "", 12)):
         pdf.set_xy(80, y)
         pdf.set_font("Barlow", fnt, sz)
         pdf.cell(150, 7, txt)
