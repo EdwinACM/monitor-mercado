@@ -35,6 +35,7 @@ SECCIONES = ["Introducción y objetivo de aprendizaje", "Características de los
 
 class _Doc(FPDF):
     seccion = ""
+    desbordes = []
     total = 0
 
     def header(self):
@@ -66,12 +67,13 @@ class _Doc(FPDF):
 
 def _doc():
     pdf = _Doc(orientation="P", format=(W, H))
+    pdf.desbordes = []
     for est, arch in (("", "Barlow-Regular"), ("B", "Barlow-Bold"), ("I", "Barlow-Italic")):
         pdf.add_font("Barlow", est, str(R.FUENTES_TTF / f"{arch}.ttf"))
     pdf.add_font("BarlowM", "", str(R.FUENTES_TTF / "Barlow-Medium.ttf"))
     pdf.add_font("BarlowC", "B", str(R.FUENTES_TTF / "BarlowSemiCondensed-Bold.ttf"))
     pdf.set_margins(ML, 24, ML)
-    pdf.set_auto_page_break(True, 20)
+    pdf.set_auto_page_break(False)
     return pdf
 
 
@@ -98,9 +100,7 @@ def _titulo(pdf, titulo, numero=None):
     pdf.ln(3)
 
 
-def _sub(pdf, texto, esp=4, min_espacio=34):
-    if pdf.get_y() + esp + min_espacio > H - 20:
-        pdf.add_page()
+def _sub(pdf, texto, esp=4):
     pdf.ln(esp)
     pdf.set_x(ML)
     pdf.set_font("Barlow", "B", 11)
@@ -432,23 +432,47 @@ def _emisoras(pdf, d, acc, fichas_, guia):
 
 
 def _tabla_variaciones(pdf, d, acc, ipc, var):
+    """Todas las fechas en una hoja: la tabla se parte en tres bloques que se leen de izquierda a derecha."""
     items = acc + [ipc]
     _pagina(pdf, "Variación porcentual diaria", "Variación porcentual diaria", 4)
-    _p(pdf, "La variación de cada día es el cierre de ese día entre el cierre anterior, menos uno, por cien. La primera fecha del periodo no tiene "
-            "variación porque no hay un día previo con el cual compararla, y un guion significa que esa bolsa no operó ese día. Las acciones están "
-            "en dólares y el IPC en puntos, pero la variación porcentual es comparable entre todos.", esp=3)
+    _p(pdf, "Variación = ((cierre del día / cierre anterior) - 1) x 100. Fechas de 2026. Un guion indica que esa bolsa no operó ese día.",
+       size=8.6, alto=4.4, color=GRIS, esp=1.6)
     fechas = [f for f in d["fechas"] if any(f in var[x["clave"]] for x in items)]
-    filas, estilos = [], {}
-    for i, f in enumerate(fechas):
-        fila = [R.fecha_corta(f)]
-        for j, it in enumerate(items):
-            v = var[it["clave"]].get(f)
-            fila.append("-" if v is None else f"{v:+.2f}")
-            if v is not None:
-                estilos[(i, j + 1)] = _color(v)
-        filas.append(fila)
-    _tabla(pdf, ["Fecha"] + [x["clave"] for x in items], filas, (27, 25.5, 25.5, 25.5, 25.5, 25.5, 25.5),
-           ["CENTER"] + ["RIGHT"] * len(items), estilos, size=7.4, alto=3.9, y=pdf.get_y(), pad=0.55)
+    bloques, sep = 3, 3.2
+    por = math.ceil(len(fechas) / bloques)
+    bw = (ANCHO - sep * (bloques - 1)) / bloques
+    wf = 9.0
+    wc = (bw - wf) / len(items)
+    y0 = pdf.get_y()
+    hh = 4.6
+    rh = min(3.6, (H - 19 - y0 - hh) / por)
+    for b in range(bloques):
+        x0 = ML + b * (bw + sep)
+        pdf.set_fill_color(*GUINDA)
+        pdf.rect(x0, y0, bw, hh, "F")
+        pdf.set_font("Barlow", "B", 6.2)
+        pdf.set_text_color(*BLANCO)
+        pdf.set_xy(x0, y0)
+        pdf.cell(wf, hh, "Fecha", align="C")
+        for it in items:
+            pdf.cell(wc, hh, it["clave"], align="R")
+        pdf.set_font("Barlow", "", 5.9)
+        for k, f in enumerate(fechas[b * por:(b + 1) * por]):
+            y = y0 + hh + k * rh
+            if k % 2:
+                pdf.set_fill_color(*GUINDA_SUAVE)
+                pdf.rect(x0, y, bw, rh, "F")
+            pdf.set_xy(x0, y)
+            pdf.set_text_color(*NEGRO)
+            pdf.cell(wf, rh, f"{f[8:10]}/{f[5:7]}", align="C")
+            for it in items:
+                v = var[it["clave"]].get(f)
+                pdf.set_text_color(*(_color(v) if v is not None else GRIS))
+                pdf.cell(wc, rh, "-" if v is None else f"{v:+.2f}", align="R")
+        pdf.set_draw_color(*GUINDA)
+        pdf.set_line_width(0.3)
+        n_b = len(fechas[b * por:(b + 1) * por])
+        pdf.line(x0, y0 + hh + n_b * rh, x0 + bw, y0 + hh + n_b * rh)
 
 
 def _graficas(pdf, d, acc, ipc, var):
@@ -457,7 +481,6 @@ def _graficas(pdf, d, acc, ipc, var):
     _p(pdf, "La primera gráfica dibuja la tabla completa: las seis columnas de variación diaria, una encima de otra. Lo que se ve es que los seis se "
             "mueven alrededor de cero casi todos los días y que los picos no están repartidos parejo. Debajo, cada activo aparece por separado con la "
             "misma escala vertical, para que la comparación entre paneles sea directa.", esp=3)
-    pdf.set_auto_page_break(False)
     fechas = [f for f in d["fechas"] if any(f in var[x["clave"]] for x in items)]
     series = [(x["clave"], [var[x["clave"]].get(f) for f in fechas], COLORES[i % 5] if not x["indice"] else NEGRO) for i, x in enumerate(items)]
     todos = [v for _, vs, _ in series for v in vs if v is not None]
@@ -470,7 +493,6 @@ def _graficas(pdf, d, acc, ipc, var):
                  [(x["clave"], [var[x["clave"]].get(f) for f in fechas], COLORES[i % 5] if not x["indice"] else NEGRO)], fechas,
                  f"{x['clave']} · desviación estándar {x['stats']['desv']:.2f} %", rango=rango, grosor=0.3, fechas_n=2)
     pdf.set_y(y + 3 * 34 + 2)
-    pdf.set_auto_page_break(True, 20)
     orden = sorted(items, key=lambda x: -x["stats"]["desv"])
     pico = max(((x, f, v) for x in items for f, v in var[x["clave"]].items()), key=lambda t: abs(t[2]))
     _p(pdf, f"Los paneles más anchos son los de {orden[0]['clave']} y {orden[1]['clave']}, con desviación estándar de {orden[0]['stats']['desv']:.2f} % y "
@@ -478,56 +500,23 @@ def _graficas(pdf, d, acc, ipc, var):
             f"salto de {pico[0]['clave']} del {R.fecha_corta(pico[1])}, de {pico[2]:+.2f} % en un solo día.", size=9, alto=4.6, color=GRIS)
 
 
-def _histograma(pdf, x0, y0, w, h, valores, titulo, color, lim=10.0, bins=20):
-    """Cuántos días cayeron en cada rango de variación. Los días fuera de ±lim entran en la barra del extremo."""
-    paso = 2 * lim / bins
-    cuenta = [0] * bins
-    for v in valores:
-        cuenta[min(bins - 1, max(0, int((min(max(v, -lim), lim) + lim) / paso)))] += 1
-    tope = max(cuenta) or 1
-    pdf.set_xy(x0, y0)
-    pdf.set_font("Barlow", "B", 8)
-    pdf.set_text_color(*NEGRO)
-    pdf.cell(w, 4.4, titulo)
-    base, ph = y0 + h - 5, h - 10
-    for i, c in enumerate(cuenta):
-        if not c:
-            continue
-        alto = c / tope * ph
-        pdf.set_fill_color(*color)
-        pdf.rect(x0 + i * w / bins + 0.25, base - alto, w / bins - 0.5, alto, "F")
-    pdf.set_draw_color(*GRIS_SUAVE)
-    pdf.set_line_width(0.2)
-    pdf.line(x0, base, x0 + w, base)
-    pdf.set_draw_color(*GRIS)
-    pdf.line(x0 + w / 2, base, x0 + w / 2, base + 1.4)
-    pdf.set_font("Barlow", "", 6.4)
-    pdf.set_text_color(*GRIS)
-    for et, xx in ((f"-{lim:g} %", x0), ("0", x0 + w / 2 - 4), (f"+{lim:g} %", x0 + w - 8)):
-        pdf.set_xy(xx, base + 1.6)
-        pdf.cell(8, 3.2, et, align="C" if et == "0" else ("L" if xx == x0 else "R"))
-    pdf.set_xy(x0 + w - 24, y0 + 4.6)
-    pdf.cell(24, 3.4, f"máximo {tope} días", align="R")
-
-
 def _estadistica(pdf, d, acc, ipc, var):
     items = acc + [ipc]
     _pagina(pdf, "Estadística de los rendimientos", "Estadística de los rendimientos", 6)
-    _p(pdf, "Todas las medidas de la tabla salen de la columna de variación diaria, con las mismas definiciones que usa Excel para una muestra. "
-            "Las dos primeras filas son precios y sirven de referencia; el rendimiento efectivo se calcula con ellas y no con el promedio de las "
-            "variaciones, que es una cifra distinta y responde a otra pregunta.", esp=3)
+    _p(pdf, "Todas las medidas salen de la columna de variación diaria, con las definiciones que usa Excel para una muestra. El rendimiento "
+            "efectivo se calcula con los precios inicial y final, no con el promedio de las variaciones.", size=9.4, alto=4.7, esp=2)
     y = pdf.get_y()
     pdf.set_fill_color(*GUINDA_SUAVE)
-    pdf.rect(ML, y, ANCHO, 19, "F")
+    pdf.rect(ML, y, ANCHO, 17, "F")
     for i, (etq, fo) in enumerate((("Variación diaria", "ra"), ("Rendimiento efectivo", "re"), ("Rendimiento promedio", "rprom"))):
         x0 = ML + i * ANCHO / 3
         pdf.set_xy(x0, y + 1.6)
         pdf.set_font("Barlow", "B", 7.6)
         pdf.set_text_color(*GUINDA)
         pdf.cell(ANCHO / 3, 3.6, etq, align="C")
-        w, _h = EJ._tam_formula(fo, 0.03)
-        EJ._formula(pdf, fo, x0 + (ANCHO / 3 - w) / 2, y + 12, 0.03)
-    pdf.set_y(y + 23)
+        w, _h = EJ._tam_formula(fo, 0.028)
+        EJ._formula(pdf, fo, x0 + (ANCHO / 3 - w) / 2, y + 11, 0.028)
+    pdf.set_y(y + 20)
     e = lambda it, k: it["stats"][k]
     filas = [["Precio o nivel inicial"] + [_n(x["pi"]) for x in items],
              ["Precio o nivel final"] + [_n(x["pf"]) for x in items],
@@ -549,8 +538,8 @@ def _estadistica(pdf, d, acc, ipc, var):
     est = {(2, j + 1): _color(x["efectivo"]) for j, x in enumerate(items)}
     est.update({(3, j + 1): _color(e(x, "media")) for j, x in enumerate(items)})
     _tabla(pdf, ["Medida"] + [x["clave"] for x in items], filas, (50, 21.6, 21.6, 21.6, 21.6, 21.6, 21.6),
-           ["LEFT"] + ["RIGHT"] * len(items), est, size=8.2, alto=5.0, y=pdf.get_y())
-    pdf.ln(5)
+           ["LEFT"] + ["RIGHT"] * len(items), est, size=7.8, alto=3.7, y=pdf.get_y(), pad=0.6)
+    pdf.ln(3)
     junta = lambda L: " y ".join([", ".join(L[:-1]), L[-1]]) if len(L) > 1 else (L[0] if L else "ninguno")
     med = sorted(items, key=lambda x: e(x, "media"))
     vol = sorted(items, key=lambda x: e(x, "desv"))
@@ -560,47 +549,25 @@ def _estadistica(pdf, d, acc, ipc, var):
     n_moda = sum(1 for x in items if e(x, "moda") is not None)
     rmax = max(items, key=lambda x: e(x, "rango"))
     _sub(pdf, "Cómo se lee la tabla", esp=0)
-    _p(pdf, f"El rendimiento promedio diario va de {e(med[0], 'media'):+.4f} % en {med[0]['clave']} a {e(med[-1], 'media'):+.4f} % en {med[-1]['clave']}. "
-            f"Son cifras chicas al lado del rendimiento efectivo porque describen el día típico, mientras que el efectivo acumula los {e(med[-1], 'n')} días "
-            "del periodo encadenados uno tras otro.")
-    _p(pdf, f"El error típico dice cuánta confianza merece ese promedio. En {med[-1]['clave']} vale {e(med[-1], 'error'):.4f}, un margen del mismo tamaño "
-            "que la media diaria o mayor. Con una muestra de nueve meses, el promedio diario no alcanza para afirmar que una acción gana más que otra; "
-            "para eso sirve el rendimiento efectivo, que no depende de un promedio.")
+    T = dict(size=9, alto=4.5, esp=1.6)
+    _p(pdf, f"El rendimiento promedio diario va de {e(med[0], 'media'):+.4f} % en {med[0]['clave']} a {e(med[-1], 'media'):+.4f} % en {med[-1]['clave']}: "
+            f"describe el día típico, mientras que el efectivo encadena los {e(med[-1], 'n')} días del periodo. El error típico de {med[-1]['clave']} "
+            f"({e(med[-1], 'error'):.4f}) es del tamaño de su propia media, así que con nueve meses el promedio diario no basta para afirmar que una acción "
+            "gana más que otra.", **T)
     if k_med * 2 >= len(items):
-        t_med = (f"En {k_med} de los {len(items)} activos la mediana queda por encima de la media, así que el día central fue mejor que el promedio. "
-                 "Eso ocurre cuando unas pocas sesiones muy malas jalan el promedio hacia abajo sin mover el centro de la distribución.")
+        t_med = f"En {k_med} de los {len(items)} activos la mediana queda arriba de la media: unas pocas sesiones muy malas jalaron el promedio hacia abajo."
     else:
-        t_med = (f"En {len(items) - k_med} de los {len(items)} activos la media queda por encima de la mediana, así que el día central fue peor que el promedio. "
-                 "Eso ocurre cuando unas pocas sesiones muy buenas levantan el promedio sin mover el centro de la distribución.")
-    _p(pdf, t_med + " La moda, en cambio, aporta poco: " +
-            (f"solo {n_moda} de los {len(items)} activos repiten una variación exacta" if n_moda else "ningún activo repite una variación exacta") +
-            ", porque los precios se mueven con decimales y es raro que dos días den el mismo porcentaje.")
-    _p(pdf, f"La desviación estándar es la medida de riesgo del ejercicio. {vol[0]['clave']} se movió {e(vol[0], 'desv'):.2f} % al día en promedio y "
-            f"{vol[-1]['clave']} {e(vol[-1], 'desv'):.2f} %, es decir {e(vol[-1], 'desv') / e(vol[0], 'desv'):.1f} veces más. La varianza dice lo mismo elevado al cuadrado y por eso "
-            f"separa todavía más a los extremos. El rango va del peor al mejor día y el más amplio es el de {rmax['clave']}, con {e(rmax, 'rango'):.2f} puntos "
-            "porcentuales de diferencia entre sus dos días extremos.")
+        t_med = f"En {len(items) - k_med} de los {len(items)} activos la media queda arriba de la mediana: unas pocas sesiones muy buenas levantaron el promedio."
+    _p(pdf, t_med + (f" Solo {n_moda} activos repiten una variación exacta, así que la moda casi no aporta." if n_moda else
+                     " Ningún activo repite una variación exacta, por eso la moda no aporta."), **T)
+    _p(pdf, f"La desviación estándar mide el riesgo: {vol[0]['clave']} se movió {e(vol[0], 'desv'):.2f} % al día y {vol[-1]['clave']} {e(vol[-1], 'desv'):.2f} %, "
+            f"{e(vol[-1], 'desv') / e(vol[0], 'desv'):.1f} veces más. La varianza es la misma idea al cuadrado, y el rango más amplio es el de {rmax['clave']}, "
+            f"{e(rmax, 'rango'):.2f} puntos entre su peor y su mejor día.", **T)
     neg = [x["clave"] for x in items if (e(x, "asimetria") or 0) < 0]
     _p(pdf, ("La curtosis es positiva en los " + str(len(items)) if k_cur == len(items) else f"La curtosis es positiva en {k_cur} de los {len(items)}") +
-            " activos: las colas pesan más que en una distribución normal, así que los días extremos aparecen con más frecuencia de la que supondría la campana. "
-            f"El coeficiente de asimetría es positivo en {len(items) - k_asi} de ellos, es decir que las subidas extremas fueron de mayor tamaño que las caídas extremas; "
-            f"en {junta(neg)} pasa lo contrario. Esto explica por qué la desviación estándar sola se queda corta para describir el peor día.")
-    _p(pdf, "La última fila es la suma de las diferencias al cuadrado entre cada variación y el promedio. Es el numerador de la varianza: dividida entre los "
-            "días trabajados menos uno devuelve exactamente la varianza de la muestra de la tabla.")
-    _distribucion(pdf, items, var)
-
-
-def _distribucion(pdf, items, var):
-    pdf.ln(3)
-    _sub(pdf, "Cómo se reparten los días", esp=0)
-    _p(pdf, "Cada barra cuenta los días que cerraron dentro de un rango de un punto porcentual. Las dos barras de los extremos incluyen los días que se "
-            "salieron de más o menos 10 %. Entre más alta y angosta es la figura, más se concentran los rendimientos alrededor de cero.", size=9, alto=4.6, esp=3)
-    y = pdf.get_y()
-    for i, x in enumerate(items):
-        col, ren = i % 3, i // 3
-        _histograma(pdf, ML + col * (ANCHO / 3 + 3) * (ANCHO / (ANCHO + 6)), y + ren * 42, ANCHO / 3 - 4,
-                    38, list(var[x["clave"]].values()), f"{x['clave']} · asimetría {x['stats']['asimetria']:+.2f}",
-                    COLORES[i % 5] if not x["indice"] else NEGRO)
-    pdf.set_y(y + 2 * 42)
+            " activos, así que los días extremos fueron más frecuentes que en una distribución normal. La asimetría es positiva en "
+            f"{len(items) - k_asi}, donde las subidas extremas superaron a las caídas extremas; en {junta(neg)} pasó lo contrario. La última fila, "
+            "la suma de (Ra - Rprom)², dividida entre los días menos uno da la varianza de la muestra.", **T)
 
 
 def _conclusion(pdf, d, acc, ipc, sp, fichas_):
@@ -622,15 +589,14 @@ def _conclusion(pdf, d, acc, ipc, sp, fichas_):
     abajo = sum(1 for x in acc if x["efectivo"] < min(sp["efectivo"], ipc["efectivo"]))
     _p(pdf, f"En el periodo analizado el S&P 500 rindió {sp['efectivo']:+.2f} % y el IPC {ipc['efectivo']:+.2f} %. Contra esas dos referencias, "
             f"{NUM[arriba]} de las cinco acciones quedaron arriba de ambas y {NUM[abajo]} abajo de ambas. La tabla reúne el resultado y el riesgo de cada una, "
-            "y la última columna es la decisión que sale de ellos.", esp=3)
+            "y la última columna es la decisión que sale de ellos.", size=9.4, alto=4.7, esp=2)
     y = _tabla(pdf, ["Acción", "Rendimiento efectivo (%)", "Diferencia con el S&P 500 (pts)", "Desviación diaria (%)", "Volatilidad anual (%)", "Beta S&P 500", "Rend. / riesgo", "Decisión"],
-               filas, (18, 26, 28, 24, 24, 20, 20, 22), ["LEFT"] + ["RIGHT"] * 6 + ["CENTER"], est, size=8.2, alto=5.6, y=pdf.get_y())
-    pdf.set_y(y + 4)
-    _p(pdf, "La regla es sencilla y se puede revisar con la misma tabla: si la acción rindió más que el S&P 500 y su volatilidad anual es baja o media, "
-            "es decir menor a 35 %, la decisión es comprar; si rindió más pero con volatilidad alta, mantener; y si quedó por debajo del índice, vender. "
-            "Comparo contra el S&P 500 y no contra el IPC porque las cinco cotizan en dólares y ese es el mercado donde compiten. La beta dice cuánto se mueve "
-            "la acción por cada punto que se mueve el índice, y la columna de rendimiento entre riesgo divide el promedio diario entre la desviación estándar: "
-            "entre más alta, más rendimiento por cada unidad de variación soportada.")
+               filas, (18, 26, 28, 24, 24, 20, 20, 22), ["LEFT"] + ["RIGHT"] * 6 + ["CENTER"], est, size=8, alto=4.4, y=pdf.get_y(), pad=0.7)
+    pdf.set_y(y + 3)
+    _p(pdf, "La regla: si la acción rindió más que el S&P 500 y su volatilidad anual es baja o media (menor a 35 %), comprar; si rindió más con "
+            "volatilidad alta, mantener; si quedó debajo del índice, vender. Comparo contra el S&P 500 porque las cinco cotizan en dólares. La beta dice "
+            "cuánto se mueve la acción por cada punto del índice, y rendimiento entre riesgo es el promedio diario dividido entre la desviación estándar.",
+       size=9.4, alto=4.7, esp=2)
     beta_max = max(acc, key=lambda x: (dec[x["clave"]][2] or {}).get("beta") or -9)["clave"]
     for it in acc:
         d_, dif, b, f = dec[it["clave"]]
@@ -649,32 +615,29 @@ def _conclusion(pdf, d, acc, ipc, sp, fichas_):
         fmejor = it["serie"][it["ra"].index(mejor) + 1][0]
         com += f" Su peor día fue el {R.fecha_corta(fpeor)} ({peor:+.2f} %) y el mejor el {R.fecha_corta(fmejor)} ({mejor:+.2f} %)."
         pdf.set_x(ML)
-        pdf.set_font("Barlow", "B", 10.2)
+        pdf.set_font("Barlow", "B", 9.2)
         pdf.set_text_color(*GUINDA)
-        pdf.cell(32, 5.1, f"{it['clave']} · {d_}")
-        pdf.set_font("Barlow", "", 10.2)
+        pdf.cell(29, 4.5, f"{it['clave']} · {d_}")
+        pdf.set_font("Barlow", "", 9.2)
         pdf.set_text_color(*NEGRO)
-        pdf.multi_cell(ANCHO - 32, 5.1, f"Rindió {it['efectivo']:+.2f} %, {abs(dif):.2f} puntos {'arriba' if dif > 0 else 'abajo'} del S&P 500, con una volatilidad anual "
+        pdf.multi_cell(ANCHO - 29, 4.5, f"Rindió {it['efectivo']:+.2f} %, {abs(dif):.2f} puntos {'arriba' if dif > 0 else 'abajo'} del S&P 500, con una volatilidad anual "
                                         f"de {f['vol']:.2f} % ({f['nivel']}) y una beta de {b['beta']:.2f}. {com}", new_x="LMARGIN", new_y="NEXT", align="J")
-        pdf.ln(1.6)
+        pdf.ln(1.2)
     comprar = [x["clave"] for x in acc if dec[x["clave"]][0] == "Comprar"]
     mantener = [x["clave"] for x in acc if dec[x["clave"]][0] == "Mantener"]
     vender = [x["clave"] for x in acc if dec[x["clave"]][0] == "Vender"]
     junta = lambda L: " y ".join([", ".join(L[:-1]), L[-1]]) if len(L) > 1 else (L[0] if L else "ninguna")
-    pdf.ln(2)
-    _sub(pdf, "Decisión final", esp=0)
+    _sub(pdf, "Decisión final", esp=1)
     texto = (f"Con estos números armaría la cartera alrededor de {junta(comprar)}: le ganaron al índice sin pedir a cambio la volatilidad de las demás. " if comprar else "")
     if mantener:
         texto += f"Dejaría {junta(mantener)} como posición secundaria, porque el rendimiento está, pero viene con oscilaciones diarias más grandes. "
     peores = sorted(acc, key=lambda x: -x["stats"]["desv"])[:len(vender)]
     extra = " y además fueron las más volátiles del grupo, la peor combinación posible" if {x["clave"] for x in peores} == set(vender) else ""
     texto += f"Y saldría de {junta(vender)}: perdieron frente al índice{extra}."
-    _p(pdf, texto)
-    _p(pdf, f"Conviene decir hasta dónde llega este ejercicio. Son {acc[0]['stats']['n']} días de un solo periodo, y la estadística que calculé describe lo que ya "
-            "pasó, no lo que viene. Una decisión de inversión en serio tendría que repetir el ejercicio en varios periodos, revisar los estados financieros "
-            "completos de cada empresa y tomar en cuenta el tipo de cambio, que para un inversionista mexicano cambia el resultado final de cualquier "
-            "acción comprada en dólares.")
-    pdf.ln(1)
+    _p(pdf, texto, size=9.4, alto=4.7, esp=1.6)
+    _p(pdf, f"El límite del ejercicio: son {acc[0]['stats']['n']} días de un solo periodo y la estadística describe lo que ya pasó. Para invertir en serio "
+            "habría que repetirlo en varios periodos, revisar los estados financieros completos y considerar el tipo de cambio, que para un inversionista "
+            "mexicano cambia el resultado de cualquier acción comprada en dólares.", size=9.4, alto=4.7, esp=1.6)
     _p(pdf, "Fuentes: Yahoo Finance (precios de cierre) y Securities and Exchange Commission, EDGAR (datos y cifras de las empresas).",
        size=8.6, alto=4.4, color=GRIS)
 
@@ -695,6 +658,10 @@ def _armar(d, paginas):
     for nombre, fn in pasos:
         reg[nombre] = pdf.page_no() + 1
         fn()
+        if pdf.get_y() > H - 19:
+            pdf.desbordes.append((nombre, round(pdf.get_y(), 1)))
+    if pdf.desbordes:
+        print("[AVISO] secciones que no caben en su hoja:", pdf.desbordes)
     return bytes(pdf.output()), reg
 
 
