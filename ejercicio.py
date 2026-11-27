@@ -30,6 +30,7 @@ import reportes as R
 import server
 
 FIN_ANALISIS = date(2026, 11, 25)
+AUTOR, ASESOR = "Edwin Alejandro Cruz Mendoza", "Mtro. Roberto Ortega Pineda"  # como aparecen en la carátula de la tesina
 G, GOSC, GSUAVE, GRIS_S, GTXT = "750946", "4F0630", "F7ECF1", "E8E9EA", "636569"
 AZUL, NARANJA = "1D63C1", "C8480F"
 COLORES = [(29, 99, 193), (200, 72, 15), (10, 127, 88), (168, 109, 0), (194, 59, 120)]
@@ -424,6 +425,7 @@ def _hoja_resumen(ws, wd, we, d, pos, ce):
     items, acc, idx = d["items"], _acciones(d), _indices(d)
     r0, ult = pos["_fil"]
     _tit(ws, "Rendimiento de 5 acciones frente al S&P 500 y al IPC", f"Del {R.fecha_corta(d['inicio'])} al {R.fecha_corta(d['ultimo'])} · Fuentes: Yahoo Finance, SEC EDGAR, Banco de México")
+    ws.cell(3, 1, f"Elaboró: {AUTOR} · Asesor: {ASESOR}").font = _fnt(color=GTXT, size=9)
     cols = ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Rendimiento promedio diario Rprom (%)", "Desviación estándar diaria (%)"] + \
           [f"Beta {x['clave']}" for x in idx] + [f"Diferencia con el {x['clave']} (puntos)" for x in idx]
     anchos = [30, 13, 13, 13, 13, 16, 18, 16] + [11] * len(idx) + [16] * len(idx)
@@ -908,8 +910,10 @@ def presentacion(d):
     pdf.set_x(20)
     pdf.set_font("Barlow", "", 13)
     pdf.cell(250, 8, periodo)
-    pdf.set_xy(20, 190)
+    pdf.set_xy(20, 186)
     pdf.set_font("Barlow", "", 9.5)
+    pdf.cell(250, 5, f"Presenta: {AUTOR}    ·    Asesor: {ASESOR}", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_x(20)
     pdf.cell(250, 5, f"Elaborado el {R.fecha_corta(FIN_ANALISIS.isoformat())}")
 
     # 6 ficha de las acciones
