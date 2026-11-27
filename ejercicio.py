@@ -30,10 +30,14 @@ import reportes as R
 import server
 
 FIN_ANALISIS = date(2026, 11, 25)
-AUTOR, ASESOR = "Edwin Alejandro Cruz Mendoza", "Mtro. Roberto Ortega Pineda"  # como aparecen en la carátula de la tesina
+# como aparecen en la carátula de la tesina (Tesina_Fintech_Mexico_2021-2026_Edwin_Cruz_vtipografia)
+INTEGRANTES = ["Cruz Mendoza Edwin Alejandro", "Galindo Alonso Edgar Yashua", "López Medina Arian Lisette",
+               "Uriostegui García Javier Adrian", "Valdez Pichardo David"]
+AUTOR, ASESOR = "Edwin Alejandro Cruz Mendoza", "Mtro. Roberto Ortega Pineda"
 G, GOSC, GSUAVE, GRIS_S, GTXT = "750946", "4F0630", "F7ECF1", "E8E9EA", "636569"
-AZUL, NARANJA = "1D63C1", "C8480F"
-COLORES = [(29, 99, 193), (200, 72, 15), (10, 127, 88), (168, 109, 0), (194, 59, 120)]
+# serie de cada acción (azul, ocre, jade, ciruela, rosa guinda), validada para daltonismo y contraste; IPC y S&P 500 van en negro y gris del IPN
+AZUL, NARANJA = "1F63B8", "B07A1A"
+COLORES = [(31, 99, 184), (176, 122, 26), (14, 138, 110), (107, 78, 155), (194, 71, 122)]
 NEGRO, GRIS, BLANCO, GUINDA = (35, 31, 32), (99, 101, 105), (255, 255, 255), (117, 9, 70)
 GUINDA_SUAVE, GRIS_SUAVE = (247, 236, 241), (232, 233, 234)
 SUBE, BAJA = (0, 100, 63), (179, 38, 30)
@@ -425,7 +429,7 @@ def _hoja_resumen(ws, wd, we, d, pos, ce):
     items, acc, idx = d["items"], _acciones(d), _indices(d)
     r0, ult = pos["_fil"]
     _tit(ws, "Rendimiento de 5 acciones frente al S&P 500 y al IPC", f"Del {R.fecha_corta(d['inicio'])} al {R.fecha_corta(d['ultimo'])} · Fuentes: Yahoo Finance, SEC EDGAR, Banco de México")
-    ws.cell(3, 1, f"Elaboró: {AUTOR} · Asesor: {ASESOR}").font = _fnt(color=GTXT, size=9)
+    ws.cell(3, 1, f"Elaboraron: {', '.join(INTEGRANTES)} · Asesor: {ASESOR}").font = _fnt(color=GTXT, size=9)
     cols = ["Instrumento", "Precio inicial", "Precio final", "Máximo", "Mínimo", "Rendimiento efectivo (%)", "Rendimiento promedio diario Rprom (%)", "Desviación estándar diaria (%)"] + \
           [f"Beta {x['clave']}" for x in idx] + [f"Diferencia con el {x['clave']} (puntos)" for x in idx]
     anchos = [30, 13, 13, 13, 13, 16, 18, 16] + [11] * len(idx) + [16] * len(idx)
@@ -488,7 +492,7 @@ def _hoja_resumen(ws, wd, we, d, pos, ce):
     ch.x_axis.delete = ch.y_axis.delete = False
     ch.x_axis.tickLblSkip = max(1, len(d["fechas"]) // 8)
     ch.x_axis.tickLblPos = "low"
-    colores = [AZUL, NARANJA, "0A7F58", "A86D00", "C23B78", "7F7F7F", "231F20"]
+    colores = [AZUL, NARANJA, "0E8A6E", "6B4E9B", "C2477A", "636569", "231F20"]
     for k, it in enumerate(items):
         ch.add_data(Reference(wd, min_col=pos[it["clave"]]["acu"], min_row=5, max_row=ult), titles_from_data=True)
         s = ch.series[-1]
@@ -645,7 +649,7 @@ def _hoja_deuda(ws, d):
                 c = ws.cell(r, col, f"={fx}({L}{r0}:{L}{ult})")
                 c.number_format, c.font = "0.00", _fnt()
         _borde(ws, r, 1, 1 + 2 * len(deu), i % 2 == 1)
-    palette = [AZUL, NARANJA, "0A7F58", "C23B78", "A86D00", "7F7F7F", "231F20"]
+    palette = [AZUL, NARANJA, "0E8A6E", "6B4E9B", "C2477A", "636569", "231F20"]
     titulos = {"tasa": "Tasa (%)", "precio": "Precio por título ($)", "monto": "Monto colocado (mdp)"}
     c0 = 2 + 2 * len(deu) + 1
     for n, x in enumerate(deu):
@@ -910,9 +914,11 @@ def presentacion(d):
     pdf.set_x(20)
     pdf.set_font("Barlow", "", 13)
     pdf.cell(250, 8, periodo)
-    pdf.set_xy(20, 186)
+    pdf.set_xy(20, 181)
     pdf.set_font("Barlow", "", 9.5)
-    pdf.cell(250, 5, f"Presenta: {AUTOR}    ·    Asesor: {ASESOR}", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(255, 4.6, f"Presentan: {', '.join(INTEGRANTES[:-1])} y {INTEGRANTES[-1]}", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_x(20)
+    pdf.cell(255, 4.6, f"Asesor: {ASESOR}", new_x="LMARGIN", new_y="NEXT")
     pdf.set_x(20)
     pdf.cell(250, 5, f"Elaborado el {R.fecha_corta(FIN_ANALISIS.isoformat())}")
 

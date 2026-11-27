@@ -22,7 +22,7 @@ GUINDA, NEGRO, GRIS, BLANCO = EJ.GUINDA, EJ.NEGRO, EJ.GRIS, EJ.BLANCO
 GUINDA_SUAVE, GRIS_SUAVE = EJ.GUINDA_SUAVE, EJ.GRIS_SUAVE
 SUBE, BAJA, COLORES = EJ.SUBE, EJ.BAJA, EJ.COLORES
 TINTA_SUBE, TINTA_BAJA = (222, 240, 230), (249, 226, 223)
-AUTOR, ASESOR = EJ.AUTOR, EJ.ASESOR
+AUTOR, ASESOR, INTEGRANTES = EJ.AUTOR, EJ.ASESOR, EJ.INTEGRANTES
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = ["Introducción y objetivo de aprendizaje", "Características de los activos", "Las emisoras",
              "Variación porcentual diaria", "Gráficas de las variaciones", "Estadística de los rendimientos",
@@ -48,10 +48,10 @@ class _Doc(FPDF):
         self.set_xy(ML, 11.5)
         self.set_font("Barlow", "B", 7.6)
         self.set_text_color(*GUINDA)
-        self.cell(ANCHO - 40, 4.5, self.seccion.upper())
+        self.cell(ANCHO - 60, 4.5, "EJERCICIO DE RENDIMIENTOS")
         self.set_font("Barlow", "", 7.6)
         self.set_text_color(*GRIS)
-        self.cell(40, 4.5, "Seminario de Titulación 2026", align="R")
+        self.cell(60, 4.5, "Rendimiento de cinco acciones frente al IPC", align="R")
         self.set_xy(ML, self.t_margin)
 
     def footer(self):
@@ -61,7 +61,7 @@ class _Doc(FPDF):
         self.set_font("Barlow", "", 7.4)
         self.set_text_color(*GRIS)
         self.set_x(ML)
-        self.cell(ANCHO - 20, 4, f"{AUTOR} · Escuela Superior de Economía, IPN")
+        self.cell(ANCHO - 20, 4, "Seminario de Titulación 2026 · Escuela Superior de Economía, IPN")
         self.set_font("Barlow", "B", 8.4)
         self.set_text_color(*GUINDA)
         self.cell(20, 4, f"{self.page_no()}", align="R")
@@ -79,19 +79,24 @@ def _doc():
 
 
 # ------------------------------------------------------------------------------ piezas de composición
-def _pagina(pdf, seccion, titulo, numero):
+def _pagina(pdf, seccion, numero, titular):
+    """Apertura de cada hoja: rótulo con número y apartado, y un titular que dice lo que muestra la hoja."""
     pdf.seccion = seccion
     pdf.add_page()
-    y = 25
-    pdf.set_xy(ML, y)
-    pdf.set_font("BarlowC", "B", 30)
-    pdf.set_text_color(*GUINDA_SUAVE)
-    pdf.cell(15, 12, f"{numero:02d}" if numero else "")
-    pdf.set_xy(ML + (17 if numero else 0), y + 0.6)
-    pdf.set_font("BarlowC", "B", 21)
+    pdf.set_xy(ML, 25)
+    pdf.set_font("Barlow", "B", 8.4)
     pdf.set_text_color(*GUINDA)
-    pdf.cell(ANCHO - 17, 11, titulo)
-    pdf.set_y(y + 15)
+    pdf.cell(ANCHO, 4.6, (f"{numero:02d}    " if numero else "") + seccion.upper(), new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(1.4)
+    pdf.set_x(ML)
+    pdf.set_font("BarlowC", "B", 19.5)
+    pdf.set_text_color(*NEGRO)
+    pdf.multi_cell(ANCHO, 8.4, titular, new_x="LMARGIN", new_y="NEXT", align="L")
+    y = pdf.get_y() + 2.4
+    pdf.set_draw_color(*GUINDA)
+    pdf.set_line_width(0.9)
+    pdf.line(ML, y, ML + 16, y)
+    pdf.set_y(y + 4.6)
 
 
 def _sub(pdf, texto, esp=3, x=None, ancho=None):
@@ -154,43 +159,6 @@ def _tabla(pdf, cols, filas, anchos, aligns=None, estilos=None, size=8.4, alto=4
                 r.cell(str(v), style=st if isinstance(st, R.FontFace) else (R.FontFace(color=st) if st else None))
     pdf.set_left_margin(ML)
     return pdf.get_y()
-
-
-def _dato(pdf, y, cifra, texto, alto=17):
-    """Recuadro con una cifra grande y una frase que la explica."""
-    pdf.set_fill_color(*GUINDA_SUAVE)
-    pdf.rect(ML, y, ANCHO, alto, "F")
-    pdf.set_fill_color(*GUINDA)
-    pdf.rect(ML, y, 1.6, alto, "F")
-    pdf.set_xy(ML + 5, y)
-    pdf.set_font("BarlowC", "B", 22)
-    pdf.set_text_color(*GUINDA)
-    pdf.cell(44, alto, cifra)
-    pdf.set_xy(ML + 50, y + (alto - 9.4) / 2)
-    pdf.set_font("Barlow", "", 9.4)
-    pdf.set_text_color(*NEGRO)
-    pdf.multi_cell(ANCHO - 54, 4.7, texto, align="L")
-    pdf.set_y(y + alto)
-
-
-def _cifras(pdf, y, piezas, alto=19):
-    """Fila de cifras grandes separadas por líneas finas: [(cifra, etiqueta, color)]."""
-    w = ANCHO / len(piezas)
-    for i, (cifra, etq, col) in enumerate(piezas):
-        x = ML + i * w
-        if i:
-            pdf.set_draw_color(*GRIS_SUAVE)
-            pdf.set_line_width(0.3)
-            pdf.line(x, y + 2, x, y + alto - 2)
-        pdf.set_xy(x + (3 if i else 0), y + 1)
-        pdf.set_font("BarlowC", "B", 20)
-        pdf.set_text_color(*col)
-        pdf.cell(w - 4, 9, cifra)
-        pdf.set_xy(x + (3 if i else 0), y + 10.5)
-        pdf.set_font("Barlow", "", 7.8)
-        pdf.set_text_color(*GRIS)
-        pdf.multi_cell(w - 6, 3.6, etq)
-    pdf.set_y(y + alto)
 
 
 def _trazo(pdf, x, y, w, h, valores, color, grosor=0.4, lim=None):
@@ -326,33 +294,41 @@ def _caratula(pdf, d, acc, ipc):
     pdf.set_font("Barlow", "", 7)
     pdf.set_text_color(232, 196, 214)
     pdf.cell(gw, 3.4, "Rendimiento acumulado en el periodo, en porcentaje")
-    # datos de quien presenta
-    y = alto_g + 16
-    for etq, nombre, yy in (("PRESENTA", AUTOR, y), ("ASESOR", ASESOR, y + 22)):
-        pdf.set_xy(ML, yy)
-        pdf.set_font("Barlow", "B", 7.8)
-        pdf.set_text_color(*GUINDA)
-        pdf.cell(90, 4, etq, new_x="LMARGIN", new_y="NEXT")
+    # quienes presentan
+    y = alto_g + 12
+    pdf.set_xy(ML, y)
+    pdf.set_font("Barlow", "B", 7.8)
+    pdf.set_text_color(*GUINDA)
+    pdf.cell(100, 4, "PRESENTAN", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(0.6)
+    for nombre in INTEGRANTES:
         pdf.set_x(ML)
-        pdf.set_font("Barlow", "B", 12.5)
+        pdf.set_font("Barlow", "B", 10.6)
         pdf.set_text_color(*NEGRO)
-        pdf.cell(110, 7, nombre)
+        pdf.cell(110, 5.6, nombre, new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(3.4)
+    pdf.set_x(ML)
+    pdf.set_font("Barlow", "B", 7.8)
+    pdf.set_text_color(*GUINDA)
+    pdf.cell(100, 4, "ASESOR", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_x(ML)
+    pdf.set_font("Barlow", "B", 10.6)
+    pdf.set_text_color(*NEGRO)
+    pdf.cell(110, 5.6, ASESOR)
     pdf.set_xy(W - ML - 70, y)
     pdf.set_font("Barlow", "B", 7.8)
     pdf.set_text_color(*GUINDA)
-    pdf.cell(70, 4, "LICENCIATURA EN ECONOMÍA", align="R", new_x="LEFT", new_y="NEXT")
+    pdf.cell(70, 4, "LICENCIATURA EN ECONOMÍA", align="R")
     pdf.set_font("Barlow", "", 10)
     pdf.set_text_color(*GRIS)
-    pdf.cell(70, 6, "Ciudad de México", align="R", new_x="LEFT", new_y="NEXT")
-    pdf.cell(70, 5, _flarga(EJ.FIN_ANALISIS.isoformat()), align="R")
-    pdf.set_draw_color(*GUINDA)
-    pdf.set_line_width(0.8)
-    pdf.line(ML, H - 20, ML + 30, H - 20)
+    for k, t in enumerate(("Ciudad de México", _flarga(EJ.FIN_ANALISIS.isoformat()))):
+        pdf.set_xy(W - ML - 70, y + 4.6 + k * 5.6)
+        pdf.cell(70, 5.6, t, align="R")
 
 
 # ------------------------------------------------------------------------------ 2. índice e introducción
 def _indice_intro(pdf, d, paginas, acc, ipc, sp):
-    _pagina(pdf, "Índice e introducción", "Índice", 0)
+    _pagina(pdf, "Índice e introducción", 0, "Índice")
     y = pdf.get_y()
     col_w = (ANCHO - 10) / 2
     for i, nombre in enumerate(SECCIONES):
@@ -378,7 +354,14 @@ def _indice_intro(pdf, d, paginas, acc, ipc, sp):
     pdf.set_font("BarlowC", "B", 17)
     pdf.set_text_color(*GUINDA)
     pdf.cell(ANCHO, 9, "Introducción", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(1)
+    pdf.ln(0.6)
+    mejor, peor = max(acc, key=lambda x: x["efectivo"]), min(acc, key=lambda x: x["efectivo"])
+    pdf.set_x(ML)
+    pdf.set_font("Barlow", "B", 12)
+    pdf.set_text_color(*GUINDA)
+    pdf.multi_cell(ANCHO, 5.8, f"En {acc[0]['stats']['n']} días de mercado, {mejor['nombre']} ganó {mejor['efectivo']:+.2f} % y {peor['nombre']} perdió "
+                               f"{abs(peor['efectivo']):.2f} %, mientras el IPC apenas se movió {ipc['efectivo']:+.2f} %.", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(2.4)
     _p(pdf, "En el seminario las tablas de rendimientos se armaron a mano, con pocos días y precios de ejemplo. Este trabajo repite el ejercicio con datos "
             "reales y con el periodo completo: el precio de cierre de cinco acciones que cotizan en Estados Unidos, Apple, Microsoft, NVIDIA, Tesla y "
             f"Coca-Cola, del {_flarga(d['inicio'])} al {_flarga(d['ultimo'])}, comparado con el S&P/BMV IPC de la Bolsa Mexicana de Valores.")
@@ -388,13 +371,7 @@ def _indice_intro(pdf, d, paginas, acc, ipc, sp):
     _p(pdf, "Los precios vienen de Yahoo Finance y los datos de cada empresa, de los reportes anuales que entregan a la Securities and Exchange Commission. "
             "La comparación tiene un detalle, las acciones cotizan en dólares y el IPC en pesos, por lo que una parte de la diferencia es tipo de cambio. "
             f"Por ello también se usa el S&P 500, que en el mismo periodo rindió {sp['efectivo']:+.2f} %.")
-    mejor, peor = max(acc, key=lambda x: x["efectivo"]), min(acc, key=lambda x: x["efectivo"])
-    pdf.ln(1)
-    _cifras(pdf, pdf.get_y(), [(str(acc[0]["stats"]["n"]), "días de mercado con variación calculada", GUINDA),
-                               (f"{mejor['efectivo']:+.2f} %", f"{mejor['nombre']}, el mejor rendimiento", SUBE),
-                               (f"{peor['efectivo']:+.2f} %", f"{peor['nombre']}, el peor rendimiento", BAJA),
-                               (f"{ipc['efectivo']:+.2f} %", "IPC en el mismo periodo", NEGRO)])
-    pdf.ln(4)
+    pdf.ln(2)
     pdf.set_x(ML)
     pdf.set_font("BarlowC", "B", 17)
     pdf.set_text_color(*GUINDA)
@@ -423,21 +400,19 @@ def _indice_intro(pdf, d, paginas, acc, ipc, sp):
 
 # ------------------------------------------------------------------------------ 3. características de los activos
 def _activos(pdf, d, acc, ipc, fichas_):
-    _pagina(pdf, "Características de los activos", "Características de los activos", 2)
+    veces = {x["clave"]: x["pf"] * fichas_[x["clave"]]["F"]["acciones"] / 1e6 / fichas_[x["clave"]]["cif"]["Capital contable"][0]
+             for x in acc if fichas_[x["clave"]]["cif"].get("Capital contable", (None,))[0]}
+    nom = {x["clave"]: x["nombre"] for x in acc}
+    alto_v, bajo_v = max(veces, key=veces.get), min(veces, key=veces.get)
+    _pagina(pdf, "Características de los activos", 2, f"{nom[alto_v]} vale en bolsa {veces[alto_v]:.0f} veces su capital contable")
     _p(pdf, "Las cinco emisoras son acciones comunes de una sola clase y cotizan en el Nasdaq y en la Bolsa de Nueva York. Una acción común da voto en la "
             "asamblea y derecho a dividendos cuando la empresa los decreta, pero no promete un pago fijo, a diferencia de un bono, donde el emisor se "
             "obliga a pagar una tasa en una fecha conocida.")
     _p(pdf, "El valor par es un valor contable y está muy lejos del precio de mercado: Apple lo fija en una cienmilésima de dólar. El IPC, por otro lado, no "
             "es una emisora ni se compra directamente, es un índice que resume a las emisoras más operadas de la Bolsa Mexicana de Valores y aquí sirve "
             "como punto de comparación.")
-    veces = {x["clave"]: x["pf"] * fichas_[x["clave"]]["F"]["acciones"] / 1e6 / fichas_[x["clave"]]["cif"]["Capital contable"][0]
-             for x in acc if fichas_[x["clave"]]["cif"].get("Capital contable", (None,))[0]}
-    if veces:
-        alto_v, bajo_v = max(veces, key=veces.get), min(veces, key=veces.get)
-        nom = {x["clave"]: x["nombre"] for x in acc}
-        _dato(pdf, pdf.get_y() + 1, f"{veces[alto_v]:.0f} veces",
-              f"{nom[alto_v]} vale en bolsa {veces[alto_v]:.1f} veces su capital contable. {nom[bajo_v]} es la más cercana a sus libros, con "
-              f"{veces[bajo_v]:.1f} veces. Esa distancia es lo que el mercado paga por las ganancias que espera.")
+    _p(pdf, f"Esa distancia entre el valor de mercado y los libros es lo que los inversionistas pagan por las ganancias que esperan. {nom[bajo_v]} es la "
+            f"más cercana a su capital contable, con {veces[bajo_v]:.1f} veces, y {nom[alto_v]} la más lejana, con {veces[alto_v]:.1f}.")
     mm = lambda v: f"{v:,.0f}" if v is not None else "s/d"
     filas = [
         ["Bolsa"] + [server.META[x["ticker"]]["mercado"] for x in acc],
@@ -464,7 +439,7 @@ def _activos(pdf, d, acc, ipc, fichas_):
 
 # ------------------------------------------------------------------------------ 4. las emisoras
 def _emisoras(pdf, d, acc, fichas_, guia):
-    _pagina(pdf, "Las emisoras", "Las emisoras", 3)
+    _pagina(pdf, "Las emisoras", 3, "Tres empresas de tecnología, una de autos eléctricos y una refresquera")
     _p(pdf, "A qué se dedica cada empresa, qué mueve su precio y cómo le fue en su último ejercicio fiscal. La línea de cada bloque es su precio de cierre "
             "durante el periodo.", size=9.2, alto=4.6, esp=2.4)
     for i, it in enumerate(acc):
@@ -534,7 +509,9 @@ def _emisoras(pdf, d, acc, fichas_, guia):
 def _tabla_variaciones(pdf, d, acc, ipc, var):
     """Todas las fechas en una hoja: la tabla se parte en tres bloques que se leen de izquierda a derecha."""
     items = acc + [ipc]
-    _pagina(pdf, "Variación porcentual diaria", "Variación porcentual diaria", 4)
+    obs = [v for x in items for v in var[x["clave"]].values()]
+    tranquilos = sum(1 for v in obs if abs(v) < 3) / len(obs) * 100
+    _pagina(pdf, "Variación porcentual diaria", 4, f"En {tranquilos:.0f} % de los registros la variación del día fue menor a 3 %")
     y = pdf.get_y()
     pdf.set_xy(ML, y)
     pdf.set_font("Barlow", "", 8.2)
@@ -623,7 +600,8 @@ def _barras_dia(pdf, x0, y0, w, h, valores, color, lim):
 
 def _graficas(pdf, d, acc, ipc, var):
     items = acc + [ipc]
-    _pagina(pdf, "Gráficas de las variaciones", "Gráficas de las variaciones", 5)
+    mejor, peor = max(acc, key=lambda x: x["efectivo"]), min(acc, key=lambda x: x["efectivo"])
+    _pagina(pdf, "Gráficas de las variaciones", 5, f"{mejor['nombre']} terminó con {mejor['efectivo']:+.2f} % y {peor['nombre']} con {peor['efectivo']:+.2f} %")
     _p(pdf, "Arriba, lo que suman las variaciones día con día: el rendimiento acumulado de cada activo. Abajo, la tabla anterior dibujada como barras, una "
             "por día, todas con la misma escala para poder compararlas.", size=9.2, alto=4.6, esp=1.6)
     fechas = [f for f in d["fechas"] if any(f in var[x["clave"]] for x in items)]
@@ -713,12 +691,17 @@ def _dispersion(pdf, x0, y0, w, h, items):
 
 def _estadistica(pdf, d, acc, ipc, var):
     items = acc + [ipc]
-    _pagina(pdf, "Estadística de los rendimientos", "Estadística de los rendimientos", 6)
+    vol_ = sorted(items, key=lambda x: x["stats"]["desv"])
+    nombre_ = lambda x: "el IPC" if x["indice"] else x["nombre"]
+    _pagina(pdf, "Estadística de los rendimientos", 6, f"{nombre_(vol_[-1]).capitalize() if vol_[-1]['indice'] else nombre_(vol_[-1])} fue "
+            f"{vol_[-1]['stats']['desv'] / vol_[0]['stats']['desv']:.1f} veces más volátil que {nombre_(vol_[0])}")
     _p(pdf, "Todas las medidas salen de la columna de variación diaria, con las definiciones que usa Excel para una muestra. El rendimiento efectivo "
             "se calcula con los precios inicial y final, no con el promedio de las variaciones.", size=9.2, alto=4.6, esp=1.8)
     y = pdf.get_y()
-    pdf.set_fill_color(*GUINDA_SUAVE)
-    pdf.rect(ML, y, ANCHO, 16, "F")
+    pdf.set_draw_color(*GRIS_SUAVE)
+    pdf.set_line_width(0.25)
+    pdf.line(ML, y, ML + ANCHO, y)
+    pdf.line(ML, y + 16, ML + ANCHO, y + 16)
     for i, (etq, fo) in enumerate((("Variación diaria", "ra"), ("Rendimiento efectivo", "re"), ("Rendimiento promedio", "rprom"))):
         x0 = ML + i * ANCHO / 3
         pdf.set_xy(x0, y + 1.4)
@@ -781,113 +764,123 @@ def _estadistica(pdf, d, acc, ipc, var):
 
 
 # ------------------------------------------------------------------------------ 8. conclusión
+def _diferencias(pdf, y, acc, dec):
+    """Barras que salen de cero: cuánto arriba o abajo del S&P 500 quedó cada acción, con su decisión a la derecha."""
+    fila, x_et, x0, w_dec = 8.2, ML, ML + 18, 30
+    w = ANCHO - 18 - w_dec - 8
+    m = max(abs(dec[x["clave"]][2]) for x in acc) * 1.3
+    cx = x0 + w / 2
+    pdf.set_xy(x0, y)
+    pdf.set_font("Barlow", "", 7)
+    pdf.set_text_color(*GRIS)
+    pdf.cell(w / 2 - 2, 3.6, "Abajo del S&P 500", align="R")
+    pdf.set_x(cx + 2)
+    pdf.cell(w / 2 - 2, 3.6, "Arriba del S&P 500")
+    pdf.set_xy(x0 + w + 4, y)
+    pdf.cell(w_dec, 3.6, "Decisión")
+    y += 5
+    for i, it in enumerate(acc):
+        d_, c_, dif, b, f = dec[it["clave"]]
+        yy = y + i * fila
+        pdf.set_xy(x_et, yy)
+        pdf.set_font("BarlowC", "B", 11)
+        pdf.set_text_color(*NEGRO)
+        pdf.cell(16, fila - 1.6, it["clave"])
+        largo = dif / m * (w / 2)
+        pdf.set_fill_color(*COLORES[i % 5])
+        pdf.rect(min(cx, cx + largo), yy + 1.2, abs(largo), fila - 4, "F")
+        pdf.set_font("Barlow", "B", 8)
+        pdf.set_text_color(*NEGRO)
+        if largo >= 0:
+            pdf.set_xy(cx + largo + 1.2, yy)
+            pdf.cell(20, fila - 1.6, f"{dif:+.2f}")
+        else:
+            pdf.set_xy(cx + largo - 21.2, yy)
+            pdf.cell(20, fila - 1.6, f"{dif:+.2f}", align="R")
+        pdf.set_fill_color(*c_)
+        pdf.ellipse(x0 + w + 4, yy + (fila - 1.6) / 2 - 1.3, 2.6, 2.6, "F")
+        pdf.set_xy(x0 + w + 8, yy)
+        pdf.set_font("Barlow", "B", 9)
+        pdf.set_text_color(*c_)
+        pdf.cell(w_dec - 4, fila - 1.6, d_)
+    pdf.set_draw_color(*GRIS)
+    pdf.set_line_width(0.3)
+    pdf.line(cx, y - 1, cx, y + len(acc) * fila - 1)
+    pdf.set_xy(x0, y + len(acc) * fila)
+    pdf.set_font("Barlow", "", 7)
+    pdf.set_text_color(*GRIS)
+    pdf.cell(w, 3.6, "Diferencia entre el rendimiento efectivo de cada acción y el del S&P 500, en puntos porcentuales", align="C")
+    return y + len(acc) * fila + 5
+
+
 def _conclusion(pdf, d, acc, ipc, sp, fichas_):
-    _pagina(pdf, "Conclusión y toma de decisión", "Conclusión y toma de decisión", 7)
-    NUM = {0: "ninguna", 1: "una", 2: "dos", 3: "tres", 4: "cuatro", 5: "las cinco"}
-    arriba = sum(1 for x in acc if x["efectivo"] > max(sp["efectivo"], ipc["efectivo"]))
-    abajo = sum(1 for x in acc if x["efectivo"] < min(sp["efectivo"], ipc["efectivo"]))
-    _p(pdf, f"En el periodo el S&P 500 rindió {sp['efectivo']:+.2f} % y el IPC {ipc['efectivo']:+.2f} %. Contra esas dos referencias, {NUM[arriba]} de las cinco "
-            f"acciones quedaron arriba de ambas y {NUM[abajo]} abajo. La decisión de cada una sale de comparar su rendimiento con el del S&P 500 y de qué "
-            "tan volátil fue.", size=9.4, alto=4.7, esp=2.4)
     dec = {}
     for it in acc:
         f = fichas_[it["clave"]]
         dec[it["clave"]] = (*_decision(it, sp, f), it["efectivo"] - sp["efectivo"], f["betas"].get("S&P 500"), f)
-    # una tarjeta por acción con su decisión
-    y = pdf.get_y()
-    gap = 3
-    tw = (ANCHO - gap * (len(acc) - 1)) / len(acc)
-    th = 37
-    for i, it in enumerate(acc):
-        d_, c_, dif, b, f = dec[it["clave"]]
-        x = ML + i * (tw + gap)
-        pdf.set_fill_color(250, 246, 248)
-        pdf.rect(x, y, tw, th, "F")
-        pdf.set_fill_color(*c_)
-        pdf.rect(x, y, tw, 7, "F")
-        pdf.set_xy(x, y)
-        pdf.set_font("Barlow", "B", 8.6)
-        pdf.set_text_color(*BLANCO)
-        pdf.cell(tw, 7, d_.upper(), align="C")
-        pdf.set_xy(x, y + 8.6)
-        pdf.set_font("BarlowC", "B", 17)
-        pdf.set_text_color(*NEGRO)
-        pdf.cell(tw, 7, it["clave"], align="C")
-        pdf.set_xy(x, y + 15.6)
-        pdf.set_font("BarlowC", "B", 12.5)
-        pdf.set_text_color(*_color(it["efectivo"]))
-        pdf.cell(tw, 6, f"{it['efectivo']:+.2f} %", align="C")
-        pdf.set_font("Barlow", "", 7.2)
-        pdf.set_text_color(*GRIS)
-        for k, t in enumerate((f"{dif:+.2f} pts vs. S&P 500", f"Volatilidad {f['vol']:.1f} %", f"Beta {b['beta']:.2f}" if b else "Beta s/d")):
-            pdf.set_xy(x, y + 22.4 + k * 4.4)
-            pdf.cell(tw, 4, t, align="C")
-    pdf.set_y(y + th + 4)
-    _p(pdf, "La regla: si la acción rindió más que el S&P 500 y su volatilidad anual es baja o media (menor a 35 %), se compra; si rindió más con volatilidad "
-            "alta, se mantiene; si quedó debajo del índice, se vende. Se compara contra el S&P 500 porque las cinco cotizan en dólares. La beta indica cuánto "
-            "se mueve la acción por cada punto que se mueve el índice.", size=9.2, alto=4.6, esp=2.4)
+    comprar = [x["clave"] for x in acc if dec[x["clave"]][0] == "Comprar"]
+    mantener = [x["clave"] for x in acc if dec[x["clave"]][0] == "Mantener"]
+    vender = [x["clave"] for x in acc if dec[x["clave"]][0] == "Vender"]
+    titular = ", ".join(t for t in (f"comprar {_junta(comprar)}" if comprar else "", f"mantener {_junta(mantener)}" if mantener else "",
+                                    f"vender {_junta(vender)}" if vender else "") if t)
+    _pagina(pdf, "Conclusión y toma de decisión", 7, titular[0].upper() + titular[1:])
+    NUM = {0: "ninguna", 1: "una", 2: "dos", 3: "tres", 4: "cuatro", 5: "las cinco"}
+    arriba = sum(1 for x in acc if x["efectivo"] > max(sp["efectivo"], ipc["efectivo"]))
+    abajo = sum(1 for x in acc if x["efectivo"] < min(sp["efectivo"], ipc["efectivo"]))
+    _p(pdf, f"En el periodo el S&P 500 rindió {sp['efectivo']:+.2f} % y el IPC {ipc['efectivo']:+.2f} %. Contra esas dos referencias, {NUM[arriba]} de las cinco "
+            f"acciones quedaron arriba de ambas y {NUM[abajo]} abajo. La regla de decisión es sencilla: si la acción rindió más que el S&P 500 y su volatilidad "
+            "anual es baja o media (menor a 35 %), se compra; si rindió más con volatilidad alta, se mantiene; si quedó debajo del índice, se vende. Se compara "
+            "contra el S&P 500 porque las cinco cotizan en dólares.", size=9.4, alto=4.7, esp=3)
+    y = _diferencias(pdf, pdf.get_y(), acc, dec)
+    pdf.set_y(y + 1)
     beta_max = max(acc, key=lambda x: (dec[x["clave"]][3] or {}).get("beta") or -9)["clave"]
-    for it in acc:
+    for i, it in enumerate(acc):
         d_, c_, dif, b, f = dec[it["clave"]]
         if b and b["beta"] > 1.3 and it["clave"] == beta_max:
             com = f"es la más sensible al mercado del grupo, por cada punto que se movió el S&P 500 ella se movió {b['beta']:.2f}"
         elif b and b["beta"] < 0:
-            com = "se movió al revés del índice buena parte del periodo, por eso amortigua una cartera cargada de tecnología"
+            com = f"con beta de {b['beta']:.2f} se movió al revés del índice, por eso amortigua una cartera cargada de tecnología"
         elif b and b["beta"] > 1.3:
-            com = f"también amplifica al mercado, con {b['beta']:.2f} puntos por cada uno del S&P 500"
+            com = f"también amplifica al mercado, con beta de {b['beta']:.2f}"
         elif b and b["beta"] > 0.8:
-            com = "se mueve casi al ritmo del mercado"
+            com = f"con beta de {b['beta']:.2f} se mueve casi al ritmo del mercado"
         else:
-            com = "su precio dependió más de lo propio que del mercado"
+            com = f"con beta de {b['beta']:.2f} su precio dependió más de lo propio que del mercado"
         peor = min(it["ra"])
         fpeor = it["serie"][it["ra"].index(peor) + 1][0]
         y = pdf.get_y()
-        pdf.set_fill_color(*c_)
-        pdf.rect(ML, y + 0.9, 2.2, 2.2, "F")
-        pdf.set_xy(ML + 4, y)
-        pdf.set_font("Barlow", "B", 9)
-        pdf.set_text_color(*NEGRO)
-        pdf.cell(12, 4.4, it["clave"])
+        pdf.set_xy(ML, y)
+        pdf.set_font("BarlowC", "B", 10.5)
+        pdf.set_text_color(*COLORES[i % 5])
+        pdf.cell(13, 4.5, it["clave"])
         pdf.set_font("Barlow", "", 9)
-        pdf.multi_cell(ANCHO - 16, 4.4, f"Rindió {it['efectivo']:+.2f} %, {abs(dif):.2f} puntos {'arriba' if dif > 0 else 'abajo'} del S&P 500, con volatilidad "
-                                         f"{f['nivel']} ({f['vol']:.2f} %); {com}. Su peor día fue el {R.fecha_corta(fpeor)}, con {peor:+.2f} %.",
+        pdf.set_text_color(*NEGRO)
+        pdf.multi_cell(ANCHO - 13, 4.5, f"Volatilidad anual {f['nivel']} ({f['vol']:.2f} %); {com}. Su peor día fue el {R.fecha_corta(fpeor)}, con {peor:+.2f} %.",
                        new_x="LMARGIN", new_y="NEXT", align="J")
-        pdf.ln(1.3)
-    comprar = [x["clave"] for x in acc if dec[x["clave"]][0] == "Comprar"]
-    mantener = [x["clave"] for x in acc if dec[x["clave"]][0] == "Mantener"]
-    vender = [x["clave"] for x in acc if dec[x["clave"]][0] == "Vender"]
+        pdf.ln(1)
     texto = (f"La cartera se armaría con {_junta(comprar)}, que le ganaron al índice sin una volatilidad alta. " if comprar else "")
     if mantener:
         texto += f"{_junta(mantener)} se mantendría como posición secundaria, el rendimiento está pero viene con oscilaciones grandes. "
     peores = sorted(acc, key=lambda x: -x["stats"]["desv"])[:len(vender)]
     extra = " y además fueron las más volátiles del grupo" if {x["clave"] for x in peores} == set(vender) else ""
     texto += f"{_junta(vender)} se venderían: quedaron debajo del índice{extra}."
-    limite = (f"Aun así, el ejercicio tiene límites, son {acc[0]['stats']['n']} días de un solo periodo y la estadística describe lo que ya pasó. Para "
-              "invertir habría que repetirlo en otros periodos, revisar los estados financieros completos y considerar el tipo de cambio, que para un "
-              "inversionista mexicano cambia el resultado de cualquier acción comprada en dólares. Fuentes: Yahoo Finance y Securities and Exchange "
-              "Commission (EDGAR).")
-    pdf.set_font("Barlow", "B", 10.4)
-    h1 = pdf.multi_cell(ANCHO - 12, 5.2, texto, dry_run=True, output="HEIGHT")
-    pdf.set_font("Barlow", "", 8.6)
-    h2 = pdf.multi_cell(ANCHO - 12, 4.3, limite, dry_run=True, output="HEIGHT")
-    alto = 9.4 + h1 + 2 + h2 + 5
-    y = pdf.get_y() + 4
-    pdf.set_fill_color(*GUINDA)
-    pdf.rect(ML, y, ANCHO, alto, "F")
-    pdf.set_xy(ML + 6, y + 4)
-    pdf.set_font("Barlow", "B", 8)
-    pdf.set_text_color(232, 196, 214)
-    pdf.cell(ANCHO - 12, 4, "DECISIÓN FINAL")
-    pdf.set_xy(ML + 6, y + 9.4)
-    pdf.set_font("Barlow", "B", 10.4)
-    pdf.set_text_color(*BLANCO)
-    pdf.multi_cell(ANCHO - 12, 5.2, texto, new_x="LEFT", new_y="NEXT", align="J")
-    pdf.ln(2)
+    y = pdf.get_y() + 3.4
+    pdf.set_xy(ML + 6, y)
+    pdf.set_font("Barlow", "B", 7.8)
+    pdf.set_text_color(*GUINDA)
+    pdf.cell(ANCHO - 6, 4, "DECISIÓN FINAL", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(0.8)
     pdf.set_x(ML + 6)
-    pdf.set_font("Barlow", "", 8.6)
-    pdf.set_text_color(240, 220, 230)
-    pdf.multi_cell(ANCHO - 12, 4.3, limite, new_x="LEFT", new_y="NEXT", align="J")
-    pdf.set_y(y + alto)
+    pdf.set_font("BarlowC", "B", 14)
+    pdf.set_text_color(*GUINDA)
+    pdf.multi_cell(ANCHO - 6, 6.4, texto, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_fill_color(*GUINDA)
+    pdf.rect(ML, y, 1.6, pdf.get_y() - y, "F")
+    pdf.ln(2.6)
+    _p(pdf, f"Aun así, el ejercicio tiene límites, son {acc[0]['stats']['n']} días de un solo periodo y la estadística describe lo que ya pasó. Para invertir "
+            "habría que repetirlo en otros periodos, revisar los estados financieros completos y considerar el tipo de cambio, que para un inversionista "
+            "mexicano cambia el resultado de cualquier acción comprada en dólares. Fuentes: Yahoo Finance y Securities and Exchange Commission (EDGAR).",
+       size=8.6, alto=4.3, color=GRIS, esp=0)
 
 
 # ------------------------------------------------------------------------------ armado
