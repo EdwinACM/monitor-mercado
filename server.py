@@ -535,7 +535,10 @@ class Handler(SimpleHTTPRequestHandler):
                     import ejercicio
                     fmt = qs.get("formato", ["xlsx"])[0]
                     d_ej = cached(("ejer", date.today()), 600, ejercicio.preparar)
-                    nombre = f"{'Presentacion_ejecutiva_rendimientos' if fmt == 'pdf' else 'Rendimientos_acciones_e_IPC'}_{d_ej['inicio']}_a_{d_ej['ultimo']}"
+                    nombre = f"{ {'pdf': 'Presentacion_ejecutiva_rendimientos', 'trabajo': 'Trabajo_rendimientos'}.get(fmt, 'Rendimientos_acciones_e_IPC')}_{d_ej['inicio']}_a_{d_ej['ultimo']}"
+                    if fmt == "trabajo":
+                        import trabajo
+                        return self.send(trabajo.trabajo(d_ej), "application/pdf", extra={"Content-Disposition": f'attachment; filename="{nombre}.pdf"'})
                     if fmt == "pdf":
                         return self.send(ejercicio.presentacion(d_ej), "application/pdf", extra={"Content-Disposition": f'attachment; filename="{nombre}.pdf"'})
                     return self.send(ejercicio.libro(d_ej), XLSX, extra={"Content-Disposition": f'attachment; filename="{nombre}.xlsx"'})

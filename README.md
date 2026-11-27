@@ -79,7 +79,7 @@ python -m pytest
 - `proyeccion.py` calcula proyecciones, Sharpe, Sortino, CAPM, portafolio y duración.
 - `contexto.py`, `fuentes.py` y `glosario.py` arman el entorno global y explican cada medida.
 - `fichas.py` y `actualizar_fichas.py` traen datos reales de cada empresa con su fuente.
-- `reportes.py` y `excel.py` generan los PDF y los Excel. `ejercicio.py` genera el ejercicio de rendimientos del seminario.
+- `reportes.py` y `excel.py` generan los PDF y los Excel. `ejercicio.py` genera el ejercicio de rendimientos del seminario (Excel y presentación ejecutiva) y `trabajo.py`, el trabajo escrito en tamaño carta.
 - `diario.py` y `analisis_diario.py` guardan el análisis de cada día en `static/data/`.
 - `api/index.py` es la única función de Vercel.
 - `static/` tiene la interfaz, el modo sin internet, las tipografías y los datos guardados.
